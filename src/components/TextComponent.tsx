@@ -1,6 +1,6 @@
-import { View, Text, StyleProp, TextStyle } from 'react-native'
+import { View, StyleProp, TextStyle } from 'react-native'
 import React from 'react'
-import { Label } from '@bsdaoquang/rncomponent';
+import { Text } from '@bsdaoquang/rncomponent';
 import { sizes } from '../constants/sizes';
 import { colors } from '../constants/colors';
 import { fontFamilies } from '../constants/fontFamilies';
@@ -13,7 +13,8 @@ type Props = {
     numberOfLine?:number;
     color?:string;
     styles?:StyleProp<TextStyle>;
-    type?:'bigTitle' | 'title' | 'text'|'description'
+    type?:'bigTitle' | 'title' | 'text'|'description';
+   
 
 };
 
@@ -39,7 +40,10 @@ const TextComponent = (props: Props) => {
             break;
     }
   return (
-   <Label text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} size={size ?? sizes.text} color = {color ?? colors.dark} styles={[{},styles]}/>
+   <Text text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} size={size ?? sizes.text} color = {color ?? colors.dark} styles={[{},styles]}
+   weight={
+    !type || (type !== 'bigTitle' && type !== 'title' ) ? '400' : 'bold'}
+   />
   )
 }
 

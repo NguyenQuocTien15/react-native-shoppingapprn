@@ -4,6 +4,7 @@ import CartScreen from "./cart/CartScreen";
 import NotificationScreen from "./notifications/NotificationScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
 import HomeAuth from "./auth/HomeAuth";
+import SwiperScreen from "./auth/SwiperScreen";
 
 export{
     HomeScreen,
@@ -11,5 +12,6 @@ export{
     CartScreen,
     NotificationScreen,
     ProfileScreen ,
-    HomeAuth
+    HomeAuth,
+    SwiperScreen,
 }
