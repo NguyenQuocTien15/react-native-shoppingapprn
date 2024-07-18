@@ -27,7 +27,7 @@ const HomeAuth = ({navigation}: any /*vào màn hình này thì bấm bất cứ
         textStyleProps={{fontWeight:'600',
             fontFamily: fontFamilies.poppinsBold
         }}
-        onPress={() => navigation.navigate('SwiperScreen',{authState:'Signup'})}></Button>
+        onPress={() => navigation.navigate('SwiperScreen',{authState:'SignUp'})}></Button>
     </Section>
    </ImageBackground>
 

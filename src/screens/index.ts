@@ -5,6 +5,7 @@ import NotificationScreen from "./notifications/NotificationScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
 import HomeAuth from "./auth/HomeAuth";
 import SwiperScreen from "./auth/SwiperScreen";
+import SignUp from "./auth/SignUp";
 
 export{
     HomeScreen,
@@ -14,4 +15,5 @@ export{
     ProfileScreen ,
     HomeAuth,
     SwiperScreen,
+    SignUp
 }
