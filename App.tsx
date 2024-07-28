@@ -1,41 +1,28 @@
-//import liraries
-import React, { useEffect, useState } from 'react';
-import MainNavigator from './src/routers/MainNavigator';
-import AuthNavigator from './src/routers/AuthNavigator';
 import {NavigationContainer} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
-import Splash from './src/screens/Splash';
+import React, {useEffect} from 'react';
+import {Provider} from 'react-redux';
+import store from './src/redux/store';
+import Router from './src/routers/Router';
+// import {StatusBar} from 'react-native';
+// import {HandleNotification} from './src/utils/handleNotification';
 
 const App = () => {
- //ng dung chi duoc vao app khi dang nhap thanh cong
- const [isLogin, setIsLogin] = useState(false);
- const [isWellcome, setIsWellcome] = useState(true)
+  // useEffect(() => {
+  //   HandleNotification.CheckNotificationPerson();
+  // }, []);
 
- useEffect(() => {
-  const timeout = setTimeout(()=> {
-    setIsWellcome(false);
-  },1500);
-  auth().onAuthStateChanged(user => {
-    setIsLogin(user ? (user.uid ? true : false) : false);
-  });
-  return () => clearTimeout(timeout);
- }, []);
   return (
-  <NavigationContainer>
-    {isWellcome ? (
-      <Splash/>
-    ) : isLogin ? (
-      <MainNavigator/>
-    ) : (
-      <AuthNavigator/>
-    )
-      
-        
-      
-    }
-  </NavigationContainer>
-
+    <NavigationContainer>
+      {/* <StatusBar
+        translucent
+        backgroundColor={'transparent'}
+        barStyle={'dark-content'}
+      /> */}
+      <Provider store={store}>
+        <Router />
+      </Provider>
+    </NavigationContainer>
   );
-
 };
+
 export default App;

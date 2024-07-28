@@ -6,6 +6,7 @@ import ProfileScreen from "./profiles/ProfileScreen";
 import HomeAuth from "./auth/HomeAuth";
 import SwiperScreen from "./auth/SwiperScreen";
 import SignUp from "./auth/SignUp";
+import Result from "./auth/Result";
 
 export{
     HomeScreen,
@@ -15,5 +16,7 @@ export{
     ProfileScreen ,
     HomeAuth,
     SwiperScreen,
-    SignUp
+    SignUp,
+    Result
+    
 }

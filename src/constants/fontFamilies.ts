@@ -1,12 +1,11 @@
 export const fontFamilies = {
-    poppinsBold: 'Poppins-Bold',
-    poppinsLight: 'Poppins-Light',
-    poppinsMedium: 'Poppins-Medium',
-    poppinsSemiBold: 'Poppins-SemiBold',
-    poppinsRegular: 'Poppins-Regular',
-    robotoBold: 'Roboto-Bold',
-    robotoLight: 'Roboto-Light',
-    robotoMedium: 'Roboto-Medium',
-    robotoSemiBold: 'Roboto-SemiBold',
-    robotoRegular: 'Roboto-Regular',
-}
+  poppinsBold: 'Poppins-Bold',
+  poppinsLight: 'Poppins-Light',
+  poppinsMedium: 'Poppins-Medium',
+  poppinsSemiBold: 'Poppins-SemiBold',
+  poppinsRegular: 'Poppins-Regular',
+  RobotoRegular: 'Roboto-Regular',
+  RobotoMedium: 'Roboto-Medium',
+  RobotoLight: 'Roboto-Light',
+  RobotoBold: 'Roboto-Bold',
+};
