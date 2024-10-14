@@ -7,5 +7,10 @@ import { StyleSheet } from "react-native";
    center: {
     justifyContent: 'center',
     alignItems: 'center'
-   }
+   },
+   avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 100
+  }
 })
