@@ -39,7 +39,7 @@ export class HandleNotification {
   static getAccesstokenFormServer = async () => {
     try {
       const res = await fetch(
-        'https://server-shopping-app-test-1.onrender.com/get-accesstoken',
+        'https://https-github-com-nguyenquoctien15-rn-4f23.onrender.com',
         {
           method: 'post',
           headers: {

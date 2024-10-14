@@ -1,22 +1,25 @@
-import HomeScreen from "./home/HomeScreen";
-import Login from "./auth/Login";
-import CartScreen from "./cart/CartScreen";
-import NotificationScreen from "./notifications/NotificationScreen";
-import ProfileScreen from "./profiles/ProfileScreen";
 import HomeAuth from "./auth/HomeAuth";
-import SwiperScreen from "./auth/SwiperScreen";
-import SignUp from "./auth/SignUp";
+import Login from "./auth/Login";
 import Result from "./auth/Result";
+import SignUp from "./auth/SignUp";
+import SwiperScreen from "./auth/SwiperScreen";
+import CartScreen from "./cart/CartScreen";
+import HomeScreen from "./home/HomeScreen";
+import ProductDetail from "./home/ProductDetail";
+import RatingScreen from "./home/RatingScreen";
+//import NotificationsScreen from "./notifications/NotificationsScreen";
+import ProfileScreen from "./profiles/ProfileScreen";
 
-export{
-    HomeScreen,
-    Login,
-    CartScreen,
-    NotificationScreen,
-    ProfileScreen ,
-    HomeAuth,
-    SwiperScreen,
-    SignUp,
-    Result
-    
-}
+export {
+  HomeScreen,
+  Login,
+  CartScreen,
+  //NotificationsScreen,
+  ProfileScreen,
+  HomeAuth,
+  SwiperScreen,
+  SignUp,
+  Result,
+  ProductDetail,
+  RatingScreen
+};
