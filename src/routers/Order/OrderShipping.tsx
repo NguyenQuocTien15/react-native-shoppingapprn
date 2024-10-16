@@ -1,15 +1,16 @@
-import {View, Text} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {CartScreen} from '../screens';
+import OrderShippingScreen from '../../screens/order/OrderShippingScreen';
 
-const CartNavigator = () => {
+const OrderShipping = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="CartScreen" component={CartScreen} />
+      <Stack.Screen
+        name="OrderShipping"
+        component={OrderShippingScreen}></Stack.Screen>
     </Stack.Navigator>
   );
 };
 
-export default CartNavigator;
+export default OrderShipping;
