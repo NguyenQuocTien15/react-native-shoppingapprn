@@ -19,14 +19,14 @@ const TopTabNavigator = () => {
       }}
       sceneContainerStyle={{backgroundColor: 'white'}}>
       <Tab.Screen
-        name="Waitting"
+        name="WaittingConfirm"
         component={OrderWaittingForConfirmation}></Tab.Screen>
       <Tab.Screen
         name="WaittingShipping"
         component={OrderWaittingShipping}></Tab.Screen>
-      <Tab.Screen name="OrderShipping" component={OrderShipping}></Tab.Screen>
-      <Tab.Screen name="OrderReview" component={OrderReview}></Tab.Screen>
-      <Tab.Screen name="OrderHistoryScreen" component={OrderHistory}></Tab.Screen>
+      <Tab.Screen name="Shipping" component={OrderShipping}></Tab.Screen>
+      <Tab.Screen name="Reviews" component={OrderReview}></Tab.Screen>
+      <Tab.Screen name="HistoryScreen" component={OrderHistory}></Tab.Screen>
     </Tab.Navigator>
   );
 }
