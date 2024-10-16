@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {Button} from '@bsdaoquang/rncomponent';
 import auth from '@react-native-firebase/auth';
@@ -12,6 +12,7 @@ const ProfileScreen = () => {
   return (
     <View>
       <Text>ProfileScreen</Text>
+      <TouchableOpacity></TouchableOpacity>
       <Button
         title="Logout"
         onPress={async () => {

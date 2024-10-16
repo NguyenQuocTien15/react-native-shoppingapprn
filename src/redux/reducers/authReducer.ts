@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   uid: '',
@@ -8,7 +8,7 @@ const initialState = {
 const authSlicer = createSlice({
   name: 'auth',
   initialState: {
-    authData: initialState
+    authData: initialState,
   },
   reducers: {
     addAuth: (state, action) => {
@@ -16,10 +16,10 @@ const authSlicer = createSlice({
     },
     removeAuth: (state, action) => {
       state.authData = initialState;
-    }
-  }
+    },
+  },
 });
 
 export const authReducer = authSlicer.reducer;
-export const { addAuth, removeAuth } = authSlicer.actions;
-export const authSelector = (state: any) => state.auth.authData;
+export const {addAuth, removeAuth} = authSlicer.actions;
+export const authSelector = (state: any) => state.authReducer.authData;
