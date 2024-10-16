@@ -257,13 +257,6 @@ const ProductDetail = ({navigation, route}: any) => {
                         borderRadius: 100,
                       }}>
                       <TouchableOpacity
-                        disabled={subProductSelected.quantity === 0}
-                        style={{paddingRight: 12}}
-                        onPress={() => setCount(count + 1)}>
-                        <Add size={24} color={colors.black} />
-                      </TouchableOpacity>
-                      <TextComponent text={count.toString()} size={16} />
-                      <TouchableOpacity
                         style={{paddingLeft: 12}}
                         disabled={count === 1}
                         onPress={() => setCount(count - 1)}>
@@ -271,6 +264,14 @@ const ProductDetail = ({navigation, route}: any) => {
                           size={24}
                           color={count === 1 ? colors.gray : colors.black}
                         />
+                      </TouchableOpacity>
+
+                      <TextComponent text={count.toString()} size={16} />
+                      <TouchableOpacity
+                        disabled={subProductSelected.quantity === 0}
+                        style={{paddingRight: 12}}
+                        onPress={() => setCount(count + 1)}>
+                        <Add size={24} color={colors.black} />
                       </TouchableOpacity>
                     </Row>
                   </Row>
