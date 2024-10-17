@@ -28,7 +28,7 @@ const ProfileScreen = () => {
         <Icon name="chevron-forward" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={ () => navigation.navigate('MyOrders') }
+        onPress={ () => navigation.navigate('MyOrder') }
         style={styles.touchableOpacity}>
         <Icon name="bag-check-outline" size={24} color="black" />
         <Text style={{flex: 1, marginLeft: 15, fontSize: 20, color: 'black'}}>
