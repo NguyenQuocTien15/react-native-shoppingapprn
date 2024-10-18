@@ -11,6 +11,7 @@ import CategoriesList from './components/CategoriesList';
  import OffersList from './components/OffersList';
  import PopularProduct from './components/PopularProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
+import FilterScreen from './components/FilterScreen';
 
 const HomeScreen = () => {
   useEffect(() => {
@@ -67,6 +68,7 @@ const HomeScreen = () => {
             </Row>
           </Section>
         </>
+        <FilterScreen/>
         <OffersList />
         <Space height={20} />
         <CategoriesList />
