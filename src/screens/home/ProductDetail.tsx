@@ -26,7 +26,7 @@ import RatingComponent from './components/RatingComponent';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   CartItem,
-  addcart,
+  addCart,
   cartSelector,
 } from '../../redux/reducers/cartReducer';
 import {sizes} from '../../constants/sizes';
@@ -125,7 +125,7 @@ const ProductDetail = ({navigation, route}: any) => {
       ? subProductSelected?.quantity - count
       : 0;
 
-    dispatch(addcart(data));
+    dispatch(addCart(data));
 
     setSubProductSelected(sub);
   };

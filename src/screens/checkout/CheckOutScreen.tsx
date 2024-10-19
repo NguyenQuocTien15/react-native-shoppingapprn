@@ -1,12 +1,44 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import { useNavigation } from '@react-navigation/native';
+import {
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {RadioButton} from 'react-native-paper';
 
 const CheckOutScreen = () => {
   const navigation = useNavigation();
+  const [checked, setChecked] = useState(false);
+
+  const DATA = [
+    {
+      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+      title: 'First Item',
+    },
+    {
+      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+      title: 'Second Item',
+    },
+    {
+      id: '58694a0f-3da1-471f-bd96-145571e29d72',
+      title: 'Third Item',
+    },
+  ];
+  type ItemProps = {title: string};
+
+  const Item = ({title}: ItemProps) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{title}</Text>
+    </View>
+  );
   return (
     <View style={styles.container}>
-      <View style={styles.flexDirectionAddress}>
+      <View style={styles.flexDirection}>
         <Text style={styles.customText}>Address:</Text>
         <Text
           style={[
@@ -17,16 +49,57 @@ const CheckOutScreen = () => {
         </Text>
       </View>
       <View style={{flex: 1}}>
-        <View style={{flex: 1, backgroundColor: 'orange'}}></View>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={{fontSize: 22, color: 'black'}}>Total</Text>
-          <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
-            â
-          </Text>
+        <View style={{flex: 1}}>
+          <View>
+            <FlatList
+              data={DATA}
+              renderItem={({item}) => <Item title={item.title} />}
+              keyExtractor={item => item.id}></FlatList>
+          </View>
         </View>
-        <TouchableOpacity style={styles.touchCheckOut} onPress={ () => navigation.navigate('MyOrder') }>
-          <Text style={styles.textCheckOut}>Order</Text>
-        </TouchableOpacity>
+
+        <View style={{marginVertical: 10}}>
+          <Text style={[{color: 'black', fontSize: 30}]}>Payment method</Text>
+          <View style={[styles.flexDirection, {alignItems: 'center'}]}>
+            <Text style={{color: 'black', fontSize: 20}}>
+              Thanh toán khi nhận hàng
+            </Text>
+            <View>
+              <RadioButton
+                value="first"
+                status={checked === true ? 'checked' : 'unchecked'}
+                onPress={() => setChecked(true)}
+              />
+            </View>
+          </View>
+          {/* <View style={[styles.flexDirection, {alignItems: 'center'}]}>
+            <Text style={{color: 'black', fontSize: 20}}>VisaCard</Text>
+            <View>
+              <RadioButton
+                value="second"
+                status={checked === 'second' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('second')}
+              />
+            </View>
+          </View> */}
+        </View>
+        <View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={{fontSize: 22, color: 'black'}}>Total</Text>
+            <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
+              Price
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.touchCheckOut,
+              {backgroundColor: checked ? '#FA7189' : '#A9A9A9'},
+            ]}
+            onPress={() => navigation.navigate('MyOrder')}
+            disabled={!checked}>
+            <Text style={styles.textCheckOut}>Order</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -39,8 +112,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  flexDirectionAddress: {
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+
+  flexDirection: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   customText: {
     fontWeight: 'bold',
@@ -48,7 +128,6 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   touchCheckOut: {
-    backgroundColor: '#FA7189',
     borderRadius: 10,
     marginTop: 10,
   },
@@ -58,5 +137,13 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+  },
+  title: {
+    fontSize: 32,
   },
 });

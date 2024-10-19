@@ -24,7 +24,7 @@ const cartSlicer = createSlice({
     cartData: initialState,
   },
   reducers: {
-    addcart: (state, action) => {
+    addCart: (state, action) => {
       const items: any = state.cartData;
       const item = action.payload;
       const index = items.findIndex((element: any) => element.id === item.id);
@@ -38,7 +38,7 @@ const cartSlicer = createSlice({
       state.cartData = items;
       handleSyncCardData(items);
     },
-    removecart: (state, action) => {
+    removeCart: (state, action) => {
       state.cartData = [];
     },
     updateQuantity: (state, action) => {
@@ -64,6 +64,6 @@ const cartSlicer = createSlice({
 });
 
 export const cartReducer = cartSlicer.reducer;
-export const {addcart, removecart, syncLocalStorage, updateQuantity} =
+export const {addCart, removeCart, syncLocalStorage, updateQuantity} =
   cartSlicer.actions;
 export const cartSelector = (state: any) => state.cartReducer.cartData;

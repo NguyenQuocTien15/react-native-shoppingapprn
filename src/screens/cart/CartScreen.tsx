@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   Image,
   StyleSheet,
@@ -8,26 +9,29 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {CartItem, cartSelector, updateQuantity} from '../../redux/reducers/cartReducer';
+import {
+  CartItem,
+  cartSelector,
+  updateQuantity,
+} from '../../redux/reducers/cartReducer';
 import {Card, Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
 import {colors} from '../../constants/colors';
-import { Minus, Add } from 'iconsax-react-native';
+import {Minus, Add} from 'iconsax-react-native';
 import Icon from '@react-native-vector-icons/ionicons';
-
-
 
 const CartScreen = () => {
   const navigation = useNavigation();
   const cartData: CartItem[] = useSelector(cartSelector);
   const dispatch = useDispatch();
-  
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+ 
   const handleChooseAll = () => {};
   const handleCheckOut = () => {
     navigation.navigate('CheckOut');
   };
-
 
   return (
     <View style={styles.container}>
@@ -37,16 +41,19 @@ const CartScreen = () => {
           <View style={{flex: 1}}>
             {/* Listcart */}
             <FlatList
-              style={{marginHorizontal: 16, marginBottom: 10}}
+              style={{marginHorizontal: 10, marginBottom: 10}}
               data={cartData}
               renderItem={({item, index}) => (
                 <View key={item.id} style={styles.itemListProduct}>
-                  <Row alignItems="flex-start" styles={{margin: 10}}>
+                  <Row alignItems="center" styles={{margin: 10}}>
+                    <Col flex={0.05} >
+                    <Text>a</Text>
+                    </Col>
                     <Image
                       source={{uri: item.imageUrl}}
                       style={{
-                        width: 100,
-                        height: 100,
+                        width: 110,
+                        height: 110,
                         borderRadius: 12,
                         resizeMode: 'cover',
                       }}></Image>
@@ -56,7 +63,7 @@ const CartScreen = () => {
                         type="title"
                         text={item.title}
                         size={20}></TextComponent>
-                      <TextComponent text={item.size}></TextComponent>
+                      <TextComponent text={item.description}></TextComponent>
                       <Row flex={1} alignItems="flex-end">
                         <Col>
                           <TextComponent
@@ -72,23 +79,31 @@ const CartScreen = () => {
                             paddingHorizontal: 12,
                           }}>
                           <TouchableOpacity
-                          onPress={()=> dispatch(updateQuantity({
-                            id: item.id,
-                            quantity: -1
-                          }))}>
+                            onPress={() =>
+                              dispatch(
+                                updateQuantity({
+                                  id: item.id,
+                                  quantity: -1,
+                                }),
+                              )
+                            }>
                             <Minus size={20} color="black"></Minus>
                           </TouchableOpacity>
                           <Space width={6}></Space>
                           <TextComponent
                             text={`${item.quantity}`}></TextComponent>
                           <Space width={6}></Space>
-                          <TouchableOpacity onPress={()=> dispatch(updateQuantity({
-                            id: item.id,
-                            quantity: 1
-                          }))}>
+                          <TouchableOpacity
+                            onPress={() =>
+                              dispatch(
+                                updateQuantity({
+                                  id: item.id,
+                                  quantity: 1,
+                                }),
+                              )
+                            }>
                             <Add size={20} color="black"></Add>
                           </TouchableOpacity>
-                          
                         </Row>
                       </Row>
                     </Col>
