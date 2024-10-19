@@ -25,7 +25,7 @@ const CartScreen = () => {
   
   const handleChooseAll = () => {};
   const handleCheckOut = () => {
-    navigation.navigate('MyOrder');
+    navigation.navigate('CheckOut');
   };
 
 
