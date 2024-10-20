@@ -13,9 +13,10 @@ const TopTabNavigator = () => {
       screenOptions={{
         tabBarScrollEnabled: true,
         tabBarIndicatorStyle: {
-          backgroundColor: 'black',
-          height: 3,
+          backgroundColor: '#ff7891',
+          height: 2,
         },
+        tabBarPressColor: '#ff7891',
       }}
       sceneContainerStyle={{backgroundColor: 'white'}}>
       <Tab.Screen

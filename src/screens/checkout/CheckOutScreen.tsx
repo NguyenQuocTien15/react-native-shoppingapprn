@@ -36,6 +36,13 @@ const CheckOutScreen = () => {
       <Text style={styles.title}>{title}</Text>
     </View>
   );
+  const handlePaymentMethod = () => {
+    if (checked) {
+      setChecked(false);
+    } else {
+      setChecked(true);
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.flexDirection}>
@@ -65,23 +72,13 @@ const CheckOutScreen = () => {
               Thanh toán khi nhận hàng
             </Text>
             <View>
-              <RadioButton
-                value="first"
-                status={checked === true ? 'checked' : 'unchecked'}
-                onPress={() => setChecked(true)}
-              />
+              <TouchableOpacity onPress={handlePaymentMethod}>
+                <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
+                  {checked && <View style={styles.selectedRb} />}
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
-          {/* <View style={[styles.flexDirection, {alignItems: 'center'}]}>
-            <Text style={{color: 'black', fontSize: 20}}>VisaCard</Text>
-            <View>
-              <RadioButton
-                value="second"
-                status={checked === 'second' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('second')}
-              />
-            </View>
-          </View> */}
         </View>
         <View>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -145,5 +142,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+  },
+  radioCircle: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'gray',
+  },
+  selectedRb: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#ff7891',
+    borderColor: '#ff7891',
   },
 });

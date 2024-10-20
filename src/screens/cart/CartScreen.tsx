@@ -14,21 +14,41 @@ import {
   cartSelector,
   updateQuantity,
 } from '../../redux/reducers/cartReducer';
-import {Card, Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
+import { Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
-import {colors} from '../../constants/colors';
 import {Minus, Add} from 'iconsax-react-native';
-import Icon from '@react-native-vector-icons/ionicons';
+
 
 const CartScreen = () => {
   const navigation = useNavigation();
   const cartData: CartItem[] = useSelector(cartSelector);
   const dispatch = useDispatch();
 
-  const [selectedProduct, setSelectedProduct] = useState(null);
- 
-  const handleChooseAll = () => {};
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [isSelectAll, setIsSelectAll] = useState(false);
+
+  // Hàm để chọn hoặc bỏ chọn sản phẩm
+  const toggleSelectProduct = (item: CartItem) => {
+    if (selectedProducts.includes(item.id)) {
+      setSelectedProducts(selectedProducts.filter(id => id !== item.id));
+    } else {
+      setSelectedProducts([...selectedProducts, item.id]);
+    }
+  };
+
+  // Hàm để chọn hoặc bỏ chọn tất cả sản phẩm
+  const handleChooseAll = () => {
+    if (isSelectAll) {
+      // Nếu đang chọn tất cả -> bỏ chọn tất cả
+      setSelectedProducts([]);
+      setIsSelectAll(false);
+    } else {
+      // Nếu chưa chọn tất cả -> chọn tất cả
+      setSelectedProducts(cartData.map(item => item.id));
+      setIsSelectAll(true);
+    }
+  };
   const handleCheckOut = () => {
     navigation.navigate('CheckOut');
   };
@@ -46,8 +66,15 @@ const CartScreen = () => {
               renderItem={({item, index}) => (
                 <View key={item.id} style={styles.itemListProduct}>
                   <Row alignItems="center" styles={{margin: 10}}>
-                    <Col flex={0.05} >
-                    <Text>a</Text>
+                    <Col flex={0.15}>
+                      <TouchableOpacity
+                        onPress={() => toggleSelectProduct(item)}>
+                        <View style={styles.radioCircle}>
+                          {selectedProducts.includes(item.id) && (
+                            <View style={styles.selectedRb} />
+                          )}
+                        </View>
+                      </TouchableOpacity>
                     </Col>
                     <Image
                       source={{uri: item.imageUrl}}
@@ -113,18 +140,25 @@ const CartScreen = () => {
           </View>
 
           <View style={styles.flexDirectionChooseAll}>
-            <TouchableOpacity onPress={() => handleChooseAll}>
+            <TouchableOpacity onPress={handleChooseAll}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View style={styles.radioButton}></View>
+                {/* Radio check cho nút chọn tất cả */}
+                <TouchableOpacity onPress={handleChooseAll}>
+                  <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
+                    {isSelectAll && <View style={styles.selectedRb} />}
+                  </View>
+                </TouchableOpacity>
                 <Text style={{marginLeft: 10, fontSize: 22, color: 'black'}}>
-                  Chọn tất cả
+                  {isSelectAll ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
                 </Text>
               </View>
             </TouchableOpacity>
             <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
-              {`$${cartData
-                .reduce((a, b) => a + b.quantity * b.price, 0)
-                .toLocaleString()}`}
+              {isSelectAll === true
+                ? `$${cartData
+                    .reduce((a, b) => a + b.quantity * b.price, 0)
+                    .toLocaleString()}`
+                : '0'}
             </Text>
           </View>
           <TouchableOpacity
@@ -169,14 +203,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  radioButton: {
-    width: 20,
+  radioCircle: {
     height: 20,
+    width: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: 'gray',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'gray',
+  },
+  selectedRb: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#ff7891',
+    borderColor: '#ff7891',
   },
   flexDirectionChooseAll: {
     marginTop: 10,
