@@ -13,7 +13,7 @@ import CategoriesList from './components/CategoriesList';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './components/FilterScreen';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);
@@ -63,12 +63,12 @@ const HomeScreen = () => {
                 styles={{width: 48, height: 48}}
                 icon={<Setting4 variant="TwoTone" size={24} color="white" />}
                 color="black"
-                onPress={() => {}}
+                onPress={() => navigation.navigate('FilterScreen')}
               />
             </Row>
           </Section>
         </>
-        <FilterScreen/>
+        {/* <FilterScreen/> */}
         <OffersList />
         <Space height={20} />
         <CategoriesList />

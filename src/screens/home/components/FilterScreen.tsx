@@ -13,15 +13,23 @@ import {
   globalStyles,
   Row,
   Section,
+  Space,
   Tabbar,
 } from '@bsdaoquang/rncomponent';
 import {fontFamilies} from '../../../constants/fontFamilies';
 import {CategoryModel} from '../../../models/CategoryModel';
 import firestore from '@react-native-firebase/firestore';
+import RnRangeSlider from 'rn-range-slider';
+import { ProductModel } from '../../../models/ProductModel';
 
 const FilterScreen = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
+  const[priceSelected,setPriceSelected] = useState({
+    low: 0,
+    high: 1000,
+  });
+  const [maxPrice,setMaxPrice] = useState(1000);
   const [isLoading, setIsLoading] = useState(false);
   //gọi hàm getData
   useEffect(() => {
@@ -31,7 +39,9 @@ const FilterScreen = () => {
   const getData = async () => {
     setIsLoading(true);
     try {
+      //gọi hàm lấy loại
       await getCategories();
+      await handleGetMaxPrice();
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -62,6 +72,26 @@ const FilterScreen = () => {
     }
     setCategoriesSelected(items);
   };
+
+  // hàm lấy giá 1 item cao nhất
+  const handleGetMaxPrice = async () => {
+    const snap = await firestore()
+    .collection('products')
+    .orderBy('price')
+    .limitToLast(1)
+    .get();
+
+    //lấy 1 item giá ở thời điểm lớn nhất nếu snap k rỗng
+    if (!snap.empty) {
+      const items:ProductModel[] = []
+      snap.forEach((item: any)=>
+        {items.push({...item.data()});
+    });
+    items.length > 0 && setMaxPrice(items[0].price);
+    setPriceSelected({...priceSelected, high : items[0].price});
+    }
+  };
+
   return isLoading ? (
     <Section>
       <ActivityIndicator></ActivityIndicator>
@@ -119,6 +149,61 @@ const FilterScreen = () => {
           titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 18}}
           title="Price"
         />
+        <Space height={12}/>
+        <RnRangeSlider
+          min={0}
+          step={1}
+          max={maxPrice}
+          renderThumb={(name)=> <View
+          style={{
+            width:14,
+            height:14,
+            borderWidth:2,
+            borderColor: colors.gray700,
+            borderRadius:100,
+            backgroundColor: colors.white,
+          }}>
+            {
+              name === 'high'
+            }
+            <View
+            style={{
+              position:'absolute',
+              right:0,
+              left:-20,
+              bottom:16,
+              width:50,
+              alignItems:'center'
+            }}>
+              <TextComponent
+               size={12}
+                color={colors.gray600}
+                 text={name==='low'
+                 ?`$${priceSelected.low}`:
+                 `$${priceSelected.high.toLocaleString()}` }/>
+            </View>
+          </View>
+          
+        }
+          renderRail={()=> <View
+          style={{
+            height:3,
+            width:'100%',
+            backgroundColor:colors.gray400
+          }}
+          ></View>}
+          renderRailSelected={()=> <View
+            style={{
+              height:3,
+              width:'100%',
+              backgroundColor:colors.gray800
+            }}
+            ></View>}
+         //giá trị mặc định khi vào min là bnh
+         onSliderTouchEnd={(low,high)=>setPriceSelected({low,high})}
+          onValueChanged={(low,high)=> {}}       
+        />
+        
       </Section>
       {/* lọc theo giá */}
     </Container>

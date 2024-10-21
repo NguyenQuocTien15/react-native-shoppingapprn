@@ -37,11 +37,14 @@ const PopularProduct = (props: Props) => {
       });
   }, []);
   //HÀM UPDATE price từ kiểu string sang int
-const handleUpdateProduct = async () => {
-products.forEach(async item => {
-await firestore().collection('products').doc(item.id).update({price: parseInt(item.price)})
-})
-};
+// const handleUpdateProduct = async () => {
+// products.forEach(async item => {
+// await firestore()
+// .collection('products')
+// .doc(item.id)
+// .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
+// })
+// };
   return (
     <View style={{flex: 1}}>
       <Tabbar
@@ -49,7 +52,8 @@ await firestore().collection('products').doc(item.id).update({price: parseInt(it
         tabbarStylesProps={{paddingHorizontal: 16}}
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
-        onSeeMore={() => handleUpdateProduct()}
+        // onSeeMore={() => handleUpdateProduct()}
+        onSeeMore={() => {}}
       />
 
       {products.length > 0 &&
