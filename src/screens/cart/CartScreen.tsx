@@ -50,7 +50,15 @@ const CartScreen = () => {
     }
   };
   const handleCheckOut = () => {
-    navigation.navigate('CheckOut');
+    const selectedItems = cartData.filter(item =>
+      selectedProducts.includes(item.id),
+    );
+
+    if (selectedItems.length > 0) {
+      navigation.navigate('CheckOut', {selectedItems});
+    } else {
+      Alert.alert('Please select at least one product to checkout.');
+    }
   };
 
   return (
