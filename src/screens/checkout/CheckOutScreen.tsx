@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
 import {Add, Minus} from 'iconsax-react-native';
+import { setOrder } from '../../redux/actions';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
@@ -22,7 +22,7 @@ const CheckOutScreen = ({route}) => {
   // Hàm tính tổng giá trị tất cả sản phẩm
   const calculateTotalPrice = () => {
     const total = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity,
       0,
     );
     setTotalPrice(total); // Cập nhật totalPrice khi tính toán xong
@@ -61,6 +61,21 @@ const CheckOutScreen = ({route}) => {
       setChecked(true);
     }
   };
+   const handleOrder = () => {
+     if (!checked) {
+       Alert.alert('Please select a payment method');
+       return;
+     }
+
+     const order = {
+       items: items,
+       totalPrice: totalPrice,
+       address: 'HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên',
+       paymentMethod: checked ? 'Cash on delivery' : '',
+     };
+   };
+
+
   return (
     <View style={styles.container}>
       <View style={[styles.flexDirection, {marginBottom: 10}]}>
@@ -168,7 +183,7 @@ const CheckOutScreen = ({route}) => {
               styles.touchCheckOut,
               {backgroundColor: checked ? '#FA7189' : '#A9A9A9'},
             ]}
-            onPress={() => navigation.navigate('MyOrder')}
+            onPress={handleOrder}
             disabled={!checked}>
             <Text style={styles.textCheckOut}>Order</Text>
           </TouchableOpacity>
