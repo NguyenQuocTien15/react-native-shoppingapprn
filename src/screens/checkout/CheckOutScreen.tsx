@@ -8,14 +8,53 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import {Add, Minus} from 'iconsax-react-native';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
   const {selectedItems} = route.params;
+  const [items, setItems] = useState(route.params.selectedItems); // Dùng state để theo dõi sản phẩm
+  const [totalPrice, setTotalPrice] = useState(0); // State để lưu tổng giá trị
 
+  // Hàm tính tổng giá trị tất cả sản phẩm
+  const calculateTotalPrice = () => {
+    const total = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+    setTotalPrice(total); // Cập nhật totalPrice khi tính toán xong
+  };
+
+  // Gọi tính toán tổng tiền khi items thay đổi
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [items]);
+
+  // Hàm xử lý tăng số lượng sản phẩm
+  const handleIncreaseQuantity = id => {
+    const updatedItems = items.map(item => {
+      if (item.id === id) {
+        return {...item, quantity: item.quantity + 1};
+      }
+      return item;
+    });
+    setItems(updatedItems);
+  };
+
+  // Hàm xử lý giảm số lượng sản phẩm
+  const handleDecreaseQuantity = id => {
+    const updatedItems = items.map(item => {
+      if (item.id === id && item.quantity > 1) {
+        return {...item, quantity: item.quantity - 1};
+      }
+      return item;
+    });
+    setItems(updatedItems);
+  };
   const handlePaymentMethod = () => {
     if (checked) {
       setChecked(false);
@@ -37,7 +76,7 @@ const CheckOutScreen = ({route}) => {
       </View>
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1}}>
-          {selectedItems.map(item => (
+          {items.map(item => (
             <View
               key={item.id}
               style={[
@@ -67,10 +106,35 @@ const CheckOutScreen = ({route}) => {
                   <Text style={styles.customText}>{`$${
                     item.price * item.quantity
                   }`}</Text>
-                  <View style={styles.flexDirection}>
-                    <Text>a</Text>
-                    <Text>a</Text>
-                    <Text>a</Text>
+                  <View
+                    style={[
+                      styles.flexDirection,
+                      {
+                        backgroundColor: '#e0e0e0',
+                        paddingVertical: 4,
+                        borderRadius: 100,
+                        paddingHorizontal: 12,
+                        alignItems: 'center',
+                      },
+                    ]}>
+                    <TouchableOpacity
+                      onPress={() => handleDecreaseQuantity(item.id)}>
+                      <Minus size={20} color="black"></Minus>
+                    </TouchableOpacity>
+
+                    <Text
+                      style={{
+                        marginLeft: 12,
+                        marginRight: 12,
+                        fontSize: 18,
+                        color: 'black',
+                      }}>
+                      {item.quantity}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleIncreaseQuantity(item.id)}>
+                      <Add size={20} color="black"></Add>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -97,7 +161,7 @@ const CheckOutScreen = ({route}) => {
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={{fontSize: 22, color: 'black'}}>Total</Text>
             <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
-              {selectedItems.map(item => item.price)}
+              {`$${totalPrice.toLocaleString()}`}
             </Text>
           </View>
           <TouchableOpacity
@@ -168,5 +232,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: 10,
     borderRadius: 15,
+  },
+  quantityButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    borderRadius: 5,
   },
 });

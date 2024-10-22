@@ -21,6 +21,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 const CartScreen = () => {
   const navigation = useNavigation();
@@ -93,7 +94,7 @@ const CartScreen = () => {
       {cartData.length > 0 ? (
         <View style={{flex: 1, marginTop: 10}}>
           {/* Listcart */}
-          <FlatList
+          <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
             data={cartData}
             renderItem={({item, index}) => (
@@ -181,7 +182,7 @@ const CartScreen = () => {
               </View>
             )}
             rightOpenValue={-75} // Độ rộng vuốt sang trái để xóa
-          ></FlatList>
+          ></SwipeListView>
 
           <View style={styles.flexDirectionChooseAll}>
             <TouchableOpacity onPress={handleChooseAll}>
