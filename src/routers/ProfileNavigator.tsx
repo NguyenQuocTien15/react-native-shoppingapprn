@@ -2,14 +2,15 @@ import {View, Text} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ProfileScreen} from '../screens';
-import MyOrderScreen from '../screens/order/MyOrderScreen';
+
+import TopTabNavigator from './TopTabNavigator';
 
 const ProfileNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator>
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{title: 'Profile'}}/>
-      <Stack.Screen name='MyOrders' component={MyOrderScreen} options={{title: 'My Orders'}}></Stack.Screen>
+      <Stack.Screen name='MyOrders' component={TopTabNavigator} options={{title: 'My Orders'}}></Stack.Screen>
     </Stack.Navigator>
   );
 };

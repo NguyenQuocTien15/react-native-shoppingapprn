@@ -6,14 +6,12 @@ import OrderShipping from './Order/OrderShippingNavigator';
 import OrderWaitingForConfirmation from './Order/OrderWaitingForConfirmationNavigator';
 import OrderWaitingShipping from './Order/OrderWaitingShippingNavigator';
 
-
-
-
-
+const Tab = createMaterialTopTabNavigator();
 const TopTabNavigator = () => {
-  const Tab = createMaterialTopTabNavigator();
+  
   return (
     <Tab.Navigator
+      initialRouteName="WaitingConfirm"
       screenOptions={{
         tabBarScrollEnabled: true,
         tabBarIndicatorStyle: {
@@ -21,10 +19,9 @@ const TopTabNavigator = () => {
           height: 1,
         },
         tabBarPressColor: '#ff7891',
-        tabBarLabelStyle: {fontSize: 14}, 
-        tabBarActiveTintColor: '#ff7891', 
+        tabBarLabelStyle: {fontSize: 14},
+        tabBarActiveTintColor: '#ff7891',
         tabBarInactiveTintColor: 'black',
-        
       }}
       sceneContainerStyle={{backgroundColor: 'white'}}>
       <Tab.Screen
