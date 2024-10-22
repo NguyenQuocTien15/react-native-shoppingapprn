@@ -16,7 +16,6 @@ import {Add, Minus} from 'iconsax-react-native';
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
-  const {selectedItems} = route.params;
   const [items, setItems] = useState(route.params.selectedItems); // Dùng state để theo dõi sản phẩm
   const [totalPrice, setTotalPrice] = useState(0); // State để lưu tổng giá trị
 
@@ -35,8 +34,8 @@ const CheckOutScreen = ({route}) => {
   }, [items]);
 
   // Hàm xử lý tăng số lượng sản phẩm
-  const handleIncreaseQuantity = id => {
-    const updatedItems = items.map(item => {
+  const handleIncreaseQuantity = (id: any) => {
+    const updatedItems = items.map((item: { id: any; quantity: number; }) => {
       if (item.id === id) {
         return {...item, quantity: item.quantity + 1};
       }
@@ -46,8 +45,8 @@ const CheckOutScreen = ({route}) => {
   };
 
   // Hàm xử lý giảm số lượng sản phẩm
-  const handleDecreaseQuantity = id => {
-    const updatedItems = items.map(item => {
+  const handleDecreaseQuantity = (id: any) => {
+    const updatedItems = items.map((item: { id: any; quantity: number; }) => {
       if (item.id === id && item.quantity > 1) {
         return {...item, quantity: item.quantity - 1};
       }
