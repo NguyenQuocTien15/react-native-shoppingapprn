@@ -11,18 +11,29 @@ import {
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
-import { setOrder } from '../../redux/actions';
+import Dialog from 'react-native-dialog';
+import {Button} from '@bsdaoquang/rncomponent';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
   const [items, setItems] = useState(route.params.selectedItems); // Dùng state để theo dõi sản phẩm
   const [totalPrice, setTotalPrice] = useState(0); // State để lưu tổng giá trị
+  const [visible, setVisible] = useState(false);
 
+  const showDialog = () => {
+    setVisible(true);
+  };
+
+  const handleDialog = () => {
+    navigation.navigate('TopTab');
+    setVisible(false);
+  };
   // Hàm tính tổng giá trị tất cả sản phẩm
   const calculateTotalPrice = () => {
     const total = items.reduce(
-      (sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity,
+      (sum: number, item: {price: number; quantity: number}) =>
+        sum + item.price * item.quantity,
       0,
     );
     setTotalPrice(total); // Cập nhật totalPrice khi tính toán xong
@@ -35,7 +46,7 @@ const CheckOutScreen = ({route}) => {
 
   // Hàm xử lý tăng số lượng sản phẩm
   const handleIncreaseQuantity = (id: any) => {
-    const updatedItems = items.map((item: { id: any; quantity: number; }) => {
+    const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id) {
         return {...item, quantity: item.quantity + 1};
       }
@@ -46,7 +57,7 @@ const CheckOutScreen = ({route}) => {
 
   // Hàm xử lý giảm số lượng sản phẩm
   const handleDecreaseQuantity = (id: any) => {
-    const updatedItems = items.map((item: { id: any; quantity: number; }) => {
+    const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id && item.quantity > 1) {
         return {...item, quantity: item.quantity - 1};
       }
@@ -61,20 +72,6 @@ const CheckOutScreen = ({route}) => {
       setChecked(true);
     }
   };
-   const handleOrder = () => {
-     if (!checked) {
-       Alert.alert('Please select a payment method');
-       return;
-     }
-
-     const order = {
-       items: items,
-       totalPrice: totalPrice,
-       address: 'HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên',
-       paymentMethod: checked ? 'Cash on delivery' : '',
-     };
-   };
-
 
   return (
     <View style={styles.container}>
@@ -183,10 +180,31 @@ const CheckOutScreen = ({route}) => {
               styles.touchCheckOut,
               {backgroundColor: checked ? '#FA7189' : '#A9A9A9'},
             ]}
-            onPress={handleOrder}
+            onPress={showDialog}
             disabled={!checked}>
             <Text style={styles.textCheckOut}>Order</Text>
           </TouchableOpacity>
+          <Dialog.Container contentStyle={{borderRadius:15}} visible={visible}>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                source={require('../../assets/images/checksuccess.png')}
+                style={{width: 50, height: 50, marginTop: 20, marginBottom: 20}}
+              />
+              <Text
+                style={{
+                  marginTop: 10,
+                  marginBottom: 10,
+                  fontSize: 30,
+                  color: 'black',
+                }}>
+                Order Successfully!
+              </Text>
+            </View>
+            <Button
+              title="My Orders"
+              onPress={handleDialog}
+              color="#ff7891"></Button>
+          </Dialog.Container>
         </View>
       </View>
     </View>
