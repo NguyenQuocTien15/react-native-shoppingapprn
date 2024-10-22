@@ -1,17 +1,17 @@
 import {View, Text} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import OrderWattingShippingScreen from '../../screens/order/OrderWaittingShippingScreen';
+import OrderWaitingShippingScreen from '../../screens/order/OrderWaitingShippingScreen';
 
-const OrderHistory = () => {
+const OrderWaitingShipping = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen
-        name="OrderWattingShipping"
-        component={OrderWattingShippingScreen}></Stack.Screen>
+        name="OrderWaitingShipping"
+        component={OrderWaitingShippingScreen}></Stack.Screen>
     </Stack.Navigator>
   );
 };
 
-export default OrderHistory;
+export default OrderWaitingShipping;

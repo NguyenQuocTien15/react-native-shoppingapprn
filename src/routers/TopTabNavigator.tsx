@@ -3,8 +3,12 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import OrderHistory from './Order/OrderHistoryNavigator';
 import OrderReview from './Order/OrderReviewNavigator';
 import OrderShipping from './Order/OrderShippingNavigator';
-import OrderWaittingShipping from './Order/OrderWaittingShippingNavigator';
-import OrderWaittingForConfirmation from './Order/OrderWaittingForConfirmationNavigator';
+import OrderWaitingForConfirmation from './Order/OrderWaitingForConfirmationNavigator';
+import OrderWaitingShipping from './Order/OrderWaitingShippingNavigator';
+
+
+
+
 
 const TopTabNavigator = () => {
   const Tab = createMaterialTopTabNavigator();
@@ -24,14 +28,14 @@ const TopTabNavigator = () => {
       }}
       sceneContainerStyle={{backgroundColor: 'white'}}>
       <Tab.Screen
-        name="WaittingConfirm"
-        component={OrderWaittingForConfirmation}></Tab.Screen>
+        name="WaitingConfirm"
+        component={OrderWaitingForConfirmation}></Tab.Screen>
       <Tab.Screen
-        name="WaittingShipping"
-        component={OrderWaittingShipping}></Tab.Screen>
+        name="WaitingShipping"
+        component={OrderWaitingShipping}></Tab.Screen>
       <Tab.Screen name="Shipping" component={OrderShipping}></Tab.Screen>
       <Tab.Screen name="Reviews" component={OrderReview}></Tab.Screen>
-      <Tab.Screen name="HistoryScreen" component={OrderHistory}></Tab.Screen>
+      <Tab.Screen name="History" component={OrderHistory}></Tab.Screen>
     </Tab.Navigator>
   );
 }

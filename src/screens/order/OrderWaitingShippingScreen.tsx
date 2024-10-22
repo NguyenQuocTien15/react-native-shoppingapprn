@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import React from 'react'
 
-const OrderWattingShippingScreen = () => {
+const OrderWaitingShippingScreen = () => {
   return (
     <View>
       <Text>OrderWattingShippingScreen</Text>
@@ -9,4 +9,4 @@ const OrderWattingShippingScreen = () => {
   )
 }
 
-export default OrderWattingShippingScreen
+export default OrderWaitingShippingScreen
