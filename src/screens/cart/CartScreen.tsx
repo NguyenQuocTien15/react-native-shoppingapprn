@@ -18,7 +18,7 @@ import {
 import {Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
-import {Minus, Add, Icon} from 'iconsax-react-native';
+import {Minus, Add} from 'iconsax-react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -47,6 +47,10 @@ const CartScreen = () => {
     // Nếu bỏ chọn một sản phẩm, "Chọn tất cả" sẽ không còn được chọn
     if (updatedSelectedProducts.length !== cartData.length) {
       setIsSelectAll(false);
+    }
+    // Nếu bỏ chọn một sản phẩm, "Chọn tất cả" sẽ không còn được chọn
+    if (updatedSelectedProducts.length === cartData.length) {
+      setIsSelectAll(true);
     }
   };
 
