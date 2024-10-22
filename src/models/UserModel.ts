@@ -6,4 +6,6 @@ export interface UserModel {
   photoUrl: any;
   displayName: string;
   emailVerified: boolean;
+  address: string;
+  phoneNumber: string;
 }

@@ -1,91 +1,136 @@
-import {View, Text, ScrollView, Image, StyleSheet, FlatList} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  StyleSheet,
+  FlatList,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-
+import {orderRef} from '../../firebase/firebaseConfig';
 
 const OrderWaitingForConfirmationScreen = () => {
-  const handleCancel =() => {}
+  const handleCancel = () => {};
   const handleConfirm = () => {};
-  
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <View>
-      
-        <Text>No order found</Text>
-      
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const snapshot = await orderRef.get();
+        const ordersData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setOrders(ordersData);
+      } catch (error) {
+        console.error('Error fetching orders: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const renderItem = ({item}) => (
+    <View style={styles.orderItem}>
+      <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
+      <Text style={styles.orderTotal}>
+        Total: ${item.totalPrice.toLocaleString()}
+      </Text>
+      <Text style={styles.orderAddress}>Address: {item.address}</Text>
+      <Text style={styles.orderDate}>
+        Date: {new Date(item.timestamp).toLocaleString()}
+      </Text>
+      {item.items.map((orderItem, index) => (
+        <View style={styles.itemListProduct}>
+          <View key={index} style={styles.orderProduct}>
+            <Image
+              source={{uri: orderItem.imageUrl}}
+              style={styles.productImage}
+            />
+            <View style={{flex: 1, flexDirection: 'column'}}>
+              <Text style={styles.customText}>{orderItem.title}</Text>
+              <Text style={{color: 'black', fontSize: 18}}>
+                Quantity: {orderItem.quantity}
+              </Text>
+
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                }}>
+                <Text style={styles.customText}>Price: ${orderItem.price}</Text>
+                <View
+                  style={[
+                    styles.flexDirection,
+                    {
+                      paddingVertical: 4,
+                      borderRadius: 100,
+                      alignItems: 'center',
+                    },
+                  ]}>
+                  <TouchableOpacity
+                    style={[
+                      styles.touch,
+                      {
+                        backgroundColor: 'white',
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.textTouch,
+                        {
+                          color: 'black',
+                        },
+                      ]}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.touch,
+                      {backgroundColor: '#ff7891', marginLeft: 10},
+                    ]}>
+                    <Text
+                      style={[
+                        styles.textTouch,
+                        {
+                          color: 'white',
+                        },
+                      ]}>
+                      Confirm
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      ))}
     </View>
   );
-  // return (
-  //   <ScrollView style={{flex: 1}}>
-  //     {/* <View style={{flexDirection: 'row', padding: 10}}>
-  //       <Image
-  //         style={{
-  //           width: 100,
-  //           height: 100,
-  //           borderRadius: 12,
-  //           marginRight: 10,
-  //           backgroundColor: 'black',
-  //         }}></Image>
-  //       <View style={{flex: 1, flexDirection: 'column'}}>
-  //         <Text style={styles.customText}>a</Text>
-  //         <Text style={{color: 'black', fontSize: 18}}>b</Text>
-  //         <View
-  //           style={{
-  //             flex: 1,
-  //             flexDirection: 'row',
-  //             justifyContent: 'space-between',
-  //             alignItems: 'flex-end',
-  //           }}>
-  //           <Text style={styles.customText}>price</Text>
-  //           <View
-  //             style={[
-  //               styles.flexDirection,
-  //               {
-  //                 paddingVertical: 4,
-  //                 borderRadius: 100,
-  //                 alignItems: 'center',
-  //               },
-  //             ]}>
-  //             <TouchableOpacity
-  //               style={[
-  //                 styles.touch,
-  //                 {
-  //                   backgroundColor: 'white',
-  //                 },
-  //               ]}>
-  //               <Text
-  //                 style={[
-  //                   styles.textTouch,
-  //                   {
-  //                     color: 'black',
-  //                   },
-  //                 ]}>
-  //                 Cancel
-  //               </Text>
-  //             </TouchableOpacity>
-  //             <TouchableOpacity
-  //               style={[
-  //                 styles.touch,
-  //                 {backgroundColor: '#ff7891', marginLeft: 10},
-  //               ]}>
-  //               <Text
-  //                 style={[
-  //                   styles.textTouch,
-  //                   {
-  //                     color: 'white',
-  //                   },
-  //                 ]}>
-  //                 Confirm
-  //               </Text>
-  //             </TouchableOpacity>
-  //           </View>
-  //         </View>
-  //       </View>
-  //     </View> */}
-  //   </ScrollView>
-  // );
+
+  return (
+    <View style={styles.container}>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={orders}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </View>
+  );
+  
 };
 
 export default OrderWaitingForConfirmationScreen;
@@ -122,35 +167,38 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 15,
   },
-  //
 
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  //
+  orderItem: {
+    marginBottom: 15,
+    borderRadius: 10,
   },
-  text: {
+  orderTitle: {
     fontSize: 18,
-    marginBottom: 10,
-  },
-  itemContainer: {
-    backgroundColor: '#f8f8f8',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  itemTitle: {
-    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 5,
   },
-  itemText: {
+  orderTotal: {
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 5,
   },
-  totalPrice: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 16,
+  orderAddress: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  orderDate: {
+    fontSize: 12,
+    marginBottom: 10,
+    color: 'gray',
+  },
+  orderProduct: {
+    flexDirection: 'row',
+    borderRadius:10,
+  },
+  productImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    marginRight: 10,
   },
 });

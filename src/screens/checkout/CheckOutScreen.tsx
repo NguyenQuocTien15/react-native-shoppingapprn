@@ -1,6 +1,4 @@
 import {
-  Alert,
-  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -13,6 +11,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
 import {Button} from '@bsdaoquang/rncomponent';
+import {orderRef} from '../../firebase/firebaseConfig';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
@@ -21,11 +20,24 @@ const CheckOutScreen = ({route}) => {
   const [totalPrice, setTotalPrice] = useState(0); // State để lưu tổng giá trị
   const [visible, setVisible] = useState(false);
 
-  const showDialog = () => {
-    setVisible(true);
+  const showDialogAndAddOrders = async () => {
+    try {
+      const orderData = {
+        items: items,
+        totalPrice: totalPrice,
+        address: 'HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên',
+        timestamp: Date.now(),
+      };
+
+      // Save order data to Firestore
+      await orderRef.add(orderData);
+      setVisible(true); // Show dialog on success
+    } catch (error) {
+      console.error('Error saving order: ', error);
+    }
   };
 
-  const handleDialog = () => {
+  const handleNavigationMyOrder = () => {
     navigation.navigate('TopTab');
     setVisible(false);
   };
@@ -180,11 +192,11 @@ const CheckOutScreen = ({route}) => {
               styles.touchCheckOut,
               {backgroundColor: checked ? '#FA7189' : '#A9A9A9'},
             ]}
-            onPress={showDialog}
+            onPress={showDialogAndAddOrders}
             disabled={!checked}>
             <Text style={styles.textCheckOut}>Order</Text>
           </TouchableOpacity>
-          <Dialog.Container contentStyle={{borderRadius:15}} visible={visible}>
+          <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
               <Image
                 source={require('../../assets/images/checksuccess.png')}
@@ -202,7 +214,7 @@ const CheckOutScreen = ({route}) => {
             </View>
             <Button
               title="My Orders"
-              onPress={handleDialog}
+              onPress={handleNavigationMyOrder}
               color="#ff7891"></Button>
           </Dialog.Container>
         </View>
