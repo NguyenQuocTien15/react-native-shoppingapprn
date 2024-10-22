@@ -32,7 +32,7 @@ const CartScreen = () => {
   const [isSelectAll, setIsSelectAll] = useState(false);
 
   // Hàm để chọn hoặc bỏ chọn sản phẩm
-  const toggleSelectProduct = item => {
+  const toggleSelectProduct = (item: CartItem) => {
     let updatedSelectedProducts;
     if (selectedProducts.includes(item.id)) {
       // Nếu sản phẩm đã được chọn, bỏ nó ra khỏi danh sách selectedProducts
