@@ -11,9 +11,9 @@ import CategoriesList from './components/CategoriesList';
  import OffersList from './components/OffersList';
  import PopularProduct from './components/PopularProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
-import FilterScreen from './components/FilterScreen';
+import FilterScreen from './FilterScreen';
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({navigation}:any) => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);

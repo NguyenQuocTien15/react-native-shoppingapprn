@@ -45,6 +45,16 @@ const PopularProduct = (props: Props) => {
 // .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
 // })
 // };
+
+//
+const handleUpdateProduct = () => {
+  products.forEach (async item => {
+await firestore()
+.collection('products')
+.doc(item.id)
+.update({seller: Math.floor(Math.random()*100)})
+  });
+};
   return (
     <View style={{flex: 1}}>
       <Tabbar

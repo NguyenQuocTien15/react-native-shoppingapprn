@@ -10,11 +10,13 @@ type Props = {
     left?: ReactNode;
     right?:ReactNode;
     isScroll?: boolean;
+    //nẳm ngoài scrollVIew
+    bottomComponent?: ReactNode;
 };
 
 
 const Container = (props: Props) => {
-    const {children, title, back,left,right,isScroll} = props;
+    const {children, title, back,left,right,isScroll,bottomComponent} = props;
   return (
     <SafeAreaView style={[globalStyles.container]}>
      
@@ -39,8 +41,9 @@ const Container = (props: Props) => {
             {children}
         </ScrollView>) : (<View style={globalStyles.container}>{children}</View>)
         }
+               {bottomComponent && bottomComponent}
     </SafeAreaView>
   );
-}
+};
 
 export default Container
