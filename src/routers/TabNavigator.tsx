@@ -16,6 +16,7 @@ import {
 import {TextComponent} from '../components';
 import {Row} from '@bsdaoquang/rncomponent';
 import {fontFamilies} from '../constants/fontFamilies';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -31,6 +32,7 @@ const TabNavigator = () => {
           height: 70,
           justifyContent: 'center',
           alignItems: 'center',
+          
         },
         tabBarIcon: ({focused, size, color}) => {
           color = focused ? colors.white : colors.dark;
@@ -75,9 +77,53 @@ const TabNavigator = () => {
         },
       })}>
       <Tab.Screen name="Home" component={HomeNavigator} />
-      <Tab.Screen name="Cart" component={CartNavigator} />
-      <Tab.Screen name="Notification" component={NotificationNavigator} />
-      <Tab.Screen name="Profile" component={ProfileNavigator} />
+      <Tab.Screen
+        name="Cart"
+        component={CartNavigator}
+        options={({route}) => ({
+          tabBarStyle: (route => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+            if (routeName === 'CheckOut') {
+              return {display: 'none'};
+            }
+            return {
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 30,
+              borderTopRightRadius: 30,
+              height: 70,
+              justifyContent: 'center',
+              alignItems: 'center',
+            };
+          })(route),
+        })}
+      />
+      <Tab.Screen name="Notification" component={NotificationNavigator}/>
+      <Tab.Screen
+        name="Profile"
+        component={ProfileNavigator}
+        options={({route}) => ({
+          tabBarStyle: (route => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+            if (routeName === 'MyOrders') {
+              return {display: 'none'};
+            }
+            if (routeName === 'ChangePassword') {
+              return {display: 'none'};
+            }
+            if (routeName === 'Address') {
+              return {display: 'none'};
+            }
+            return {
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 30,
+              borderTopRightRadius: 30,
+              height: 70,
+              justifyContent: 'center',
+              alignItems: 'center',
+            };
+          })(route),
+        })}
+      />
     </Tab.Navigator>
   );
 };

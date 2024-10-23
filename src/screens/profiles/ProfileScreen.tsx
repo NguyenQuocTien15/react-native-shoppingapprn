@@ -8,42 +8,78 @@ import {localDataNames} from '../../constants/localDataNames';
 import {removeAuth} from '../../redux/reducers/authReducer';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const handlePersonalDetails = () => {
-    console.log('aaaaaaaaaaaaa');
+    navigation.navigate('Personal')
   };
 
   return (
-    <View style={{flex: 1, padding: 20}}>
+    <View style={{flex: 1, paddingLeft: 10, paddingRight: 10, paddingTop: 20}}>
       <TouchableOpacity
         onPress={handlePersonalDetails}
         style={styles.touchableOpacity}>
-        <Icon name="person" size={24} color="black" />
-        <Text style={{flex: 1, marginLeft: 15, fontSize: 20, color: 'black'}}>
-          Personal Details
-        </Text>
+        <FontAwesome5
+          name="user-edit"
+          size={24}
+          color="black"
+          style={{flex: 0.1}}
+        />
+        <Text style={styles.textTouch}>Personal Details</Text>
         <Icon name="chevron-forward" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={ () => navigation.navigate('MyOrders') }
+        onPress={() => navigation.navigate('MyOrders')}
         style={styles.touchableOpacity}>
-        <Icon name="bag-check-outline" size={24} color="black" />
-        <Text style={{flex: 1, marginLeft: 15, fontSize: 20, color: 'black'}}>
-          My Orders
-        </Text>
+        <FontAwesome5
+          name="shopping-bag"
+          size={24}
+          color="black"
+          style={{flex: 0.1}}
+        />
+        <Text style={styles.textTouch}>My Orders</Text>
         <Icon name="chevron-forward" size={24} color="black" />
       </TouchableOpacity>
-      <Button
-        title="Logout"
+      <TouchableOpacity
+        onPress={() => navigation.navigate('ChangePassword')}
+        style={styles.touchableOpacity}>
+        <MaterialIcons
+          name="password"
+          size={24}
+          color="black"
+          style={{flex: 0.1}}
+        />
+        <Text style={styles.textTouch}>ChangPassword</Text>
+        <Icon name="chevron-forward" size={24} color="black" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Address')}
+        style={styles.touchableOpacity}>
+        <FontAwesome5
+          name="shipping-fast"
+          size={24}
+          color="black"
+          style={{flex: 0.1}}
+        />
+        <Text style={styles.textTouch}>Address</Text>
+        <Icon name="chevron-forward" size={24} color="black" />
+      </TouchableOpacity>
+      <TouchableOpacity
         onPress={async () => {
           await auth().signOut();
           await AsyncStorage.removeItem(localDataNames.auth);
           dispatch(removeAuth({}));
         }}
-      />
+        style={styles.touchableOpacity}>
+        <AntDesign name="logout" size={24} color="black" style={{flex: 0.1}} />
+        <Text style={styles.textTouch}>Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -52,6 +88,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 12,
   },
+  textTouch: {flex: 1, marginLeft: 15, fontSize: 20, color: 'black'},
 });
 export default ProfileScreen;

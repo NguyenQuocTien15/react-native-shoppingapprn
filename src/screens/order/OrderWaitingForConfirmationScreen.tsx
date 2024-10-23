@@ -9,10 +9,14 @@ import {
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
 import {orderRef} from '../../firebase/firebaseConfig';
+import Dialog from 'react-native-dialog'
 
 const OrderWaitingForConfirmationScreen = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+ 
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -32,7 +36,14 @@ const OrderWaitingForConfirmationScreen = () => {
 
     fetchOrders();
   }, []);
-  const handleCancel = async (orderId, productIndex) => {
+   const showDialog = () => {
+     setDialogVisible(true);
+   };
+
+   const handleCancelDialog = () => {
+     setDialogVisible(false);
+   };
+  const handleCancelOrderProduct = async (orderId, productIndex) => {
     try {
       // Find the order to update
       const orderToUpdate = orders.find(order => order.id === orderId);
@@ -108,7 +119,7 @@ const OrderWaitingForConfirmationScreen = () => {
                         backgroundColor: 'white',
                       },
                     ]}
-                    onPress={() => handleCancel(item.id, index)}>
+                    onPress={showDialog}>
                     <Text
                       style={[
                         styles.textTouch,
@@ -119,6 +130,20 @@ const OrderWaitingForConfirmationScreen = () => {
                       Cancel
                     </Text>
                   </TouchableOpacity>
+                  <Dialog.Container visible={dialogVisible}>
+                    <Dialog.Description>
+                      Do you want to cancel the order of product {' '}
+                      {orderItem.title}?
+                    </Dialog.Description>
+                    <Dialog.Button
+                      label="Cancel"
+                      onPress={handleCancelDialog}></Dialog.Button>
+                    <Dialog.Button
+                      label="Yes"
+                      onPress={() =>
+                        handleCancelOrderProduct(item.id, index)
+                      }></Dialog.Button>
+                  </Dialog.Container>
                   <TouchableOpacity
                     style={[
                       styles.touch,
@@ -228,6 +253,7 @@ const styles = StyleSheet.create({
   orderProduct: {
     flexDirection: 'row',
     borderRadius: 10,
+    padding:5
   },
   productImage: {
     width: 100,
