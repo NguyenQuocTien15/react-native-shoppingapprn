@@ -65,7 +65,7 @@ const OrderWaitingForConfirmationScreen = () => {
                   justifyContent: 'space-between',
                   alignItems: 'flex-end',
                 }}>
-                <Text style={styles.customText}>Price: ${orderItem.price}</Text>
+                <Text style={styles.customText}>Price: ${orderItem.price * orderItem.quantity}</Text>
                 <View
                   style={[
                     styles.flexDirection,

@@ -16,8 +16,8 @@ import {orderRef} from '../../firebase/firebaseConfig';
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
-  const [items, setItems] = useState(route.params.selectedItems); // Dùng state để theo dõi sản phẩm
-  const [totalPrice, setTotalPrice] = useState(0); // State để lưu tổng giá trị
+  const [items, setItems] = useState(route.params.selectedItems);
+  const [totalPrice, setTotalPrice] = useState(0); 
   const [visible, setVisible] = useState(false);
 
   const showDialogAndAddOrders = async () => {
@@ -29,9 +29,8 @@ const CheckOutScreen = ({route}) => {
         timestamp: Date.now(),
       };
 
-      // Save order data to Firestore
       await orderRef.add(orderData);
-      setVisible(true); // Show dialog on success
+      setVisible(true);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
@@ -41,22 +40,22 @@ const CheckOutScreen = ({route}) => {
     navigation.navigate('TopTab');
     setVisible(false);
   };
-  // Hàm tính tổng giá trị tất cả sản phẩm
+  
   const calculateTotalPrice = () => {
     const total = items.reduce(
       (sum: number, item: {price: number; quantity: number}) =>
         sum + item.price * item.quantity,
       0,
     );
-    setTotalPrice(total); // Cập nhật totalPrice khi tính toán xong
+    setTotalPrice(total); 
   };
 
-  // Gọi tính toán tổng tiền khi items thay đổi
+  
   useEffect(() => {
     calculateTotalPrice();
   }, [items]);
 
-  // Hàm xử lý tăng số lượng sản phẩm
+  
   const handleIncreaseQuantity = (id: any) => {
     const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id) {
@@ -67,7 +66,7 @@ const CheckOutScreen = ({route}) => {
     setItems(updatedItems);
   };
 
-  // Hàm xử lý giảm số lượng sản phẩm
+ 
   const handleDecreaseQuantity = (id: any) => {
     const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id && item.quantity > 1) {

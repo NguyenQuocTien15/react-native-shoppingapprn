@@ -34,10 +34,10 @@ const CartScreen = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null); // State để lưu item cần xóa
+  const [itemToDelete, setItemToDelete] = useState(null); 
 
   const showDialog = item => {
-    setItemToDelete(item); // Lưu sản phẩm cần xóa
+    setItemToDelete(item); 
     setDialogVisible(true);
   };
 
@@ -47,56 +47,56 @@ const CartScreen = () => {
 
   const handleDelete = () => {
     if (itemToDelete) {
-      dispatch(removeCartItem(itemToDelete.id)); // Gọi dispatch để xóa sản phẩm khỏi giỏ hàng
+      dispatch(removeCartItem(itemToDelete.id));
       setDialogVisible(false);
-      setItemToDelete(null); // Đặt lại itemToDelete
+      setItemToDelete(null); 
     }
   };
 
-  // Hàm để chọn hoặc bỏ chọn sản phẩm
+  
   const toggleSelectProduct = (item: CartItem) => {
     let updatedSelectedProducts;
     if (selectedProducts.includes(item.id)) {
-      // Nếu sản phẩm đã được chọn, bỏ nó ra khỏi danh sách selectedProducts
+      
       updatedSelectedProducts = selectedProducts.filter(id => id !== item.id);
     } else {
-      // Nếu sản phẩm chưa được chọn, thêm nó vào danh sách selectedProducts
+      
       updatedSelectedProducts = [...selectedProducts, item.id];
     }
 
-    // Cập nhật trạng thái chọn sản phẩm
+   
     setSelectedProducts(updatedSelectedProducts);
 
-    // Nếu bỏ chọn một sản phẩm, "Chọn tất cả" sẽ không còn được chọn
+   
     if (updatedSelectedProducts.length !== cartData.length) {
       setIsSelectAll(false);
     }
-    // Nếu bỏ chọn một sản phẩm, "Chọn tất cả" sẽ không còn được chọn
+    
     if (updatedSelectedProducts.length === cartData.length) {
       setIsSelectAll(true);
     }
   };
 
-  // Hàm để chọn hoặc bỏ chọn tất cả sản phẩm
+  
   const handleChooseAll = () => {
     if (isSelectAll) {
-      // Nếu đang chọn tất cả -> bỏ chọn tất cả
+      
       setSelectedProducts([]);
       setIsSelectAll(false);
     } else {
-      // Nếu chưa chọn tất cả -> chọn tất cả
+      
       setSelectedProducts(cartData.map(item => item.id));
       setIsSelectAll(true);
     }
   };
   const calculateTotalPrice = () => {
     return cartData
-      .filter(item => selectedProducts.includes(item.id)) // Lọc các sản phẩm được chọn
-      .reduce((total, item) => total + item.price * item.quantity, 0); // Tính tổng giá
+      .filter(item => selectedProducts.includes(item.id)) 
+      .reduce((total, item) => total + item.price * item.quantity, 0); 
   };
-  // Hàm xóa sản phẩm khỏi giỏ hàng
+  
   const handleDeleteItem = item => {
-    dispatch(removeCartItem(item.id)); // Xóa sản phẩm khỏi giỏ hàng
+    dispatch(removeCartItem(item.id)); 
     setDialogVisible(false);
   };
   const handleCheckOut = () => {
