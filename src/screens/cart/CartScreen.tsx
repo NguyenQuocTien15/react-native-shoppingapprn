@@ -20,11 +20,9 @@ import {Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
-
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
-import {Modal} from 'react-native';
 
 const CartScreen = () => {
   const navigation = useNavigation();
@@ -34,10 +32,8 @@ const CartScreen = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null); 
 
-  const showDialog = item => {
-    setItemToDelete(item); 
+  const showDialog = () => {
     setDialogVisible(true);
   };
 
@@ -45,15 +41,6 @@ const CartScreen = () => {
     setDialogVisible(false);
   };
 
-  const handleDelete = () => {
-    if (itemToDelete) {
-      dispatch(removeCartItem(itemToDelete.id));
-      setDialogVisible(false);
-      setItemToDelete(null); 
-    }
-  };
-
-  
   const toggleSelectProduct = (item: CartItem) => {
     let updatedSelectedProducts;
     if (selectedProducts.includes(item.id)) {
@@ -63,8 +50,6 @@ const CartScreen = () => {
       
       updatedSelectedProducts = [...selectedProducts, item.id];
     }
-
-   
     setSelectedProducts(updatedSelectedProducts);
 
    
@@ -95,7 +80,7 @@ const CartScreen = () => {
       .reduce((total, item) => total + item.price * item.quantity, 0); 
   };
   
-  const handleDeleteItem = item => {
+  const handleDeleteItem = (item) => {
     dispatch(removeCartItem(item.id)); 
     setDialogVisible(false);
   };
@@ -198,20 +183,19 @@ const CartScreen = () => {
               <View style={styles.rowBack}>
                 <TouchableOpacity
                   style={[styles.backRightBtn, styles.backRightBtnRight]}
-                  onPress={() => handleDeleteItem(item)}>
+                  onPress={showDialog}>
                   <MaterialIcons name="delete" size={30} color="white" />
                   <Text style={styles.backTextWhite}>Delete</Text>
                 </TouchableOpacity>
-                {/* <Dialog.Container visible={dialogVisible}>
+                <Dialog.Container visible={dialogVisible}>
                   <Dialog.Title>Delete {item.title}?</Dialog.Title>
                   <Dialog.Description>
                     Are you sure you want to remove this {item.title}{' '}
                     product from your cart?
                   </Dialog.Description>
                   <Dialog.Button label="Cancel" onPress={handleCancel} />
-                  <Dialog.Button label="Delete" onPress={()=>handleDeleteItem(item)} />{' '}
-                 
-                </Dialog.Container>  */}
+                  <Dialog.Button label="Delete" onPress={() => handleDeleteItem(item)} />
+                </Dialog.Container> 
               </View>
             )}
             rightOpenValue={-75} // Độ rộng vuốt sang trái để xóa

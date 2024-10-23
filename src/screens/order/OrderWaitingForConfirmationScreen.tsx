@@ -11,8 +11,6 @@ import {TouchableOpacity} from 'react-native';
 import {orderRef} from '../../firebase/firebaseConfig';
 
 const OrderWaitingForConfirmationScreen = () => {
-  const handleCancel = () => {};
-  const handleConfirm = () => {};
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,13 +32,39 @@ const OrderWaitingForConfirmationScreen = () => {
 
     fetchOrders();
   }, []);
+  const handleCancel = async (orderId, productIndex) => {
+    try {
+      // Find the order to update
+      const orderToUpdate = orders.find(order => order.id === orderId);
+      if (!orderToUpdate) return;
+
+      // Remove the product from the local state
+      const updatedItems = [...orderToUpdate.items];
+      updatedItems.splice(productIndex, 1);
+
+      // Update the order in Firebase
+      const orderDocRef = orderRef.doc(orderId);
+      await orderDocRef.update({items: updatedItems});
+
+      // Update the local state to reflect the changes
+      setOrders(prevOrders => {
+        return prevOrders.map(order =>
+          order.id === orderId ? {...order, items: updatedItems} : order,
+        );
+      });
+    } catch (error) {
+      console.error('Error deleting product from Firebase: ', error);
+    }
+  };
+
+  const handleConfirm = () => {
+    // Implement confirmation logic here
+  };
 
   const renderItem = ({item}) => (
     <View style={styles.orderItem}>
       <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
-      <Text style={styles.orderTotal}>
-        Total: ${item.totalPrice.toLocaleString()}
-      </Text>
+
       <Text style={styles.orderAddress}>Address: {item.address}</Text>
       <Text style={styles.orderDate}>
         Date: {new Date(item.timestamp).toLocaleString()}
@@ -65,7 +89,9 @@ const OrderWaitingForConfirmationScreen = () => {
                   justifyContent: 'space-between',
                   alignItems: 'flex-end',
                 }}>
-                <Text style={styles.customText}>Price: ${orderItem.price * orderItem.quantity}</Text>
+                <Text style={styles.customText}>
+                  Price: ${orderItem.price * orderItem.quantity}
+                </Text>
                 <View
                   style={[
                     styles.flexDirection,
@@ -81,7 +107,8 @@ const OrderWaitingForConfirmationScreen = () => {
                       {
                         backgroundColor: 'white',
                       },
-                    ]}>
+                    ]}
+                    onPress={() => handleCancel(item.id, index)}>
                     <Text
                       style={[
                         styles.textTouch,
@@ -113,6 +140,14 @@ const OrderWaitingForConfirmationScreen = () => {
           </View>
         </View>
       ))}
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
+          Total:
+        </Text>
+        <Text style={styles.customText}>
+          ${item.totalPrice.toLocaleString()}
+        </Text>
+      </View>
     </View>
   );
 
@@ -130,7 +165,6 @@ const OrderWaitingForConfirmationScreen = () => {
       )}
     </View>
   );
-  
 };
 
 export default OrderWaitingForConfirmationScreen;
@@ -193,7 +227,7 @@ const styles = StyleSheet.create({
   },
   orderProduct: {
     flexDirection: 'row',
-    borderRadius:10,
+    borderRadius: 10,
   },
   productImage: {
     width: 100,
