@@ -31,6 +31,7 @@ const FilterScreen = ({navigation}: any) => {
   const [sortBySelected, setSortBySelected] = useState('newtoday');
   const [isLoading, setIsLoading] = useState(false);
   const [rateSelected, setRateSelected] = useState(5);
+  const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<{
     categories: string[];
     price: {
@@ -81,14 +82,14 @@ const FilterScreen = ({navigation}: any) => {
   };
 
   const handleSelectedCategory = (id: string) => {
-    const items = [...filterValues.categories];
+    const items = [...categoriesSelected]
     const index = items.findIndex((element) => element === id);
     if (index !== -1) {
       items.splice(index, 1);
     } else {
       items.push(id);
     }
-    setFilterValues({ ...filterValues, categories: items });
+   setCategoriesSelected(items);
   };
 
   const handleGetMaxPrice = async () => {
@@ -119,7 +120,7 @@ const FilterScreen = ({navigation}: any) => {
           <Button
             inline
             title="Apply Now"
-            onPress={() => navigation.navigate('ResultScreen', {filterValues})}
+            onPress={() => navigation.navigate('ResultScreen', {...filterValues, categories: categoriesSelected})}
             color={colors.black}
           />
         </Section>
@@ -148,7 +149,7 @@ const FilterScreen = ({navigation}: any) => {
                   borderRadius: 100,
                   paddingVertical: 8,
                   paddingHorizontal: 20,
-                  backgroundColor: filterValues.categories.includes(item.id)
+                  backgroundColor: categoriesSelected.includes(item.id)
                     ? colors.black
                     : colors.white,
                 },
@@ -157,7 +158,7 @@ const FilterScreen = ({navigation}: any) => {
             >
               <TextComponent
                 color={
-                  filterValues.categories.includes(item.id)
+                  categoriesSelected.includes(item.id)
                     ? colors.white
                     : colors.black
                 }
