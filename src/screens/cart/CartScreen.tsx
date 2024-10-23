@@ -32,9 +32,11 @@ const CartScreen = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null); // Track the item to delete
 
-  const showDialog = () => {
-    setDialogVisible(true);
+  const showDialog = item => {
+    setSelectedItem(item); // Set the selected item for deletion
+    setDialogVisible(true); // Show the dialog
   };
 
   const handleCancel = () => {
@@ -44,44 +46,38 @@ const CartScreen = () => {
   const toggleSelectProduct = (item: CartItem) => {
     let updatedSelectedProducts;
     if (selectedProducts.includes(item.id)) {
-      
       updatedSelectedProducts = selectedProducts.filter(id => id !== item.id);
     } else {
-      
       updatedSelectedProducts = [...selectedProducts, item.id];
     }
     setSelectedProducts(updatedSelectedProducts);
 
-   
     if (updatedSelectedProducts.length !== cartData.length) {
       setIsSelectAll(false);
     }
-    
+
     if (updatedSelectedProducts.length === cartData.length) {
       setIsSelectAll(true);
     }
   };
 
-  
   const handleChooseAll = () => {
     if (isSelectAll) {
-      
       setSelectedProducts([]);
       setIsSelectAll(false);
     } else {
-      
       setSelectedProducts(cartData.map(item => item.id));
       setIsSelectAll(true);
     }
   };
   const calculateTotalPrice = () => {
     return cartData
-      .filter(item => selectedProducts.includes(item.id)) 
-      .reduce((total, item) => total + item.price * item.quantity, 0); 
+      .filter(item => selectedProducts.includes(item.id))
+      .reduce((total, item) => total + item.price * item.quantity, 0);
   };
-  
-  const handleDeleteItem = (item) => {
-    dispatch(removeCartItem(item.id)); 
+
+  const handleDeleteItem = item => {
+    dispatch(removeCartItem(item.id));
     setDialogVisible(false);
   };
   const handleCheckOut = () => {
@@ -132,6 +128,7 @@ const CartScreen = () => {
                       text={item.title}
                       size={20}></TextComponent>
                     <TextComponent text={item.description}></TextComponent>
+                    <TextComponent text={item.size}></TextComponent>
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
@@ -183,19 +180,23 @@ const CartScreen = () => {
               <View style={styles.rowBack}>
                 <TouchableOpacity
                   style={[styles.backRightBtn, styles.backRightBtnRight]}
-                  onPress={showDialog}>
+                  onPress={() => showDialog(item)}>
                   <MaterialIcons name="delete" size={30} color="white" />
                   <Text style={styles.backTextWhite}>Delete</Text>
                 </TouchableOpacity>
                 <Dialog.Container visible={dialogVisible}>
-                  <Dialog.Title>Delete {item.title}?</Dialog.Title>
+                  <Dialog.Title>Delete {selectedItem?.title}?</Dialog.Title>
+
                   <Dialog.Description>
-                    Are you sure you want to remove this {item.title}{' '}
+                    Are you sure you want to remove this {selectedItem?.title}
                     product from your cart?
                   </Dialog.Description>
                   <Dialog.Button label="Cancel" onPress={handleCancel} />
-                  <Dialog.Button label="Delete" onPress={() => handleDeleteItem(item)} />
-                </Dialog.Container> 
+                  <Dialog.Button
+                    label="Delete"
+                    onPress={() => handleDeleteItem(selectedItem)}
+                  />
+                </Dialog.Container>
               </View>
             )}
             rightOpenValue={-75} // Độ rộng vuốt sang trái để xóa

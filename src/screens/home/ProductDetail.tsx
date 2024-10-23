@@ -10,7 +10,7 @@ import {
 } from '@bsdaoquang/rncomponent';
 import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState} from 'react';
-import {ScrollView, TouchableOpacity, View} from 'react-native';
+import {Alert, ScrollView, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {TextComponent} from '../../components';
@@ -124,10 +124,13 @@ const ProductDetail = ({navigation, route}: any) => {
     sub.quantity = subProductSelected
       ? subProductSelected?.quantity - count
       : 0;
+    if (sizeSelected) {
+      dispatch(addCart(data));
 
-    dispatch(addCart(data));
-
-    setSubProductSelected(sub);
+      setSubProductSelected(sub);
+    } else {
+      Alert.alert('Bạn chưa chọn size');
+    }
   };
 
   const renderCartButton = () => {
