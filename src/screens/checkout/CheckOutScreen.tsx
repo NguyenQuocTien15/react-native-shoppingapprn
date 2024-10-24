@@ -37,7 +37,7 @@ const CheckOutScreen = ({route}) => {
   };
 
   const handleNavigationMyOrder = () => {
-    navigation.navigate('TopTab');
+    navigation.navigate('MyOrders');
     setVisible(false);
   };
   

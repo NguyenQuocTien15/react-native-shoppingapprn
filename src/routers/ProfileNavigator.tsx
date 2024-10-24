@@ -7,6 +7,7 @@ import TopTabNavigator from './TopTabNavigator';
 import ChangePasswordScreen from '../screens/profiles/ChangePasswordScreen';
 import AddressScreen from '../screens/profiles/AddressScreen';
 import PersonalDetailsScreen from '../screens/profiles/PersonalDetailsScreen';
+import MyOrders from '../screens/order/MyOrders';
 
 const ProfileNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -23,7 +24,7 @@ const ProfileNavigator = () => {
         options={{title: 'Personal'}}></Stack.Screen>
       <Stack.Screen
         name="MyOrders"
-        component={TopTabNavigator}
+        component={MyOrders}
         options={{title: 'My Orders'}}></Stack.Screen>
       <Stack.Screen
         name="ChangePassword"

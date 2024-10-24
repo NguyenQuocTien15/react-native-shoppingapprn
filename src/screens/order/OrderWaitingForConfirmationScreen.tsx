@@ -132,7 +132,7 @@ const OrderWaitingForConfirmationScreen = () => {
                   </TouchableOpacity>
                   <Dialog.Container visible={dialogVisible}>
                     <Dialog.Description>
-                      Do you want to cancel the order of product {' '}
+                      Do you want to cancel the order of product{' '}
                       {orderItem.title}?
                     </Dialog.Description>
                     <Dialog.Button
@@ -144,21 +144,6 @@ const OrderWaitingForConfirmationScreen = () => {
                         handleCancelOrderProduct(item.id, index)
                       }></Dialog.Button>
                   </Dialog.Container>
-                  <TouchableOpacity
-                    style={[
-                      styles.touch,
-                      {backgroundColor: '#ff7891', marginLeft: 10},
-                    ]}>
-                    <Text
-                      style={[
-                        styles.textTouch,
-                        {
-                          color: 'white',
-                        },
-                      ]}>
-                      Confirm
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -173,6 +158,19 @@ const OrderWaitingForConfirmationScreen = () => {
           ${item.totalPrice.toLocaleString()}
         </Text>
       </View>
+      <View style={{alignItems:'flex-end'}}><TouchableOpacity
+        style={[styles.touch, {backgroundColor: '#ff7891', width: '30%'}]}>
+        <Text
+          style={[
+            styles.textTouch,
+            {
+              color: 'white',
+            },
+          ]}>
+          Confirm
+        </Text>
+      </TouchableOpacity></View>
+      
     </View>
   );
 

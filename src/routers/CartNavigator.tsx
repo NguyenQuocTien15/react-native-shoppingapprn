@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {CartScreen} from '../screens';
 import CheckOutScreen from '../screens/checkout/CheckOutScreen';
 import TopTabNavigator from './TopTabNavigator';
+import MyOrders from '../screens/order/MyOrders';
 
 const Stack = createNativeStackNavigator();
 const CartNavigator = () => {
@@ -21,8 +22,8 @@ const CartNavigator = () => {
           component={CheckOutScreen}
           options={{headerTitle: 'Check Out'}}></Stack.Screen>
         <Stack.Screen
-          name="TopTab"
-          component={TopTabNavigator}
+          name="MyOrder"
+          component={MyOrders}
           options={{title: 'My Orders'}}></Stack.Screen>
       </Stack.Navigator>
     </>
