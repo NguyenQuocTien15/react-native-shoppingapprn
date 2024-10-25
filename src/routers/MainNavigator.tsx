@@ -1,9 +1,8 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import TabNavigator from './TabNavigator';
-import ProductDetail from '../screens/home/ProductDetail';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 import { CartScreen, FilterScreen, RatingScreen, ResultScreen } from '../screens';
+import ProductDetail from '../screens/home/ProductDetail';
+import TabNavigator from './TabNavigator';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();

@@ -120,7 +120,7 @@ const FilterScreen = ({navigation}: any) => {
           <Button
             inline
             title="Apply Now"
-            onPress={() => navigation.navigate('ResultScreen', {...filterValues, categories: categoriesSelected})}
+            onPress={() => navigation.navigate('ResultScreen',{filterValues: {...filterValues, categories: categoriesSelected}})}
             color={colors.black}
           />
         </Section>
