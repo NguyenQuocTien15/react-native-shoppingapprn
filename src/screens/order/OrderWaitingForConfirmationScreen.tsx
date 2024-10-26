@@ -204,20 +204,6 @@ const handleCancelOrderProduct = async () => {
                       Cancel
                     </Text>
                   </TouchableOpacity>
-                  {/* <Dialog.Container visible={dialogVisible}>
-                    <Dialog.Description>
-                      Do you want to cancel the order of product{' '}
-                      {orderItem.title}?
-                    </Dialog.Description>
-                    <Dialog.Button
-                      label="Cancel"
-                      onPress={handleCancelDialog}></Dialog.Button>
-                    <Dialog.Button
-                      label="Yes"
-                      onPress={() =>
-                        handleCancelOrderProduct(item.id, index)
-                      }></Dialog.Button>
-                  </Dialog.Container> */}
                 </View>
               </View>
             </View>

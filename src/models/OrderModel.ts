@@ -1,13 +1,14 @@
+import { Double } from "react-native/Libraries/Types/CodegenTypes";
+
 export interface OrderModel {
-    orderId : string;
-    userId: number;
-    shipperId: number;
-    totalAmount : number;
-    shippingAddress: string;
-    paymentMethodId: number;
-    orderStatusId: number;
+  orderId: string;
+  userId: string;
+  shipperId: string;
+  totalAmount: Double;
+  paymentMethodId: string;
+  orderStatusId: string;
 }
 export interface OrderStatus {
-  orderStatusId: number;
-  orderStatusName: string
+  orderStatusId: string;
+  orderStatusName: string;
 }
