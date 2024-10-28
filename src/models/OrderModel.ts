@@ -7,6 +7,7 @@ export interface OrderModel {
   totalAmount: Double;
   paymentMethodId: string;
   orderStatusId: string;
+  timestamp: Date;
 }
 export interface OrderStatus {
   orderStatusId: string;
