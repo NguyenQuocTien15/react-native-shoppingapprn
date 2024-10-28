@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+//Change Password
 const ChangePasswordScreen = () => {
   const [currenPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');

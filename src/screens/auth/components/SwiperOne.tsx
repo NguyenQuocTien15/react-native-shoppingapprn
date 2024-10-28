@@ -6,7 +6,7 @@ import { fontFamilies } from '../../../constants/fontFamilies';
 import { Button, Row, Section } from '@bsdaoquang/rncomponent';
 import { ArrowLeft, ArrowRight } from 'iconsax-react-native';
 import { colors } from '../../../constants/colors';
-
+//Display splash Screen
 const SwiperOne = () => {
   return (
     <View style={{flex: 1}}>

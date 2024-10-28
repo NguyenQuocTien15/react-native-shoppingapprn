@@ -21,7 +21,7 @@ const initState = {
   password: '',
   confirm: '',
 };
-
+//Register
 const SignUp = ({navigation}: any) => {
   const [registerForm, setRegisterForm] = useState(initState);
   const [isDisable, setIsDisable] = useState(true);

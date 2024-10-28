@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {localDataNames} from '../../constants/localDataNames';
 import { Auth } from '../../utils/handleAuthen';
 
+//login
 const Login = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -10,7 +10,7 @@ import {useDispatch} from 'react-redux';
 import {addAuth} from '../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {localDataNames} from '../../constants/localDataNames';
-
+//Display  Register Successfully
 const Result = ({navigation, route}: any) => {
   const user = auth().currentUser;
   const dispatch = useDispatch();
