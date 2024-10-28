@@ -24,14 +24,16 @@ const Container = (props: Props) => {
           (back || left || title || right) && 
           <Row
           styles={{
-            backgroundColor:'coral',
+            //backgroundColor:'white',
+            marginTop:16,
+            padding:1,
             paddingHorizontal: 16,
             paddingVertical:12,
           }}>
             {back && <TextComponent text='Back'/>}
             {left && !back && <TextComponent text='Left'/>}
             <View style={{paddingHorizontal: 16,flex:1}}>
-              {title && (<TextComponent text='{title}'  type="bigTitle"/>)}
+              {title && (<TextComponent text= {title}  type="bigTitle"/>)}
             </View>
             {right && right}
           </Row>

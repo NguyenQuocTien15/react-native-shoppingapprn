@@ -8,7 +8,7 @@ const HomeNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown:false}}>
     <Stack.Screen name='HomeScreen' component={HomeScreen}/>
-    <Stack.Screen name='FilterScreen' component={FilterScreen}/>
+    {/* <Stack.Screen name='FilterScreen' component={FilterScreen}/> */}
    </Stack.Navigator>
   )
 }

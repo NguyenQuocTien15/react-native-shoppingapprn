@@ -24,6 +24,7 @@ import RnRangeSlider from 'rn-range-slider';
 import { ProductModel } from '../../models/ProductModel';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const FilterScreen = ({navigation}: any) => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -125,13 +126,33 @@ const FilterScreen = ({navigation}: any) => {
           />
         </Section>
       }
-      back
-      right={
-        <TouchableOpacity>
-          <SearchNormal size={24} color={colors.gray800} />
-        </TouchableOpacity>
-      }
     >
+      <Section>
+        <Row
+          styles={{backgroundColor: 'transparent'}}
+          justifyContent="space-between">
+          <TouchableOpacity
+            style={[
+              globalStyles.center,
+              {
+                backgroundColor: colors.gray800,
+                borderRadius: 100,
+                padding: 0,
+                width: 38,
+                height: 38,
+                marginTop:26
+              },
+            ]}
+            onPress={() => navigation.goBack()}>
+            <MaterialIcons
+              style={{marginLeft: 8}}
+              name="arrow-back-ios"
+              size={22}
+              color={colors.white}
+            />
+          </TouchableOpacity>
+          </Row>
+          </Section>
       <Section>
         <Tabbar
           showSeeMore={false}

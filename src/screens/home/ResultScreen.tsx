@@ -21,7 +21,12 @@ const ResultScreen = ({navigation,route}:any) => {
   const getProducts = async () => {
     setIsLoading(true);
     try {
-      const snap = await firestore().collection('products').where('categories' ,'array-contains-any',filterValues.categories).get()
+      const snap = await firestore()
+      .collection('products')
+      //.where('categories','array-contains-any',filterValues.categories)
+       .where('price', '>=',filterValues.price.low)
+       .where('price', '<',filterValues.price.high)
+      .get()
       if (!snap.empty) {
         const items:ProductModel[]=[]
         snap.forEach((item:any)=>{
@@ -36,7 +41,7 @@ const ResultScreen = ({navigation,route}:any) => {
       setIsLoading(false);
     }
   }
-  return <Container back title='Results' isScroll={false}>
+  return <Container  back title='Results' isScroll={false}>
     {
       isLoading ? (
       <Section styles={[globalStyles.center,{flex:1,}]}>
