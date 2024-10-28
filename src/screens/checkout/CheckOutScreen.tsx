@@ -12,17 +12,45 @@ import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
 import {Button} from '@bsdaoquang/rncomponent';
 import {orderRef} from '../../firebase/firebaseConfig';
+import {firebase} from '@react-native-firebase/firestore';
+import EvilIcons from 'react-native-vector-icons//EvilIcons';
+import Icon from 'react-native-vector-icons//EvilIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
+
   const [checked, setChecked] = useState(false);
   const [items, setItems] = useState(route.params.selectedItems);
-  const [totalPrice, setTotalPrice] = useState(0); 
+  const [totalPrice, setTotalPrice] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const data = await fetchUserData();
+      setUserData(data);
+    };
+    loadUserData();
+  }, []);
+  const fetchUserData = async () => {
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const userRef = firebase.firestore().collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+        const userData = doc.data();
+        return userData;
+      } else {
+        console.log('No user data found!');
+      }
+    }
+  };
 
   const showDialogAndAddOrders = async () => {
     try {
       const orderData = {
+        fullName: userData.displayName,
         items: items,
         totalPrice: totalPrice,
         address: 'HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên',
@@ -31,31 +59,30 @@ const CheckOutScreen = ({route}) => {
 
       await orderRef.add(orderData);
       setVisible(true);
+      console.log('Dialog visibility:', visible);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
   };
 
   const handleNavigationMyOrder = () => {
-    navigation.navigate('MyOrders');
+    navigation.navigate('MyOrder');
     setVisible(false);
   };
-  
+
   const calculateTotalPrice = () => {
     const total = items.reduce(
       (sum: number, item: {price: number; quantity: number}) =>
         sum + item.price * item.quantity,
       0,
     );
-    setTotalPrice(total); 
+    setTotalPrice(total);
   };
 
-  
   useEffect(() => {
     calculateTotalPrice();
   }, [items]);
 
-  
   const handleIncreaseQuantity = (id: any) => {
     const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id) {
@@ -66,7 +93,6 @@ const CheckOutScreen = ({route}) => {
     setItems(updatedItems);
   };
 
- 
   const handleDecreaseQuantity = (id: any) => {
     const updatedItems = items.map((item: {id: any; quantity: number}) => {
       if (item.id === id && item.quantity > 1) {
@@ -86,16 +112,39 @@ const CheckOutScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.flexDirection, {marginBottom: 10}]}>
-        <Text style={styles.customText}>Address:</Text>
-        <Text
-          style={[
-            styles.customText,
-            {flex: 1, marginLeft: 20, fontStyle: 'italic'},
-          ]}>
-          HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên
-        </Text>
-      </View>
+      <TouchableOpacity onPress={()=> navigation.navigate('Address')}><View style={{marginBottom: 10}}>
+        {userData ? (
+          <>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <EvilIcons name="location" size={20} color="black" />
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <Text style={styles.customText}>{userData.displayName}</Text>
+                <Text style={[styles.customText, {marginLeft: 7}]}>
+                  {userData.phoneNumber}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </View>
+            <View style={{marginLeft: 20, flexDirection: 'column'}}>
+              <Text style={{color: 'black', fontSize: 13}}>
+                {userData.houseNumber}
+              </Text>
+              <Text style={{color: 'black', fontSize: 13}}>
+                {userData.selectedWard}
+                {', '}
+                {userData.selectedDistrict}
+                {', '}
+                {userData.selectedProvince}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <Text>Loading...</Text>
+        )}
+        <View style={styles.lineRed} />
+      </View></TouchableOpacity>
+      
+
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1}}>
           {items.map(item => (
@@ -282,4 +331,11 @@ const styles = StyleSheet.create({
     color: 'black',
     borderRadius: 5,
   },
+  lineRed: {
+    width: '100%',
+    height: 1,
+    backgroundColor: 'red',
+    marginTop:10
+  },
+
 });
