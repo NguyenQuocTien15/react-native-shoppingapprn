@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,55 +12,99 @@ import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
 import {Button} from '@bsdaoquang/rncomponent';
-import {orderRef} from '../../firebase/firebaseConfig';
-import {firebase} from '@react-native-firebase/firestore';
+import {
+  db,
+  orderRef,
+  orderStatusRef,
+  userRef,
+} from '../../firebase/firebaseConfig';
+import {
+  addDoc,
+  collection,
+  firebase,
+  onSnapshot,
+} from '@react-native-firebase/firestore';
 import EvilIcons from 'react-native-vector-icons//EvilIcons';
-import Icon from 'react-native-vector-icons//EvilIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import {
+  OrderModel,
+  OrderStatus,
+  PaymentMethodModel,
+} from '../../models/OrderModel';
 
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
 
-  const [checked, setChecked] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    string | null
+  >(null);
   const [items, setItems] = useState(route.params.selectedItems);
   const [totalPrice, setTotalPrice] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState('');
 
   useEffect(() => {
-    const loadUserData = async () => {
-      const data = await fetchUserData();
-      setUserData(data);
+    const loadUser = async () => {
+      const data = await fetchUser();
+      setUser(data);
     };
-    loadUserData();
+    loadUser();
   }, []);
-  const fetchUserData = async () => {
+
+  const fetchUser = async () => {
     const user = firebase.auth().currentUser;
     if (user) {
       const userRef = firebase.firestore().collection('users').doc(user.uid);
       const doc = await userRef.get();
       if (doc.exists) {
-        const userData = doc.data();
-        return userData;
+        const user = doc.data();
+        return user;
       } else {
         console.log('No user data found!');
       }
+    }
+  };
+  function getCurrentDateTime(): string {
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const seconds = currentDate.getSeconds();
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  }
+
+  const saveOrderStatus = async (status: OrderStatus) => {
+    try {
+      const docRef = await addDoc(collection(db, 'orderStatus'), {
+        orderStatusId: status.orderStatusId,
+        orderStatusName: status.orderStatusName,
+      });
+      console.log('Trạng thái đơn hàng đã được lưu với ID: ', docRef.id);
+    } catch (error) {
+      console.error('Lỗi khi thêm trạng thái đơn hàng: ', error);
     }
   };
 
   const showDialogAndAddOrders = async () => {
     try {
       const orderData = {
-        fullName: userData.displayName,
+        userName: user.displayName,
+        phoneNumber: user.phoneNumber,
+        address: `${user.houseNumber}, ${user.selectedWard}, ${user.selectedDistrict}, ${user.selectedProvince}, Việt Nam`,
         items: items,
         totalPrice: totalPrice,
-        address: 'HH2A Đơn Nguyên A, ngõ 562 Nguyễn Văn Cừ, Long Biên',
-        timestamp: Date.now(),
+        shipperId: null,
+        paymentMethodId: selectedPaymentMethod,
+        orderStatusId: '1',
+        timestamp: getCurrentDateTime(),
       };
 
       await orderRef.add(orderData);
       setVisible(true);
-      console.log('Dialog visibility:', visible);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
@@ -102,48 +147,65 @@ const CheckOutScreen = ({route}) => {
     });
     setItems(updatedItems);
   };
-  const handlePaymentMethod = () => {
-    if (checked) {
-      setChecked(false);
-    } else {
-      setChecked(true);
-    }
+  const paymentMethods: PaymentMethodModel[] = [
+    {paymentMethodId: '0', paymentMethodName: 'Thanh toán khi nhận hàng'},
+  ];
+  const handlePaymentMethodSelect = (paymentMethodId: string) => {
+    setSelectedPaymentMethod(paymentMethodId);
   };
+  const renderItemPaymentMethod = ({item}: {item: PaymentMethodModel}) => (
+    <View style={[styles.flexDirection, {alignItems: 'center'}]}>
+      <Text style={{color: 'black', fontSize: 20}}>
+        {item.paymentMethodName}
+      </Text>
+      <View>
+        <TouchableOpacity
+          onPress={() => handlePaymentMethodSelect(item.paymentMethodId)}>
+          <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
+            {selectedPaymentMethod === item.paymentMethodId && (
+              <View style={styles.selectedRb} />
+            )}
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={()=> navigation.navigate('Address')}><View style={{marginBottom: 10}}>
-        {userData ? (
-          <>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <EvilIcons name="location" size={20} color="black" />
-              <View style={{flexDirection: 'row', flex: 1}}>
-                <Text style={styles.customText}>{userData.displayName}</Text>
-                <Text style={[styles.customText, {marginLeft: 7}]}>
-                  {userData.phoneNumber}
+      <TouchableOpacity onPress={() => navigation.navigate('Address')}>
+        <View style={{marginBottom: 10}}>
+          {user ? (
+            <>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <EvilIcons name="location" size={20} color="black" />
+                <View style={{flexDirection: 'row', flex: 1}}>
+                  <Text style={styles.customText}>{user.displayName}</Text>
+                  <Text style={[styles.customText, {marginLeft: 7}]}>
+                    {user.phoneNumber}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color="black" />
+              </View>
+              <View style={{marginLeft: 20, flexDirection: 'column'}}>
+                <Text style={{color: 'black', fontSize: 13}}>
+                  {user.houseNumber}
+                </Text>
+                <Text style={{color: 'black', fontSize: 13}}>
+                  {user.selectedWard}
+                  {', '}
+                  {user.selectedDistrict}
+                  {', '}
+                  {user.selectedProvince}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={24} color="black" />
-            </View>
-            <View style={{marginLeft: 20, flexDirection: 'column'}}>
-              <Text style={{color: 'black', fontSize: 13}}>
-                {userData.houseNumber}
-              </Text>
-              <Text style={{color: 'black', fontSize: 13}}>
-                {userData.selectedWard}
-                {', '}
-                {userData.selectedDistrict}
-                {', '}
-                {userData.selectedProvince}
-              </Text>
-            </View>
-          </>
-        ) : (
-          <Text>Loading...</Text>
-        )}
-        <View style={styles.lineRed} />
-      </View></TouchableOpacity>
-      
+            </>
+          ) : (
+            <Text>Loading...</Text>
+          )}
+          <View style={styles.lineRed} />
+        </View>
+      </TouchableOpacity>
 
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1}}>
@@ -215,18 +277,10 @@ const CheckOutScreen = ({route}) => {
 
         <View style={{marginVertical: 10}}>
           <Text style={[{color: 'black', fontSize: 27}]}>Payment method</Text>
-          <View style={[styles.flexDirection, {alignItems: 'center'}]}>
-            <Text style={{color: 'black', fontSize: 20}}>
-              Thanh toán khi nhận hàng
-            </Text>
-            <View>
-              <TouchableOpacity onPress={handlePaymentMethod}>
-                <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
-                  {checked && <View style={styles.selectedRb} />}
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <FlatList
+            data={paymentMethods}
+            renderItem={renderItemPaymentMethod}
+            keyExtractor={item => item.paymentMethodId}></FlatList>
         </View>
         <View>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -238,10 +292,10 @@ const CheckOutScreen = ({route}) => {
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
-              {backgroundColor: checked ? '#FA7189' : '#A9A9A9'},
+              {backgroundColor: selectedPaymentMethod ? '#FA7189' : '#A9A9A9'},
             ]}
             onPress={showDialogAndAddOrders}
-            disabled={!checked}>
+            disabled={!selectedPaymentMethod}>
             <Text style={styles.textCheckOut}>Order</Text>
           </TouchableOpacity>
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
@@ -335,7 +389,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 1,
     backgroundColor: 'red',
-    marginTop:10
+    marginTop: 10,
   },
-
 });

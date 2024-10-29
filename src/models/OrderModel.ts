@@ -9,6 +9,10 @@ export interface OrderModel {
   orderStatusId: string;
   timestamp: Date;
 }
+export interface PaymentMethodModel {
+  paymentMethodId: string;
+  paymentMethodName: string;
+}
 export interface OrderStatus {
   orderStatusId: string;
   orderStatusName: string;

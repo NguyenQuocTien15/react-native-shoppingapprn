@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
-import {orderRef} from '../../firebase/firebaseConfig';
+import {orderRef, orderStatusRef} from '../../firebase/firebaseConfig';
 import Dialog from 'react-native-dialog';
 
 const OrderWaitingForConfirmationScreen = () => {
@@ -18,7 +18,6 @@ const OrderWaitingForConfirmationScreen = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedProductIndex, setSelectedProductIndex] = useState(null);
-
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -37,6 +36,24 @@ const OrderWaitingForConfirmationScreen = () => {
     };
 
     fetchOrders();
+  }, []);
+  useEffect(() => {
+    const fetchOrderStatus = async () => {
+      try {
+        const snapshot = await orderStatusRef.get();
+        const orderStatusData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log(orderStatusData);
+      } catch (error) {
+        console.error('Error fetching orders: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderStatus();
   }, []);
   const showDialog = (
     orderId: React.SetStateAction<null>,
@@ -93,12 +110,14 @@ const OrderWaitingForConfirmationScreen = () => {
 
   const renderItem = ({item}) => (
     <View style={styles.orderItem}>
-      <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Image
+          source={require('../../assets/images/logofs.jpg')}
+          style={{width: 25, height: 25, marginRight: 10}}></Image>
+        <Text style={styles.customText}>Fashion Store</Text>
+      </View>
 
-      <Text style={styles.orderAddress}>Address: {item.address}</Text>
-      <Text style={styles.orderDate}>
-        Date: {new Date(item.timestamp).toLocaleString()}
-      </Text>
+      <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
       {item.items.map((orderItem, index) => (
         <View style={styles.itemListProduct}>
           <View key={index} style={styles.orderProduct}>
@@ -163,7 +182,7 @@ const OrderWaitingForConfirmationScreen = () => {
           ${item.totalPrice.toLocaleString()}
         </Text>
       </View>
-      <View style={{alignItems: 'flex-end'}}>
+      {/* <View style={{alignItems: 'flex-end'}}>
         <TouchableOpacity
           style={[styles.touch, {backgroundColor: '#ff7891', width: '30%'}]}>
           <Text
@@ -176,7 +195,7 @@ const OrderWaitingForConfirmationScreen = () => {
             Confirm
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 
