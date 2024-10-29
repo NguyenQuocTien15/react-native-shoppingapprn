@@ -10,7 +10,7 @@ import {
 } from '@bsdaoquang/rncomponent';
 import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState} from 'react';
-import {ScrollView, TouchableOpacity, View} from 'react-native';
+import {Alert, ScrollView, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {TextComponent} from '../../components';
@@ -26,7 +26,7 @@ import RatingComponent from './components/RatingComponent';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   CartItem,
-  addcart,
+  addCart,
   cartSelector,
 } from '../../redux/reducers/cartReducer';
 import {sizes} from '../../constants/sizes';
@@ -125,10 +125,13 @@ const ProductDetail = ({navigation, route}: any) => {
     sub.quantity = subProductSelected
       ? subProductSelected?.quantity - count
       : 0;
+    if (sizeSelected) {
+      dispatch(addCart(data));
 
-    dispatch(addcart(data));
-
-    setSubProductSelected(sub);
+      setSubProductSelected(sub);
+    } else {
+      Alert.alert('Bạn chưa chọn size');
+    }
   };
 
   const renderCartButton = () => {
@@ -191,7 +194,7 @@ const ProductDetail = ({navigation, route}: any) => {
                   height: 38,
                 },
               ]}
-              onPress={() => navigation.goBack()}>
+              onPress={() => navigation.navigate('Cart')}>
               <MaterialCommunityIcons
                 name="shopping"
                 size={22}
@@ -259,13 +262,6 @@ const ProductDetail = ({navigation, route}: any) => {
                         borderRadius: 100,
                       }}>
                       <TouchableOpacity
-                        disabled={subProductSelected.quantity === 0}
-                        style={{paddingRight: 12}}
-                        onPress={() => setCount(count + 1)}>
-                        <Add size={24} color={colors.black} />
-                      </TouchableOpacity>
-                      <TextComponent text={count.toString()} size={16} />
-                      <TouchableOpacity
                         style={{paddingLeft: 12}}
                         disabled={count === 1}
                         onPress={() => setCount(count - 1)}>
@@ -273,6 +269,14 @@ const ProductDetail = ({navigation, route}: any) => {
                           size={24}
                           color={count === 1 ? colors.gray : colors.black}
                         />
+                      </TouchableOpacity>
+
+                      <TextComponent text={count.toString()} size={16} />
+                      <TouchableOpacity
+                        disabled={subProductSelected.quantity === 0}
+                        style={{paddingRight: 12}}
+                        onPress={() => setCount(count + 1)}>
+                        <Add size={24} color={colors.black} />
                       </TouchableOpacity>
                     </Row>
                   </Row>

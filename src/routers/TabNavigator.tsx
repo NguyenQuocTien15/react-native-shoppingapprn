@@ -7,10 +7,16 @@ import NotificationNavigator from './NotificationNavigator';
 import ProfileNavigator from './ProfileNavigator';
 import {colors} from '../constants/colors';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { CardTick1, Notification, Profile, ShoppingCart } from 'iconsax-react-native';
-import { TextComponent } from '../components';
-import { Row } from '@bsdaoquang/rncomponent';
-import { fontFamilies } from '../constants/fontFamilies';
+import {
+  CardTick1,
+  Notification,
+  Profile,
+  ShoppingCart,
+} from 'iconsax-react-native';
+import {TextComponent} from '../components';
+import {Row} from '@bsdaoquang/rncomponent';
+import {fontFamilies} from '../constants/fontFamilies';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -26,42 +32,98 @@ const TabNavigator = () => {
           height: 70,
           justifyContent: 'center',
           alignItems: 'center',
+          
         },
-        tabBarIcon: ({focused,size,color}) => {
+        tabBarIcon: ({focused, size, color}) => {
           color = focused ? colors.white : colors.dark;
           size = focused ? 14 : 20;
           let icon = <Entypo name="home" size={size} color={color} />;
           switch (route.name) {
-            case 'CartTab':
-            icon = <ShoppingCart variant='TwoTone' size={size} color={color}/>
-            break;
-            case 'NotificationTab':
-            icon = <Notification variant='TwoTone' size={size} color={color}/>
-            break;
-            case 'ProfileTab':
-            icon = <Profile variant='TwoTone' size={size} color={color}/>
-            break;
+            case 'Cart':
+              icon = (
+                <ShoppingCart variant="TwoTone" size={size} color={color} />
+              );
+              break;
+            case 'Notification':
+              icon = (
+                <Notification variant="TwoTone" size={size} color={color} />
+              );
+              break;
+            case 'Profile':
+              icon = <Profile variant="TwoTone" size={size} color={color} />;
+              break;
             default:
               icon = <Entypo name="home" size={size} color={color} />;
 
               break;
           }
-          return (  
-            <Row styles={focused ? { backgroundColor: colors.gray, } : undefined}>
-            <View style={focused ? styles.iconContainer : undefined}>{icon}</View>
-             {focused && (
-                <TextComponent styles={{paddingHorizontal:6, fontSize: 11, fontFamily: fontFamilies.poppinsMedium}}
-                text={route.name}/>
-             )}
+          return (
+            <Row styles={focused ? {backgroundColor: colors.gray} : undefined}>
+              <View style={focused ? styles.iconContainer : undefined}>
+                {icon}
+              </View>
+              {focused && (
+                <TextComponent
+                  styles={{
+                    paddingHorizontal: 6,
+                    fontSize: 11,
+                    fontFamily: fontFamilies.poppinsMedium,
+                  }}
+                  text={route.name}
+                />
+              )}
             </Row>
-           
           );
         },
       })}>
-      <Tab.Screen name="HomeTab" component={HomeNavigator} />
-      <Tab.Screen name="CartTab" component={CartNavigator} />
-      <Tab.Screen name="NotificationTab" component={NotificationNavigator} />
-      <Tab.Screen name="ProfileTab" component={ProfileNavigator} />
+      <Tab.Screen name="Home" component={HomeNavigator} />
+      <Tab.Screen
+        name="Cart"
+        component={CartNavigator}
+        options={({route}) => ({
+          tabBarStyle: (route => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+            if (routeName === 'CheckOut') {
+              return {display: 'none'};
+            }
+            return {
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 30,
+              borderTopRightRadius: 30,
+              height: 70,
+              justifyContent: 'center',
+              alignItems: 'center',
+            };
+          })(route),
+        })}
+      />
+      <Tab.Screen name="Notification" component={NotificationNavigator}/>
+      <Tab.Screen
+        name="Profile"
+        component={ProfileNavigator}
+        options={({route}) => ({
+          tabBarStyle: (route => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+            if (routeName === 'MyOrders') {
+              return {display: 'none'};
+            }
+            if (routeName === 'ChangePassword') {
+              return {display: 'none'};
+            }
+            if (routeName === 'Address') {
+              return {display: 'none'};
+            }
+            return {
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 30,
+              borderTopRightRadius: 30,
+              height: 70,
+              justifyContent: 'center',
+              alignItems: 'center',
+            };
+          })(route),
+        })}
+      />
     </Tab.Navigator>
   );
 };
@@ -69,12 +131,12 @@ const TabNavigator = () => {
 export default TabNavigator;
 
 const styles = StyleSheet.create({
-iconContainer: {
-  width: 30,
-  height:30,
-  backgroundColor: colors.dark,
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: 100
-}
+  iconContainer: {
+    width: 30,
+    height: 30,
+    backgroundColor: colors.dark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+  },
 });

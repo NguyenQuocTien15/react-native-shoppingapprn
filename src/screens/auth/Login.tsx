@@ -149,29 +149,7 @@ const Login = ({navigation}: any) => {
             type="link"
           />
         </Row>
-        <Section>
-          <Button
-            title="Continue with Facebook"
-            icon={
-              <Ionicons name="logo-facebook" size={18} color={colors.white} />
-            }
-            color={'#3498db'}
-            textStyleProps={{fontFamily: fontFamilies.poppinsMedium}}
-            onPress={handleLogin}
-          />
-          <Button
-            title="Continue with Google"
-            textStyleProps={{fontFamily: fontFamilies.poppinsMedium}}
-            onPress={handleLogin}
-            icon={<Ionicons name="logo-google" size={18} color={colors.dark} />}
-          />
-          <Button
-            title="Continue with Apple"
-            textStyleProps={{fontFamily: fontFamilies.poppinsMedium}}
-            onPress={handleLogin}
-            icon={<Ionicons name="logo-apple" size={18} color={colors.dark} />}
-          />
-        </Section>
+       
       </ScrollView>
     </Container>
   );

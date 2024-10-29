@@ -1,16 +1,38 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { ProfileScreen } from '../screens';
+import {View, Text} from 'react-native';
+import React from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {ProfileScreen} from '../screens';
+
+import TopTabNavigator from './TopTabNavigator';
+import ChangePasswordScreen from '../screens/profiles/ChangePasswordScreen';
+import AddressScreen from '../screens/profiles/AddressScreen';
+import PersonalDetailsScreen from '../screens/profiles/PersonalDetailsScreen';
+import MyOrders from '../screens/order/MyOrders';
 
 const ProfileNavigator = () => {
-    const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator();
   return (
-   <Stack.Navigator screenOptions={{headerShown:false}}> 
-   <Stack.Screen name='ProfileScreen' component={ProfileScreen}/>
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{title: 'Profile'}}
+      />
+      <Stack.Screen
+        name="Personal"
+        component={PersonalDetailsScreen}
+        options={{title: 'Personal'}}></Stack.Screen>
+      <Stack.Screen
+        name="MyOrders"
+        component={MyOrders}
+        options={{title: 'My Orders'}}></Stack.Screen>
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{title: 'Change password'}}></Stack.Screen>
+      <Stack.Screen name="Address" component={AddressScreen}></Stack.Screen>
+    </Stack.Navigator>
+  );
+};
 
-   </Stack.Navigator>
-  )
-}
-
-export default ProfileNavigator
+export default ProfileNavigator;
