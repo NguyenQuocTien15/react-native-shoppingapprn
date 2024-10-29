@@ -24,7 +24,7 @@ const HomeScreen = ({navigation}:any) => {
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16}}>
+      <Section styles={{paddingTop: 16, marginTop:16}}>
         <Row justifyContent="space-between">
           <Button
             inline

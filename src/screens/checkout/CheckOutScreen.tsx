@@ -13,7 +13,7 @@ import Dialog from 'react-native-dialog';
 import {Button} from '@bsdaoquang/rncomponent';
 import {orderRef} from '../../firebase/firebaseConfig';
 
-const CheckOutScreen = ({route}) => {
+const CheckOutScreen = ({route}:any) => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
   const [items, setItems] = useState(route.params.selectedItems);
