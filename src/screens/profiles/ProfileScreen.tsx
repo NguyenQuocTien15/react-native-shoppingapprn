@@ -8,7 +8,6 @@ import {localDataNames} from '../../constants/localDataNames';
 import {removeAuth} from '../../redux/reducers/authReducer';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -35,7 +34,7 @@ const ProfileScreen = () => {
         <Icon name="chevron-forward" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => navigation.navigate('MyOrders')}
+        onPress={() => navigation.navigate('MyOrder')}
         style={styles.touchableOpacity}>
         <FontAwesome5
           name="shopping-bag"

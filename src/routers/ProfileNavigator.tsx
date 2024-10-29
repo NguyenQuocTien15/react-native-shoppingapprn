@@ -3,11 +3,12 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ProfileScreen} from '../screens';
 
-import TopTabNavigator from './TopTabNavigator';
+
 import ChangePasswordScreen from '../screens/profiles/ChangePasswordScreen';
-import AddressScreen from '../screens/profiles/AddressScreen';
+
 import PersonalDetailsScreen from '../screens/profiles/PersonalDetailsScreen';
 import MyOrders from '../screens/order/MyOrders';
+import AddressSelector from '../screens/profiles/AddressScreen';
 
 const ProfileNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -23,14 +24,14 @@ const ProfileNavigator = () => {
         component={PersonalDetailsScreen}
         options={{title: 'Personal'}}></Stack.Screen>
       <Stack.Screen
-        name="MyOrders"
+        name="MyOrder"
         component={MyOrders}
         options={{title: 'My Orders'}}></Stack.Screen>
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
         options={{title: 'Change password'}}></Stack.Screen>
-      <Stack.Screen name="Address" component={AddressScreen}></Stack.Screen>
+      <Stack.Screen name="Address" component={AddressSelector}></Stack.Screen>
     </Stack.Navigator>
   );
 };
