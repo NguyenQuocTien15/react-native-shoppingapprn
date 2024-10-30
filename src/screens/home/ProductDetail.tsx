@@ -67,6 +67,7 @@ const ProductDetail = ({navigation, route}: any) => {
     }
   }, [cartData, subProductSelected]);
 
+  //onsnap cập nhật ngay lập tức
   const getProductDetail = () => {
     productRef.doc(id).onSnapshot((snap: any) => {
       if (snap.exists) {
@@ -243,6 +244,7 @@ const ProductDetail = ({navigation, route}: any) => {
                     text={productDetail?.title}
                     font={fontFamilies.RobotoBold}
                     size={20}
+                   
                   />
                   <TextComponent
                     text={productDetail.type}

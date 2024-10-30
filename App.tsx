@@ -3,7 +3,7 @@ import React, {useEffect} from 'react';
 import {Provider} from 'react-redux';
 import store from './src/redux/store';
 import Router from './src/routers/Router';
-// import {StatusBar} from 'react-native';
+ import {StatusBar} from 'react-native';
 // import {HandleNotification} from './src/utils/handleNotification';
 
 const App = () => {
@@ -13,11 +13,11 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      {/* <StatusBar
+      <StatusBar
         translucent
         backgroundColor={'transparent'}
         barStyle={'dark-content'}
-      /> */}
+      />
       <Provider store={store}>
         <Router />
       </Provider>

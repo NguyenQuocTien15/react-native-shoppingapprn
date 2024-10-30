@@ -8,7 +8,7 @@ import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
 import {useNavigation} from '@react-navigation/native';
-
+import firestore from '@react-native-firebase/firestore';
 type Props = {};
 
 const PopularProduct = (props: Props) => {
@@ -36,7 +36,25 @@ const PopularProduct = (props: Props) => {
         }
       });
   }, []);
+  //HÀM UPDATE price từ kiểu string sang int
+// const handleUpdateProduct = async () => {
+// products.forEach(async item => {
+// await firestore()
+// .collection('products')
+// .doc(item.id)
+// .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
+// })
+// };
 
+//
+const handleUpdateProduct = () => {
+  products.forEach (async item => {
+await firestore()
+.collection('products')
+.doc(item.id)
+.update({seller: Math.floor(Math.random()*100)})
+  });
+};
   return (
     <View style={{flex: 1}}>
       <Tabbar
@@ -44,6 +62,7 @@ const PopularProduct = (props: Props) => {
         tabbarStylesProps={{paddingHorizontal: 16}}
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
+        // onSeeMore={() => handleUpdateProduct()}
         onSeeMore={() => {}}
       />
 
