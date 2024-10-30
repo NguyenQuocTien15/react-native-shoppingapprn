@@ -13,27 +13,22 @@ import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
 import {Button} from '@bsdaoquang/rncomponent';
 import {
-  db,
   orderRef,
-  orderStatusRef,
-  userRef,
 } from '../../firebase/firebaseConfig';
 import {
-  addDoc,
-  collection,
   firebase,
-  onSnapshot,
 } from '@react-native-firebase/firestore';
 import EvilIcons from 'react-native-vector-icons//EvilIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {
-  OrderModel,
-  OrderStatus,
   PaymentMethodModel,
 } from '../../models/OrderModel';
+import { useDispatch } from 'react-redux';
+import { removeCartItem } from '../../redux/reducers/cartReducer';
 
 const CheckOutScreen = ({route}) => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
@@ -77,18 +72,6 @@ const CheckOutScreen = ({route}) => {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  const saveOrderStatus = async (status: OrderStatus) => {
-    try {
-      const docRef = await addDoc(collection(db, 'orderStatus'), {
-        orderStatusId: status.orderStatusId,
-        orderStatusName: status.orderStatusName,
-      });
-      console.log('Trạng thái đơn hàng đã được lưu với ID: ', docRef.id);
-    } catch (error) {
-      console.error('Lỗi khi thêm trạng thái đơn hàng: ', error);
-    }
-  };
-
   const showDialogAndAddOrders = async () => {
     try {
       const orderData = {
@@ -104,6 +87,7 @@ const CheckOutScreen = ({route}) => {
       };
 
       await orderRef.add(orderData);
+      dispatch(removeCartItem(items.map((item: { id: any; }) => item.id)));
       setVisible(true);
     } catch (error) {
       console.error('Error saving order: ', error);

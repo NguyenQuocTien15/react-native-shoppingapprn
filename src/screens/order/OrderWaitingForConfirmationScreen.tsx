@@ -22,7 +22,7 @@ const OrderWaitingForConfirmationScreen = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const snapshot = await orderRef.get();
+        const snapshot = await orderRef.where('orderStatusId','==','1').get();
         const ordersData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),

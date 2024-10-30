@@ -1,7 +1,5 @@
 import {
   Alert,
-  Button,
-  FlatList,
   Image,
   StyleSheet,
   Text,
@@ -32,11 +30,11 @@ const CartScreen = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null); // Track the item to delete
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const showDialog = item => {
-    setSelectedItem(item); // Set the selected item for deletion
-    setDialogVisible(true); // Show the dialog
+    setSelectedItem(item); 
+    setDialogVisible(true);
   };
 
   const handleCancel = () => {
@@ -97,7 +95,6 @@ const CartScreen = () => {
       <Text style={styles.textCart}>Carts({cartData.length})</Text>
       {cartData.length > 0 ? (
         <View style={{flex: 1, marginTop: 10}}>
-          {/* Listcart */}
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
             data={cartData}
