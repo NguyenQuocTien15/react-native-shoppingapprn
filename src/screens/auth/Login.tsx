@@ -1,5 +1,5 @@
 import {Button, Input, Row, Section, Text} from '@bsdaoquang/rncomponent';
-import {TickCircle} from 'iconsax-react-native';
+import {Link, TickCircle} from 'iconsax-react-native';
 import React, {useState} from 'react';
 import {Image, ScrollView} from 'react-native';
 import {Container} from '../../components';
@@ -125,11 +125,13 @@ const Login = ({navigation}: any) => {
           <Button
             title="Forgot Password?"
             inline
-            onPress={() => {}}
+            onPress={() => navigation.navigate('ForgotPassword')}
+            //onPress={() => {}}
             type="link"
           />
         </Row>
-
+        
+        
         <Section>
           <Button
             title="Login"

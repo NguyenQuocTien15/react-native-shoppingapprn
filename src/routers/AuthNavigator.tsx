@@ -3,6 +3,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {HomeAuth, Login, Result, SignUp} from '../screens';
 import SwiperScreen from '../screens/auth/SwiperScreen';
+import ForgotPassword from '../screens/auth/forgotpassword';
 
 const AuthNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -15,6 +16,7 @@ const AuthNavigator = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Result" component={Result} />
+        <Stack.Screen name='ForgotPassword' component={ForgotPassword}/>
       </Stack.Navigator>
     </>
   );
