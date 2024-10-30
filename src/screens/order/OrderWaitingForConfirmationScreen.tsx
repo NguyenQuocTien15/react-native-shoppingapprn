@@ -15,7 +15,8 @@ const OrderWaitingForConfirmationScreen = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogVisible, setDialogVisible] = useState(false);
-
+const[selectedOrder, setSelectedOrder] = useState(null);
+const [selectedProductIndex, setSelectedProductIndex] = useState(null);
  
 
   useEffect(() => {
@@ -36,37 +37,110 @@ const OrderWaitingForConfirmationScreen = () => {
 
     fetchOrders();
   }, []);
-   const showDialog = () => {
+   const showDialog = (orderId: React.SetStateAction<null>, productIndex: React.SetStateAction<null>) => {
+     setSelectedOrder(orderId);
+     setSelectedProductIndex(productIndex);
      setDialogVisible(true);
    };
 
    const handleCancelDialog = () => {
      setDialogVisible(false);
    };
-  const handleCancelOrderProduct = async (orderId, productIndex) => {
-    try {
-      // Find the order to update
-      const orderToUpdate = orders.find(order => order.id === orderId);
-      if (!orderToUpdate) return;
 
-      // Remove the product from the local state
-      const updatedItems = [...orderToUpdate.items];
-      updatedItems.splice(productIndex, 1);
+const handleCancelOrderProduct = async () => {
+  if (selectedOrder === null || selectedProductIndex === null) return;
 
+  try {
+    const orderToUpdate = orders.find(order => order.id === selectedOrder);
+    if (!orderToUpdate) return;
+
+    // Remove the product from the local state
+    const updatedItems = [...orderToUpdate.items];
+    updatedItems.splice(selectedProductIndex, 1);
+
+    const orderDocRef = orderRef.doc(selectedOrder);
+
+    if (updatedItems.length === 0) {
+      // Delete the entire order if no items remain
+      await orderDocRef.delete();
+      setOrders(prevOrders =>
+        prevOrders.filter(order => order.id !== selectedOrder),
+      );
+    } else {
       // Update the order in Firebase
-      const orderDocRef = orderRef.doc(orderId);
       await orderDocRef.update({items: updatedItems});
-
-      // Update the local state to reflect the changes
-      setOrders(prevOrders => {
-        return prevOrders.map(order =>
-          order.id === orderId ? {...order, items: updatedItems} : order,
-        );
-      });
-    } catch (error) {
-      console.error('Error deleting product from Firebase: ', error);
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === selectedOrder ? {...order, items: updatedItems} : order,
+        ),
+      );
     }
-  };
+    setDialogVisible(false);
+  } catch (error) {
+    console.error('Error deleting product or order from Firebase: ', error);
+  }
+};
+  // const handleCancelOrderProduct = async (orderId, productIndex) => {
+  //   // try {
+  //   //   // Find the order to update
+  //   //   const orderToUpdate = orders.find(order => order.id === orderId);
+  //   //   if (!orderToUpdate) return;
+
+  //   //   // Remove the product from the local state
+  //   //   const updatedItems = [...orderToUpdate.items];
+  //   //   updatedItems.splice(productIndex, 1);
+
+  //   //   // Update the order in Firebase
+  //   //   const orderDocRef = orderRef.doc(orderId);
+  //   //   await orderDocRef.update({items: updatedItems});
+
+  
+  //   //   // Update the local state to reflect the changes
+  //   //   setOrders(prevOrders => {
+  //   //     return prevOrders.map(order =>
+  //   //       order.id === orderId ? {...order, items: updatedItems} : order,
+  //   //     );
+  //   //   });
+  //   //   setDialogVisible(false);
+  //   // } catch (error) {
+  //   //   console.error('Error deleting product from Firebase: ', error);
+  //   // }
+  //    try {
+  //     // Find the order to update
+  //     const orderToUpdate = orders.find(order => order.id === orderId);
+  //     if (!orderToUpdate) return;
+
+  //     // Remove the product from the local state
+  //     const updatedItems = [...orderToUpdate.items];
+  //     updatedItems.splice(productIndex, 1);
+
+  //     // Reference to the order in Firebase
+  //     const orderDocRef = orderRef.doc(orderId);
+
+  //     if (updatedItems.length === 0) {
+  //       // If no items left, delete the order from Firebase
+  //       await orderDocRef.delete();
+
+  //       // Update local state to remove the order
+  //       setOrders(prevOrders =>
+  //         prevOrders.filter(order => order.id !== orderId),
+  //       );
+  //     } else {
+  //       // Update the order in Firebase
+  //       await orderDocRef.update({items: updatedItems});
+
+  //       // Update the local state to reflect the changes
+  //       setOrders(prevOrders =>
+  //         prevOrders.map(order =>
+  //           order.id === orderId ? {...order, items: updatedItems} : order,
+  //         ),
+  //       );
+  //     }
+  //     setDialogVisible(false);
+  //   } catch (error) {
+  //     console.error('Error deleting product or order from Firebase: ', error);
+  //   }
+  // };
 
   const handleConfirm = () => {
     // Implement confirmation logic here
@@ -119,7 +193,7 @@ const OrderWaitingForConfirmationScreen = () => {
                         backgroundColor: 'white',
                       },
                     ]}
-                    onPress={showDialog}>
+                    onPress={() => showDialog(item.id, index)}>
                     <Text
                       style={[
                         styles.textTouch,
@@ -128,35 +202,6 @@ const OrderWaitingForConfirmationScreen = () => {
                         },
                       ]}>
                       Cancel
-                    </Text>
-                  </TouchableOpacity>
-                  <Dialog.Container visible={dialogVisible}>
-                    <Dialog.Description>
-                      Do you want to cancel the order of product {' '}
-                      {orderItem.title}?
-                    </Dialog.Description>
-                    <Dialog.Button
-                      label="Cancel"
-                      onPress={handleCancelDialog}></Dialog.Button>
-                    <Dialog.Button
-                      label="Yes"
-                      onPress={() =>
-                        handleCancelOrderProduct(item.id, index)
-                      }></Dialog.Button>
-                  </Dialog.Container>
-                  <TouchableOpacity
-                    style={[
-                      styles.touch,
-                      {backgroundColor: '#ff7891', marginLeft: 10},
-                    ]}>
-                    <Text
-                      style={[
-                        styles.textTouch,
-                        {
-                          color: 'white',
-                        },
-                      ]}>
-                      Confirm
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -173,6 +218,20 @@ const OrderWaitingForConfirmationScreen = () => {
           ${item.totalPrice.toLocaleString()}
         </Text>
       </View>
+      <View style={{alignItems: 'flex-end'}}>
+        <TouchableOpacity
+          style={[styles.touch, {backgroundColor: '#ff7891', width: '30%'}]}>
+          <Text
+            style={[
+              styles.textTouch,
+              {
+                color: 'white',
+              },
+            ]}>
+            Confirm
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -188,6 +247,15 @@ const OrderWaitingForConfirmationScreen = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* Dialog for cancellation */}
+      <Dialog.Container visible={dialogVisible}>
+        <Dialog.Description>
+          Do you want to cancel the selected product?
+        </Dialog.Description>
+        <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
+        <Dialog.Button label="Yes" onPress={handleCancelOrderProduct} />
+      </Dialog.Container>
     </View>
   );
 };

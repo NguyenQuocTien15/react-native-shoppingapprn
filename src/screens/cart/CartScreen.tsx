@@ -225,7 +225,7 @@ const CartScreen = () => {
               {`$${calculateTotalPrice().toLocaleString()}`}
             </Text>
           </View>
-          {/* {selectedProducts.length > 0 && ( */}
+          
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
@@ -238,7 +238,6 @@ const CartScreen = () => {
             onPress={handleCheckOut}>
             <Text style={styles.textCheckOut}>Check Out</Text>
           </TouchableOpacity>
-          {/* )} */}
         </View>
       ) : (
         <Section>

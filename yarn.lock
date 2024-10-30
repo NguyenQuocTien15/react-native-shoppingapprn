@@ -9540,7 +9540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-vector-icons@npm:^10.1.0":
+"react-native-vector-icons@npm:^10.1.0, react-native-vector-icons@npm:^10.2.0":
   version: 10.2.0
   resolution: "react-native-vector-icons@npm:10.2.0"
   dependencies:
@@ -10268,7 +10268,7 @@ __metadata:
     react-native-swipe-list-view: ^3.2.9
     react-native-swiper: ^1.6.0
     react-native-tab-view: ^3.5.2
-    react-native-vector-icons: ^10.1.0
+    react-native-vector-icons: ^10.2.0
     react-redux: ^9.1.2
     react-test-renderer: 18.2.0
     redux: ^5.0.1
