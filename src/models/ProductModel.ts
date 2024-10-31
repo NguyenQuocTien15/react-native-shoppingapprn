@@ -12,7 +12,7 @@ export interface ProductModel {
   createdAt: number;
   updatedAt: number;
   rate: string;
-  seller: number;
+  selled: number;
 }
 
 export interface SubProduct {

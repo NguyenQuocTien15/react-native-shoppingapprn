@@ -42,7 +42,7 @@ const handleUpdateProduct = () => {
 await firestore()
 .collection('products')
 .doc(item.id)
-.update({seller: Math.floor(Math.random()*100)})
+.update({selled: Math.floor(Math.random()*100)})
   });
 };
   return (
@@ -53,7 +53,7 @@ await firestore()
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
         // onSeeMore={() => handleUpdateProduct()}
-        onSeeMore={() => {}}
+       
       />
 
       {products.length > 0 &&

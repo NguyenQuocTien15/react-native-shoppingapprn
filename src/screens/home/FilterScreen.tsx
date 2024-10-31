@@ -29,7 +29,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const FilterScreen = ({navigation}: any) => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [maxPrice, setMaxPrice] = useState(1000);
-  const [sortBySelected, setSortBySelected] = useState('newtoday');
+  const [sortBySelected, setSortBySelected] = useState('today');
   const [isLoading, setIsLoading] = useState(false);
   const [rateSelected, setRateSelected] = useState(5);
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
@@ -47,13 +47,13 @@ const FilterScreen = ({navigation}: any) => {
       low: 0,
       high: 1000,
     },
-    sortby: 'newtoday',
+    sortby: 'today',
     rate: 5,
   });
 
   const sortByValues = [
-    { key: 'newtoday', title: 'New Today' },
-    { key: 'newthisweek', title: 'New This Week' },
+    { key: 'today', title: 'New Today' },
+    { key: 'thisweek', title: 'New This Week' },
     { key: 'bestseller', title: 'Best Seller' },
   ];
 
@@ -77,6 +77,7 @@ const FilterScreen = ({navigation}: any) => {
     if (!snap.empty) {
       const items: CategoryModel[] = [];
       snap.forEach((item: any) => items.push({ id: item.id, ...item.data() }));
+      //mặc định chọn trường đầu tiên
       handleSelectedCategory(items[0].id);
       setCategories(items);
     }

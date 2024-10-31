@@ -5,7 +5,9 @@ import {TextComponent} from '../../../components';
 import {fontFamilies} from '../../../constants/fontFamilies';
 import {colors} from '../../../constants/colors';
 import {CategoryModel} from '../../../models/CategoryModel';
-import {categoriesRef} from '../../../firebase/firebaseConfig';
+import { categoriesRef } from '../../../firebase/firebaseConfig';
+//import {categoriesRef} from '../../../firebase/firebaseConfig';
+
 
 const CategoriesList = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);

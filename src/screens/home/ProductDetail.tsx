@@ -23,12 +23,7 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {useStatusBar} from '../../utils/useStatusBar';
 import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  CartItem,
-  addCart,
-  cartSelector,
-} from '../../redux/reducers/cartReducer';
+
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
 const ProductDetail = ({navigation, route}: any) => {
@@ -125,25 +120,25 @@ const ProductDetail = ({navigation, route}: any) => {
         const cartDoc = await transaction.get(cartRef);
 
         if (!cartDoc.exists) {
-          // Nếu giỏ hàng chưa tồn tại, tạo mới với sản phẩm đầu tiên
+          
           transaction.set(cartRef, {
             products: {
               [productId]: {
                 quantity: quantity,
-                addedAt: new Date().toISOString(), // Thêm thời gian thêm vào
+                addedAt: new Date().toISOString(),
               },
             },
           });
         } else {
-          // Nếu giỏ hàng đã tồn tại, cập nhật số lượng sản phẩm
+
           const currentProducts = cartDoc.data().products || {};
           const currentQuantity = currentProducts[productId]?.quantity || 0;
 
-          // Cập nhật số lượng và thời gian thêm vào
+         
           transaction.update(cartRef, {
             [`products.${productId}`]: {
               quantity: currentQuantity + quantity,
-              addedAt: new Date().toISOString(), // Cập nhật thời gian thêm vào
+              addedAt: new Date().toISOString(), 
             },
           });
         }
@@ -180,6 +175,7 @@ const ProductDetail = ({navigation, route}: any) => {
           right: 0,
           left: 0,
           padding: 20,
+          marginTop:15
         }}>
         <Row
           styles={{backgroundColor: 'transparent'}}
@@ -234,12 +230,14 @@ const ProductDetail = ({navigation, route}: any) => {
           style={[
             globalStyles.container,
             {
+              
               height: sizes.height * 0.5,
             },
           ]}>
           {subProductSelected && (
             <View
               style={{
+                // marginTop:35,
                 width: sizes.width,
                 height: sizes.height * 0.5,
               }}>
@@ -258,7 +256,7 @@ const ProductDetail = ({navigation, route}: any) => {
             },
           ]}>
           {productDetail && subProductSelected && (
-            <Section styles={{paddingVertical: 12}}>
+            <Section styles={{paddingVertical: 12, backgroundColor:colors.gray100, borderTopStartRadius:30,borderTopEndRadius:30}}>
               <Row>
                 <Col>
                   <TextComponent
@@ -385,7 +383,7 @@ const ProductDetail = ({navigation, route}: any) => {
                           <MaterialCommunityIcons
                             name="check"
                             size={18}
-                            color="white"
+                            color={colors.red700}
                           />
                         )}
                       </TouchableOpacity>
