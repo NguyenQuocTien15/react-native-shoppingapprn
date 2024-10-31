@@ -11,6 +11,7 @@ import {TouchableOpacity} from 'react-native';
 import {orderRef, orderStatusRef} from '../../firebase/firebaseConfig';
 import Dialog from 'react-native-dialog';
 
+
 const OrderWaitingForConfirmationScreen = () => {
   const [user, setUser] = useState('');
   const [orders, setOrders] = useState([]);
@@ -19,10 +20,13 @@ const OrderWaitingForConfirmationScreen = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedProductIndex, setSelectedProductIndex] = useState(null);
 
+
+
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const snapshot = await orderRef.where('orderStatusId','==','1').get();
+        const snapshot = await orderRef.where('orderStatusId', '==', '1').get();
         const ordersData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -37,24 +41,7 @@ const OrderWaitingForConfirmationScreen = () => {
 
     fetchOrders();
   }, []);
-  useEffect(() => {
-    const fetchOrderStatus = async () => {
-      try {
-        const snapshot = await orderStatusRef.get();
-        const orderStatusData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log(orderStatusData);
-      } catch (error) {
-        console.error('Error fetching orders: ', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrderStatus();
-  }, []);
+ 
   const showDialog = (
     orderId: React.SetStateAction<null>,
     productIndex: React.SetStateAction<null>,

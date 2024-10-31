@@ -26,7 +26,7 @@ import {
 } from '../../models/OrderModel';
 import { useDispatch } from 'react-redux';
 import { removeCartItem } from '../../redux/reducers/cartReducer';
-
+import auth from '@react-native-firebase/auth';
 const CheckOutScreen = ({route}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -38,6 +38,19 @@ const CheckOutScreen = ({route}) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [visible, setVisible] = useState(false);
   const [user, setUser] = useState('');
+
+  const [userId, setUserId] = useState(null);
+
+    const getUserId = () => {
+      const currentUser = auth().currentUser;
+
+      if (currentUser) {
+        return currentUser.uid;
+      } else {
+        console.log('No user is signed in.');
+        return null;
+      }
+    };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -75,8 +88,7 @@ const CheckOutScreen = ({route}) => {
   const showDialogAndAddOrders = async () => {
     try {
       const orderData = {
-        userName: user.displayName,
-        phoneNumber: user.phoneNumber,
+        userId: getUserId(),
         address: `${user.houseNumber}, ${user.selectedWard}, ${user.selectedDistrict}, ${user.selectedProvince}, Việt Nam`,
         items: items,
         totalPrice: totalPrice,
@@ -209,8 +221,16 @@ const CheckOutScreen = ({route}) => {
                   marginRight: 10,
                 }}></Image>
               <View style={{flex: 1, flexDirection: 'column'}}>
-                <Text style={styles.customText}>{item.title}</Text>
-                <Text style={{color: 'black', fontSize: 18}}>
+                <Text
+                  style={styles.customText}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  {item.title}
+                </Text>
+                <Text
+                  style={{color: 'black', fontSize: 18}}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
                   {item.description}
                 </Text>
                 <View

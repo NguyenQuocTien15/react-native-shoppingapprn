@@ -10,7 +10,7 @@ import {
 } from '@bsdaoquang/rncomponent';
 import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView, TouchableOpacity, View} from 'react-native';
+import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {TextComponent} from '../../components';
@@ -30,7 +30,7 @@ import {
   cartSelector,
 } from '../../redux/reducers/cartReducer';
 import {sizes} from '../../constants/sizes';
-
+import auth from '@react-native-firebase/auth';
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
 
@@ -40,14 +40,12 @@ const ProductDetail = ({navigation, route}: any) => {
   const [count, setCount] = useState(1);
   const [sizeSelected, setSizeSelected] = useState('');
 
-  const cartData: CartItem[] = useSelector(cartSelector);
-  const dispatch = useDispatch();
 
   useStatusBar('dark-content');
 
   useEffect(() => {
     getProductDetail();
-    getSubProducts();
+   getSubProducts();
   }, [id]);
 
   useEffect(() => {
@@ -55,18 +53,16 @@ const ProductDetail = ({navigation, route}: any) => {
     setSizeSelected('');
   }, [subProductSelected]);
 
-  useEffect(() => {
-    if (subProductSelected) {
-      const item = cartData.find(
-        element => element.id === subProductSelected.id,
-      );
+  const getUserId = () => {
+    const currentUser = auth().currentUser;
 
-      if (item) {
-        setCount(item.quantity);
-      }
+    if (currentUser) {
+      return currentUser.uid;
+    } else {
+      console.log('No user is signed in.');
+      return null;
     }
-  }, [cartData, subProductSelected]);
-
+  };
   //onsnap cập nhật ngay lập tức
   const getProductDetail = () => {
     productRef.doc(id).onSnapshot((snap: any) => {
@@ -81,7 +77,7 @@ const ProductDetail = ({navigation, route}: any) => {
     });
   };
 
-  const getSubProducts = async () => {
+   const getSubProducts = async () => {
     try {
       const snap = await firestore()
         .collection('subProducts')
@@ -109,28 +105,53 @@ const ProductDetail = ({navigation, route}: any) => {
     }
   };
 
-  const handleAddToCard = (item: SubProduct) => {
-    const data = {
-      id: item.id,
-      title: productDetail?.title,
-      size: sizeSelected,
-      quantity: count,
-      description: productDetail?.description,
-      color: item.color,
-      price: item.price,
-      imageUrl: item.imageUrl,
-    };
-
-    const sub: any = {...subProductSelected};
-    sub.quantity = subProductSelected
-      ? subProductSelected?.quantity - count
-      : 0;
-    if (sizeSelected) {
-      dispatch(addCart(data));
-
-      setSubProductSelected(sub);
-    } else {
+  const handleAddToCart = async (
+    userId: string | null | undefined,
+    productId: string | number,
+    quantity: number,
+  ) => {
+     if (!sizeSelected) {
       Alert.alert('Bạn chưa chọn size');
+      return;
+    }
+    const cartRef = firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('cart')
+      .doc('cartDoc');
+
+    try {
+      await firestore().runTransaction(async transaction => {
+        const cartDoc = await transaction.get(cartRef);
+
+        if (!cartDoc.exists) {
+          // Nếu giỏ hàng chưa tồn tại, tạo mới với sản phẩm đầu tiên
+          transaction.set(cartRef, {
+            products: {
+              [productId]: {
+                quantity: quantity,
+                addedAt: new Date().toISOString(), // Thêm thời gian thêm vào
+              },
+            },
+          });
+        } else {
+          // Nếu giỏ hàng đã tồn tại, cập nhật số lượng sản phẩm
+          const currentProducts = cartDoc.data().products || {};
+          const currentQuantity = currentProducts[productId]?.quantity || 0;
+
+          // Cập nhật số lượng và thời gian thêm vào
+          transaction.update(cartRef, {
+            [`products.${productId}`]: {
+              quantity: currentQuantity + quantity,
+              addedAt: new Date().toISOString(), // Cập nhật thời gian thêm vào
+            },
+          });
+        }
+      });
+
+      console.log('Product added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding product to cart: ', error);
     }
   };
 
@@ -141,7 +162,7 @@ const ProductDetail = ({navigation, route}: any) => {
           disable={subProductSelected.quantity === 0}
           icon={<FontAwesome6 name="bag-shopping" size={18} color={'white'} />}
           inline
-          onPress={() => handleAddToCard(subProductSelected)}
+          onPress={() => handleAddToCart(getUserId(), id, count)}
           color={colors.black}
           title={'Add to cart'}
         />
@@ -182,7 +203,7 @@ const ProductDetail = ({navigation, route}: any) => {
               color={colors.white}
             />
           </TouchableOpacity>
-          <Badge count={cartData.length}>
+          <Badge>
             <TouchableOpacity
               style={[
                 globalStyles.center,

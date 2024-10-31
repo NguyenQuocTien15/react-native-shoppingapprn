@@ -36,17 +36,7 @@ const PopularProduct = (props: Props) => {
         }
       });
   }, []);
-  //HÀM UPDATE price từ kiểu string sang int
-// const handleUpdateProduct = async () => {
-// products.forEach(async item => {
-// await firestore()
-// .collection('products')
-// .doc(item.id)
-// .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
-// })
-// };
 
-//
 const handleUpdateProduct = () => {
   products.forEach (async item => {
 await firestore()

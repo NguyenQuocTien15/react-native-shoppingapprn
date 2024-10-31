@@ -6,80 +6,256 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  CartItem,
-  cartSelector,
-  removeCartItem,
-  updateQuantity,
-} from '../../redux/reducers/cartReducer';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
-
+import auth from '@react-native-firebase/auth';
+import {dbFirestore, productRef, userRef} from '../../firebase/firebaseConfig';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
 const CartScreen = () => {
   const navigation = useNavigation();
-  const cartData: CartItem[] = useSelector(cartSelector);
-  const dispatch = useDispatch();
 
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
 
-  const showDialog = item => {
-    setSelectedItem(item); 
-    setDialogVisible(true);
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      setUserId(currentUser.uid);
+
+      const cartRef = userRef
+        .doc(currentUser.uid)
+        .collection('cart')
+        .doc('cartDoc');
+
+      const unsubscribe = cartRef.onSnapshot(async doc => {
+        if (doc.exists) {
+          const products = doc.data().products;
+
+          const productDetails = await Promise.all(
+            Object.keys(products).map(async productId => {
+              const productDoc = await firebase.firestore()
+                .collection('products')
+                .doc(productId)
+                .get();
+
+              // Lấy thời gian thêm vào từ sản phẩm
+              const addedAt = products[productId].addedAt; // Giả sử bạn có thuộc tính này trong products
+
+              return {
+                productId,
+                imageUrl: productDoc.data().imageUrl,
+                quantity: products[productId].quantity,
+                title: productDoc.data().title,
+                description: productDoc.data().description,
+                sizes: productDoc.data().size,
+                price: productDoc.data().price,
+                addedAt: addedAt ? new Date(addedAt) : new Date(), // Nếu không có, sử dụng thời gian hiện tại
+              };
+            }),
+          );
+
+          // Sắp xếp sản phẩm theo thời gian thêm vào (mới nhất trước)
+          const sortedProductDetails = productDetails.sort(
+            (a, b) => b.addedAt - a.addedAt,
+          );
+
+          setCartItems(sortedProductDetails);
+        } else {
+          console.log('Giỏ hàng trống');
+        }
+      });
+
+      return () => unsubscribe(); // Hủy theo dõi khi component bị unmount
+    } else {
+      console.log('Không có người dùng đăng nhập');
+    }
+  }, []);
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      const cartRef = dbFirestore.collection('carts').doc('userId'); 
+      const doc = await cartRef.get();
+      if (doc.exists) {
+        setCartItems(doc.data().products);
+      }
+    };
+
+    fetchCartItems();
+  }, []);
+ 
+  const updateCart = async (
+    userId: string | null | undefined,
+    productId: string | number,
+    quantity: number,
+  ) => {
+    const cartRef = userRef
+      .doc(userId)
+      .collection('cart')
+      .doc('cartDoc');
+
+    try {
+      await firebase.firestore().runTransaction(async transaction => {
+        const cartDoc = await transaction.get(cartRef);
+
+        if (!cartDoc.exists) {
+          console.log('Cart does not exist.');
+          return; // Nếu giỏ hàng không tồn tại, không làm gì cả
+        }
+
+        const currentProducts = cartDoc.data().products || {};
+        const currentQuantity = currentProducts[productId]?.quantity || 0;
+
+        if (currentQuantity + quantity < 0) {
+          console.log('Cannot reduce quantity below zero.');
+          return; // Nếu số lượng sau khi cập nhật dưới 0, không cập nhật
+        }
+
+        transaction.update(cartRef, {
+          [`products.${productId}`]: {quantity: currentQuantity + quantity},
+        });
+      });
+
+      console.log('Cart updated successfully!');
+    } catch (error) {
+      console.error('Error updating cart: ', error);
+    }
+  };
+  const handleDecrease = productId => {
+    const currentProduct = cartItems.find(item => item.productId === productId);
+    if (currentProduct && currentProduct.quantity > 0) {
+      updateCart(getUserId(), productId, -1); // Giảm số lượng sản phẩm
+    }
   };
 
+  const handleIncrease = productId => {
+    updateCart(getUserId(), productId, 1); // Tăng số lượng sản phẩm
+  };
+
+
+
+  const showDialog = (item: React.SetStateAction<null>) => {
+    setSelectedItem(item);
+    setDialogVisible(true);
+  };
+  const getUserId = () => {
+    const currentUser = auth().currentUser;
+
+    if (currentUser) {
+      return currentUser.uid;
+    } else {
+      console.log('No user is signed in.');
+      return null;
+    }
+  };
+  const userID = getUserId();
   const handleCancel = () => {
     setDialogVisible(false);
   };
 
-  const toggleSelectProduct = (item: CartItem) => {
-    let updatedSelectedProducts;
-    if (selectedProducts.includes(item.id)) {
-      updatedSelectedProducts = selectedProducts.filter(id => id !== item.id);
-    } else {
-      updatedSelectedProducts = [...selectedProducts, item.id];
-    }
-    setSelectedProducts(updatedSelectedProducts);
+   const toggleSelectProduct = useCallback(
+     item => {
+       let updatedSelectedProducts;
 
-    if (updatedSelectedProducts.length !== cartData.length) {
-      setIsSelectAll(false);
-    }
+       // Kiểm tra nếu sản phẩm đã được chọn
+       if (selectedProducts.includes(item.id)) {
+         // Nếu đã chọn, loại bỏ sản phẩm khỏi danh sách đã chọn
+         updatedSelectedProducts = selectedProducts.filter(
+           id => id !== item.id,
+         );
+       } else {
+         // Nếu chưa chọn, thêm sản phẩm vào danh sách đã chọn
+         updatedSelectedProducts = [...selectedProducts, item.id];
+       }
 
-    if (updatedSelectedProducts.length === cartData.length) {
-      setIsSelectAll(true);
-    }
-  };
+       setSelectedProducts(updatedSelectedProducts);
+
+       // Cập nhật trạng thái chọn tất cả
+       setIsSelectAll(updatedSelectedProducts.length === cartItems.length);
+     },
+     [selectedProducts, cartItems.length],
+   );
 
   const handleChooseAll = () => {
     if (isSelectAll) {
       setSelectedProducts([]);
       setIsSelectAll(false);
     } else {
-      setSelectedProducts(cartData.map(item => item.id));
+      setSelectedProducts(cartItems.map(item => item.id));
       setIsSelectAll(true);
     }
   };
   const calculateTotalPrice = () => {
-    return cartData
-      .filter(item => selectedProducts.includes(item.id))
-      .reduce((total, item) => total + item.price * item.quantity, 0);
+    if (isSelectAll) {
+    
+      return cartItems.reduce(
+        (total, item) => total + item.quantity * item.price,
+        0,
+      );
+    } else if (selectedProducts.length > 0) {
+      
+      return cartItems
+        .filter(item => selectedProducts.includes(item.id))
+        .reduce((total, item) => total + item.quantity * item.price, 0);
+    }
+    
+    return 0;
   };
 
-  const handleDeleteItem = item => {
-    dispatch(removeCartItem(item.id));
-    setDialogVisible(false);
+
+  const handleRemoveFromCart = async (
+    userId: string | null | undefined,
+    productId: string | number,
+  ) => {
+    if (!userId) {
+      console.error('User ID is required');
+      return;
+    }
+
+    const cartRef = firebase
+      .firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('cart')
+      .doc('cartDoc');
+
+    try {
+      await firebase.firestore().runTransaction(async transaction => {
+        const cartDoc = await transaction.get(cartRef);
+
+        if (cartDoc.exists) {
+          const currentProducts = cartDoc.data()?.products || {};
+
+          if (currentProducts[productId]) {
+            delete currentProducts[productId];
+
+            transaction.update(cartRef, {
+              products: currentProducts,
+            });
+            setDialogVisible(false);
+            console.log('Product removed from cart successfully!');
+          } else {
+            console.warn('Product not found in cart:', productId);
+          }
+        } else {
+          console.warn('Cart does not exist.');
+        }
+      });
+    } catch (error) {
+      console.error('Error removing product from cart: ', error);
+    }
   };
+
   const handleCheckOut = () => {
-    const selectedItems = cartData.filter(item =>
+    const selectedItems = cartItems.filter(item =>
       selectedProducts.includes(item.id),
     );
 
@@ -92,16 +268,17 @@ const CartScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.textCart}>Carts({cartData.length})</Text>
-      {cartData.length > 0 ? (
+      <Text style={styles.textCart}>Carts({cartItems.length})</Text>
+      {cartItems.length > 0 ? (
         <View style={{flex: 1, marginTop: 10}}>
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
-            data={cartData}
+            data={cartItems}
+            keyExtractor={item => item.id}
             renderItem={({item, index}) => (
               <View key={item.id} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
-                  <Col flex={0.15}>
+                  {/* <Col flex={0.15}>
                     <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
                         {selectedProducts.includes(item.id) && (
@@ -109,7 +286,7 @@ const CartScreen = () => {
                         )}
                       </View>
                     </TouchableOpacity>
-                  </Col>
+                  </Col> */}
                   <Image
                     source={{uri: item.imageUrl}}
                     style={{
@@ -117,21 +294,35 @@ const CartScreen = () => {
                       height: 110,
                       borderRadius: 12,
                       resizeMode: 'cover',
-                    }}></Image>
-                  <Space width={12}></Space>
+                    }}
+                  />
+                  <Space width={12} />
                   <Col>
                     <TextComponent
                       type="title"
+                      numberOfLine={1}
+                      ellipsizeMode="tail"
                       text={item.title}
-                      size={20}></TextComponent>
-                    <TextComponent text={item.description}></TextComponent>
-                    <TextComponent text={item.size}></TextComponent>
+                      size={20}
+                    />
+                    <TextComponent
+                      numberOfLine={1}
+                      ellipsizeMode="tail"
+                      text={item.description}
+                    />
+                    <TextComponent
+                      numberOfLine={1}
+                      ellipsizeMode="tail"
+                      text={item.sizes}
+                    />
+                    <TextComponent text={item.size} />
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
                           type="title"
                           text={`$${item.price * item.quantity}`}
-                          size={20}></TextComponent>
+                          size={20}
+                        />
                       </Col>
                       <Row
                         styles={{
@@ -141,30 +332,15 @@ const CartScreen = () => {
                           paddingHorizontal: 12,
                         }}>
                         <TouchableOpacity
-                          onPress={() =>
-                            dispatch(
-                              updateQuantity({
-                                id: item.id,
-                                quantity: -1,
-                              }),
-                            )
-                          }>
-                          <Minus size={20} color="black"></Minus>
+                          onPress={() => handleDecrease(item.productId)}>
+                          <Minus size={20} color="black" />
                         </TouchableOpacity>
-                        <Space width={6}></Space>
-                        <TextComponent
-                          text={`${item.quantity}`}></TextComponent>
-                        <Space width={6}></Space>
+                        <Space width={6} />
+                        <TextComponent text={`${item.quantity}`} />
+                        <Space width={6} />
                         <TouchableOpacity
-                          onPress={() =>
-                            dispatch(
-                              updateQuantity({
-                                id: item.id,
-                                quantity: 1,
-                              }),
-                            )
-                          }>
-                          <Add size={20} color="black"></Add>
+                          onPress={() => handleIncrease(item.productId)}>
+                          <Add size={20} color="black" />
                         </TouchableOpacity>
                       </Row>
                     </Row>
@@ -191,7 +367,9 @@ const CartScreen = () => {
                   <Dialog.Button label="Cancel" onPress={handleCancel} />
                   <Dialog.Button
                     label="Delete"
-                    onPress={() => handleDeleteItem(selectedItem)}
+                    onPress={() =>
+                      handleRemoveFromCart(userID, selectedItem?.productId)
+                    }
                   />
                 </Dialog.Container>
               </View>
@@ -202,7 +380,6 @@ const CartScreen = () => {
           <View style={styles.flexDirectionChooseAll}>
             <TouchableOpacity onPress={handleChooseAll}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                {/* Radio check cho nút chọn tất cả */}
                 <TouchableOpacity onPress={handleChooseAll}>
                   <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
                     {isSelectAll && <View style={styles.selectedRb} />}
@@ -214,15 +391,10 @@ const CartScreen = () => {
               </View>
             </TouchableOpacity>
             <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
-              {/* {isSelectAll === true
-                ? `$${cartData
-                    .reduce((a, b) => a + b.quantity * b.price, 0)
-                    .toLocaleString()}`
-                : '0'}  */}
               {`$${calculateTotalPrice().toLocaleString()}`}
             </Text>
           </View>
-          
+
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
@@ -231,15 +403,13 @@ const CartScreen = () => {
                   selectedProducts.length > 0 ? '#ff7891' : 'gray',
               },
             ]}
-            disabled={selectedProducts.length < 0}
+            disabled={selectedProducts.length === 0}
             onPress={handleCheckOut}>
             <Text style={styles.textCheckOut}>Check Out</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <Section>
-          <TextComponent text="No product in your cart"></TextComponent>
-        </Section>
+        <Text>Giỏ hàng của bạn đang trống.</Text>
       )}
     </View>
   );
