@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Image,
   StyleSheet,
@@ -43,13 +44,13 @@ const CartScreen = () => {
 
           const productDetails = await Promise.all(
             Object.keys(products).map(async productId => {
-              const productDoc = await firebase.firestore()
+              const productDoc = await firebase
+                .firestore()
                 .collection('products')
                 .doc(productId)
                 .get();
 
-              // Lấy thời gian thêm vào từ sản phẩm
-              const addedAt = products[productId].addedAt; // Giả sử bạn có thuộc tính này trong products
+              const addedAt = products[productId].addedAt;
 
               return {
                 productId,
@@ -59,12 +60,11 @@ const CartScreen = () => {
                 description: productDoc.data().description,
                 sizes: productDoc.data().size,
                 price: productDoc.data().price,
-                addedAt: addedAt ? new Date(addedAt) : new Date(), // Nếu không có, sử dụng thời gian hiện tại
+                addedAt: addedAt ? new Date(addedAt) : new Date(),
               };
             }),
           );
 
-          // Sắp xếp sản phẩm theo thời gian thêm vào (mới nhất trước)
           const sortedProductDetails = productDetails.sort(
             (a, b) => b.addedAt - a.addedAt,
           );
@@ -82,7 +82,7 @@ const CartScreen = () => {
   }, []);
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartRef = dbFirestore.collection('carts').doc('userId'); 
+      const cartRef = dbFirestore.collection('carts').doc('userId');
       const doc = await cartRef.get();
       if (doc.exists) {
         setCartItems(doc.data().products);
@@ -91,13 +91,11 @@ const CartScreen = () => {
 
     fetchCartItems();
   }, []);
- 
-  const updateCart = async (
-    userId: string | null | undefined,
-    productId: string | number,
-    quantity: number,
-  ) => {
-    const cartRef = userRef
+
+  const updateCart = async (userId, productId, quantity) => {
+    const cartRef = firebase
+      .firestore()
+      .collection('users')
       .doc(userId)
       .collection('cart')
       .doc('cartDoc');
@@ -108,19 +106,33 @@ const CartScreen = () => {
 
         if (!cartDoc.exists) {
           console.log('Cart does not exist.');
-          return; // Nếu giỏ hàng không tồn tại, không làm gì cả
+          return;
         }
 
         const currentProducts = cartDoc.data().products || {};
         const currentQuantity = currentProducts[productId]?.quantity || 0;
 
         if (currentQuantity + quantity < 0) {
-          console.log('Cannot reduce quantity below zero.');
-          return; // Nếu số lượng sau khi cập nhật dưới 0, không cập nhật
+          return;
         }
 
         transaction.update(cartRef, {
           [`products.${productId}`]: {quantity: currentQuantity + quantity},
+        });
+
+        setCartItems(prevItems => {
+          const updatedItems = [...prevItems];
+          const itemIndex = updatedItems.findIndex(
+            item => item.productId === productId,
+          );
+          if (itemIndex > -1) {
+            updatedItems[itemIndex].quantity += quantity;
+
+            if (updatedItems[itemIndex].quantity <= 0) {
+              updatedItems.splice(itemIndex, 1);
+            }
+          }
+          return updatedItems;
         });
       });
 
@@ -129,18 +141,17 @@ const CartScreen = () => {
       console.error('Error updating cart: ', error);
     }
   };
+
   const handleDecrease = productId => {
     const currentProduct = cartItems.find(item => item.productId === productId);
     if (currentProduct && currentProduct.quantity > 0) {
-      updateCart(getUserId(), productId, -1); // Giảm số lượng sản phẩm
+      updateCart(userId, productId, -1);
     }
   };
 
   const handleIncrease = productId => {
-    updateCart(getUserId(), productId, 1); // Tăng số lượng sản phẩm
+    updateCart(userId, productId, 1);
   };
-
-
 
   const showDialog = (item: React.SetStateAction<null>) => {
     setSelectedItem(item);
@@ -161,55 +172,48 @@ const CartScreen = () => {
     setDialogVisible(false);
   };
 
-   const toggleSelectProduct = useCallback(
-     item => {
-       let updatedSelectedProducts;
+  const toggleSelectProduct = item => {
+    setSelectedProducts(prevSelected => {
+      const isSelected = prevSelected.includes(item.productId);
+      const updatedSelected = isSelected
+        ? prevSelected.filter(id => id !== item.productId)
+        : [...prevSelected, item.productId];
 
-       // Kiểm tra nếu sản phẩm đã được chọn
-       if (selectedProducts.includes(item.id)) {
-         // Nếu đã chọn, loại bỏ sản phẩm khỏi danh sách đã chọn
-         updatedSelectedProducts = selectedProducts.filter(
-           id => id !== item.id,
-         );
-       } else {
-         // Nếu chưa chọn, thêm sản phẩm vào danh sách đã chọn
-         updatedSelectedProducts = [...selectedProducts, item.id];
-       }
+      // Check if all items are selected
+      if (updatedSelected.length === cartItems.length) {
+        setIsSelectAll(true); // All items are selected
+      } else {
+        setIsSelectAll(false); // Not all items are selected
+      }
 
-       setSelectedProducts(updatedSelectedProducts);
-
-       // Cập nhật trạng thái chọn tất cả
-       setIsSelectAll(updatedSelectedProducts.length === cartItems.length);
-     },
-     [selectedProducts, cartItems.length],
-   );
+      return updatedSelected;
+    });
+  };
 
   const handleChooseAll = () => {
     if (isSelectAll) {
       setSelectedProducts([]);
       setIsSelectAll(false);
     } else {
-      setSelectedProducts(cartItems.map(item => item.id));
+      setSelectedProducts(cartItems.map(item => item.productId)); // Use productId here
       setIsSelectAll(true);
     }
   };
+
   const calculateTotalPrice = () => {
     if (isSelectAll) {
-    
       return cartItems.reduce(
         (total, item) => total + item.quantity * item.price,
         0,
       );
     } else if (selectedProducts.length > 0) {
-      
       return cartItems
-        .filter(item => selectedProducts.includes(item.id))
+        .filter(item => selectedProducts.includes(item.productId)) // Use productId here
         .reduce((total, item) => total + item.quantity * item.price, 0);
     }
-    
+
     return 0;
   };
-
 
   const handleRemoveFromCart = async (
     userId: string | null | undefined,
@@ -276,17 +280,17 @@ const CartScreen = () => {
             data={cartItems}
             keyExtractor={item => item.id}
             renderItem={({item, index}) => (
-              <View key={item.id} style={styles.itemListProduct}>
+              <View key={item.productId} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
-                  {/* <Col flex={0.15}>
+                  <Col flex={0.15}>
                     <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
-                        {selectedProducts.includes(item.id) && (
+                        {selectedProducts.includes(item.productId) && (
                           <View style={styles.selectedRb} />
                         )}
                       </View>
                     </TouchableOpacity>
-                  </Col> */}
+                  </Col>
                   <Image
                     source={{uri: item.imageUrl}}
                     style={{
@@ -409,7 +413,7 @@ const CartScreen = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <Text>Giỏ hàng của bạn đang trống.</Text>
+        <ActivityIndicator size="small" color="#0000ff" />
       )}
     </View>
   );
