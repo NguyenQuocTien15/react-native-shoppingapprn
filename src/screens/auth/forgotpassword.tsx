@@ -1,3 +1,14 @@
+// import React, { useState } from 'react';
+// import { 
+//   StyleSheet, 
+//   View, 
+//   Text, 
+//   TextInput, 
+//   TouchableOpacity,
+//   ActivityIndicator 
+// } from 'react-native';
+// import auth from'@react-native-firebase/auth';
+// import { sendPasswordResetEmail,updatePassword } from 'firebase/auth'; 
 import React, { useState } from 'react';
 import { 
   StyleSheet, 
@@ -7,9 +18,9 @@ import {
   TouchableOpacity,
   ActivityIndicator 
 } from 'react-native';
-import auth from'@react-native-firebase/auth';
-import { sendPasswordResetEmail,updatePassword } from 'firebase/auth'; 
-const ForgotPassword = ({navigation}: any,) =>  {
+import  auth from '@react-native-firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
+const ForgotPassword = ({ navigation }: any) =>   {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -20,23 +31,41 @@ const ForgotPassword = ({navigation}: any,) =>  {
       setMessage('Vui lòng nhập địa chỉ email hợp lệ.');
       return;
     }
+    // setIsLoading(true);
+    // setMessage('');
+    // try {
+    //   await sendPasswordResetEmail(auth, email);
+    //   setMessage('Email đặt lại mật khẩu đã được gửi!');
+    //   setEmail(''); 
+    // } catch (error) {
+    //   console.error(error);
+    //   switch(error) {
+    //     case 'auth/user-not-found':
+    //       setMessage('Không tìm thấy tài khoản với email này.');
+    //       break;
+    //     case 'auth/invalid-email':
+    //       setMessage('Địa chỉ email không hợp lệ.');
+    //       break;
+    //     default:
+    //       setMessage('Đã có lỗi xảy ra.');
+    //   }
+    // } finally {
+    //   setIsLoading(false);
+    // }
     setIsLoading(true);
     setMessage('');
     try {
-      await sendPasswordResetEmail(auth, email);
+      await auth().sendPasswordResetEmail(email); // Sử dụng auth()
       setMessage('Email đặt lại mật khẩu đã được gửi!');
       setEmail(''); 
-    } catch (error) {
+    } catch (error: any) { // Hoặc sử dụng FirebaseError từ firebase/app
       console.error(error);
-      switch(error) {
-        case 'auth/user-not-found':
-          setMessage('Không tìm thấy tài khoản với email này.');
-          break;
-        case 'auth/invalid-email':
-          setMessage('Địa chỉ email không hợp lệ.');
-          break;
-        default:
-          setMessage('Đã có lỗi xảy ra.');
+      if (error.code === 'auth/user-not-found') {
+        setMessage('Không tìm thấy tài khoản với email này.');
+      } else if (error.code === 'auth/invalid-email') {
+        setMessage('Địa chỉ email không hợp lệ.');
+      } else {
+        setMessage('Đã có lỗi xảy ra.');
       }
     } finally {
       setIsLoading(false);
