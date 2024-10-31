@@ -120,25 +120,25 @@ const ProductDetail = ({navigation, route}: any) => {
         const cartDoc = await transaction.get(cartRef);
 
         if (!cartDoc.exists) {
-          // Nếu giỏ hàng chưa tồn tại, tạo mới với sản phẩm đầu tiên
+          
           transaction.set(cartRef, {
             products: {
               [productId]: {
                 quantity: quantity,
-                addedAt: new Date().toISOString(), // Thêm thời gian thêm vào
+                addedAt: new Date().toISOString(),
               },
             },
           });
         } else {
-          // Nếu giỏ hàng đã tồn tại, cập nhật số lượng sản phẩm
+
           const currentProducts = cartDoc.data().products || {};
           const currentQuantity = currentProducts[productId]?.quantity || 0;
 
-          // Cập nhật số lượng và thời gian thêm vào
+         
           transaction.update(cartRef, {
             [`products.${productId}`]: {
               quantity: currentQuantity + quantity,
-              addedAt: new Date().toISOString(), // Cập nhật thời gian thêm vào
+              addedAt: new Date().toISOString(), 
             },
           });
         }
