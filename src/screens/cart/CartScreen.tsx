@@ -92,12 +92,9 @@ const CartScreen = () => {
     fetchCartItems();
   }, []);
  
-  const updateCart = async (
-    userId: string | null | undefined,
-    productId: string | number,
-    quantity: number,
-  ) => {
-    const cartRef = userRef
+  const updateCart = async (userId, productId, quantity) => {
+    const cartRef = firebase.firestore()
+      .collection('users')
       .doc(userId)
       .collection('cart')
       .doc('cartDoc');
@@ -108,19 +105,34 @@ const CartScreen = () => {
 
         if (!cartDoc.exists) {
           console.log('Cart does not exist.');
-          return; // Nếu giỏ hàng không tồn tại, không làm gì cả
+          return;
         }
 
         const currentProducts = cartDoc.data().products || {};
         const currentQuantity = currentProducts[productId]?.quantity || 0;
 
         if (currentQuantity + quantity < 0) {
-          console.log('Cannot reduce quantity below zero.');
-          return; // Nếu số lượng sau khi cập nhật dưới 0, không cập nhật
+          return;
         }
 
         transaction.update(cartRef, {
           [`products.${productId}`]: {quantity: currentQuantity + quantity},
+        });
+
+        // Cập nhật trạng thái giỏ hàng sau khi thực hiện giao dịch
+        setCartItems(prevItems => {
+          const updatedItems = [...prevItems];
+          const itemIndex = updatedItems.findIndex(
+            item => item.productId === productId,
+          );
+          if (itemIndex > -1) {
+            updatedItems[itemIndex].quantity += quantity;
+            // Nếu số lượng sản phẩm bằng 0, có thể chọn xóa sản phẩm khỏi danh sách
+            if (updatedItems[itemIndex].quantity <= 0) {
+              updatedItems.splice(itemIndex, 1);
+            }
+          }
+          return updatedItems;
         });
       });
 
@@ -129,17 +141,17 @@ const CartScreen = () => {
       console.error('Error updating cart: ', error);
     }
   };
+
   const handleDecrease = productId => {
     const currentProduct = cartItems.find(item => item.productId === productId);
     if (currentProduct && currentProduct.quantity > 0) {
-      updateCart(getUserId(), productId, -1); // Giảm số lượng sản phẩm
+      updateCart(userId, productId, -1);
     }
   };
 
   const handleIncrease = productId => {
-    updateCart(getUserId(), productId, 1); // Tăng số lượng sản phẩm
+    updateCart(userId, productId, 1);
   };
-
 
 
   const showDialog = (item: React.SetStateAction<null>) => {

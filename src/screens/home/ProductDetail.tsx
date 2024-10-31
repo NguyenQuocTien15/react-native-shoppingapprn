@@ -23,12 +23,7 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {useStatusBar} from '../../utils/useStatusBar';
 import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  CartItem,
-  addCart,
-  cartSelector,
-} from '../../redux/reducers/cartReducer';
+
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
 const ProductDetail = ({navigation, route}: any) => {
