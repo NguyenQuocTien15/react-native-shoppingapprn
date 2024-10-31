@@ -175,6 +175,7 @@ const ProductDetail = ({navigation, route}: any) => {
           right: 0,
           left: 0,
           padding: 20,
+          marginTop:15
         }}>
         <Row
           styles={{backgroundColor: 'transparent'}}
@@ -229,12 +230,14 @@ const ProductDetail = ({navigation, route}: any) => {
           style={[
             globalStyles.container,
             {
+              
               height: sizes.height * 0.5,
             },
           ]}>
           {subProductSelected && (
             <View
               style={{
+                // marginTop:35,
                 width: sizes.width,
                 height: sizes.height * 0.5,
               }}>
@@ -253,7 +256,7 @@ const ProductDetail = ({navigation, route}: any) => {
             },
           ]}>
           {productDetail && subProductSelected && (
-            <Section styles={{paddingVertical: 12}}>
+            <Section styles={{paddingVertical: 12, backgroundColor:colors.gray100, borderTopStartRadius:30,borderTopEndRadius:30}}>
               <Row>
                 <Col>
                   <TextComponent
@@ -380,7 +383,7 @@ const ProductDetail = ({navigation, route}: any) => {
                           <MaterialCommunityIcons
                             name="check"
                             size={18}
-                            color="white"
+                            color={colors.red700}
                           />
                         )}
                       </TouchableOpacity>
