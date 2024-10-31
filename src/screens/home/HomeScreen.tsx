@@ -68,7 +68,7 @@ const HomeScreen = ({navigation}:any) => {
             </Row>
           </Section>
         </>
-        {/* <FilterScreen/> */}
+       
         <OffersList />
         <Space height={20} />
         <CategoriesList />

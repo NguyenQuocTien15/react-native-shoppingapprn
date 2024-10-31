@@ -15,10 +15,10 @@ const OffersList = (props: Props) => {
     firestore()
       .collection(collectionNames.offers)
       .where('startAt', '<=', time)
-      // .where('endAt', '>=', time)
+     // .where('endAt', '>=', time)
       .onSnapshot(snap => {
-        if (snap.empty) {
-          console.log('Offer active not found');
+        if (!snap || snap.empty) {  // Kiểm tra snap không null trước
+          console.log('No active offers found');
         } else {
           const items: OfferModel[] = [];
           snap.forEach((item: any) => {
@@ -27,9 +27,11 @@ const OffersList = (props: Props) => {
               ...item.data(),
             });
           });
-
+  
           setOffers(items);
         }
+      }, error => {
+        console.error("Error fetching offers:", error);
       });
   }, []);
 
