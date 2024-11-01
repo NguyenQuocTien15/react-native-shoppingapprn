@@ -8,7 +8,7 @@ import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
 import {useNavigation} from '@react-navigation/native';
-
+import { query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 type Props = {};
 
 const PopularProduct = (props: Props) => {
@@ -16,27 +16,61 @@ const PopularProduct = (props: Props) => {
 
   const navigation: any = useNavigation();
 
+  // useEffect(() => {
+  //   productRef
+  //     .orderBy('rate')
+  //     .limit(5)
+  //     .onSnapshot(snap => {
+  //       if (snap.empty) {
+  //         console.log(`Products not found!`);
+  //       } else {
+  //         const items: ProductModel[] = [];
+  //         snap.forEach((item: any) =>
+  //           items.push({
+  //             id: item.id,
+  //             ...item.data(),
+  //           }),
+  //         );
+
+  //         setProducts(items);
+  //       }
+  //     });
+  // }, []);
+
+
   useEffect(() => {
-    productRef
-      .orderBy('rate')
-      .limit(5)
-      .onSnapshot(snap => {
-        if (snap.empty) {
-          console.log(`Products not found!`);
-        } else {
-          const items: ProductModel[] = [];
-          snap.forEach((item: any) =>
-            items.push({
-              id: item.id,
-              ...item.data(),
-            }),
-          );
+    const productsQuery = query(productRef, orderBy('rate'), limit(5));
 
-          setProducts(items);
-        }
-      });
+    const unsubscribe = onSnapshot(productsQuery, (snap) => {
+      if (snap.empty) {
+        console.log(`Products not found!`);
+        setProducts([]); // Clear products if none found
+      } else {
+        const items: ProductModel[] = [];
+        snap.forEach((item) => {
+          items.push({
+            id: item.id,
+            ...item.data(),
+            type: '',
+            description: '',
+            price: '',
+            title: '',
+            imageUrl: '',
+            files: [],
+            categories: [],
+            createdAt: 0,
+            updatedAt: 0,
+            rate: ''
+          });
+        });
+        setProducts(items);
+      }
+    }, (error) => {
+      console.error("Error fetching products: ", error);
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
   }, []);
-
   return (
     <View style={{flex: 1}}>
       <Tabbar

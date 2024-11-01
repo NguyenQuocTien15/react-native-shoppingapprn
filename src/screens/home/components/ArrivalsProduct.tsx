@@ -25,8 +25,8 @@ const ArrivalsProduct = (props: Props) => {
   //         const items: ProductModel[] = [];
   //         snap.forEach((item: any) =>
   //           items.unshift({
-  //             id: item.id,
-  //             ...item.data(),
+  //             id: items.id,
+  //             ...items.data(),
   //           }),
   //         );
 
@@ -34,6 +34,9 @@ const ArrivalsProduct = (props: Props) => {
   //       }
   //     });
   // }, []);
+
+
+  
   useEffect(() => {
     const getProducts = async () => {
       try {

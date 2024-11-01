@@ -24,6 +24,7 @@ const ForgotPassword = ({ navigation }: any) =>   {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  
 
   const handleSubmit = async () => {
     const emailRegex = /^\S+@\S+\.\S+$/; 
@@ -58,7 +59,9 @@ const ForgotPassword = ({ navigation }: any) =>   {
       await auth().sendPasswordResetEmail(email); // Sử dụng auth()
       setMessage('Email đặt lại mật khẩu đã được gửi!');
       setEmail(''); 
-    } catch (error: any) { // Hoặc sử dụng FirebaseError từ firebase/app
+      navigation.navigate('Login');
+     
+    } catch (error: any) {
       console.error(error);
       if (error.code === 'auth/user-not-found') {
         setMessage('Không tìm thấy tài khoản với email này.');

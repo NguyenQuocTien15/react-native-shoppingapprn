@@ -1,3 +1,4 @@
+
 import {
   Alert,
   Button,
@@ -8,16 +9,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import auth from '@react-native-firebase/auth';
+
 //Change Password
 const ChangePasswordScreen = () => {
-  const [currenPassword, setCurrentPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+
+
   const toggleShowCurrentPassword = () => {
     setShowCurrentPassword(!showCurrentPassword);
   };
@@ -27,102 +33,139 @@ const ChangePasswordScreen = () => {
   const toggleShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
+
+  const handleChangePassword = async () => {
+    setIsLoading(true); // Show loading indicator
+    try {
+      // 1. Re-authenticate the user
+      const user = auth().currentUser;
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const credential = auth.EmailAuthProvider.credential(
+        user.email!,
+        currentPassword
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      if (newPassword !== confirmNewPassword) {
+        throw new Error("New password and confirm password do not match");
+      }
+
+      await user.updatePassword(newPassword);
+
+      
+      await auth().signInWithEmailAndPassword(user.email!, newPassword);
+
+      Alert.alert('Success', 'Password changed successfully!');
+ 
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsLoading(false); 
+    }
+  };
+
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.customText}>Current password</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 10,
-        }}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter current password"
-          autoCapitalize="none"
-          autoCorrect={false}
-          textContentType="password"
-          secureTextEntry={!showCurrentPassword}
-          value={currenPassword}
-          onChangeText={text => setCurrentPassword(text)}
-        />
-
-        <TouchableOpacity
-          style={styles.toggleButton}
-          onPress={toggleShowCurrentPassword}>
-          <Ionicons
-            name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
-            size={24}
-            color="black"
-          />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.customText}>New password</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 10,
-        }}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter new password"
-          autoCapitalize="none"
-          autoCorrect={false}
-          textContentType="password"
-          secureTextEntry={!showNewPassword}
-          value={newPassword}
-          onChangeText={text => setNewPassword(text)}
-        />
-
-        <TouchableOpacity
-          style={styles.toggleButton}
-          onPress={toggleShowNewPassword}>
-          <Ionicons
-            name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-            size={24}
-            color="black"
-          />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.customText}>Confirm new password</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 10,
-        }}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter confirm new password"
-          autoCapitalize="none"
-          autoCorrect={false}
-          textContentType="password"
-          secureTextEntry={!showConfirmPassword}
-          value={confirmNewPassword}
-          onChangeText={text => setConfirmNewPassword(text)}
-        />
-
-        <TouchableOpacity
-          style={styles.toggleButton}
-          onPress={toggleShowConfirmPassword}>
-          <Ionicons
-            name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-            size={24}
-            color="black"
-          />
-        </TouchableOpacity>
-      </View>
-      <Button
+        <ScrollView style={styles.container}>
+          <Text style={styles.customText}>Current password</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 10,
+            }}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter current password"
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
+              secureTextEntry={!showCurrentPassword}
+              value={currentPassword}
+              onChangeText={text => setCurrentPassword(text)}
+            />
+    
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={toggleShowCurrentPassword}>
+              <Ionicons
+                name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.customText}>New password</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 10,
+            }}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter new password"
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
+              secureTextEntry={!showNewPassword}
+              value={newPassword}
+              onChangeText={text => setNewPassword(text)}
+            />
+    
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={toggleShowNewPassword}>
+              <Ionicons
+                name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.customText}>Confirm new password</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 10,
+            }}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter confirm new password"
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
+              secureTextEntry={!showConfirmPassword}
+              value={confirmNewPassword}
+              onChangeText={text => setConfirmNewPassword(text)}
+            />
+    
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={toggleShowConfirmPassword}>
+              <Ionicons
+                name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
+          <Button
         color="#ff7891"
         title="Save"
-        onPress={() => Alert.alert('Save')}></Button>
-    </ScrollView>
-  );
-};
-
+        onPress={handleChangePassword}
+        disabled={isLoading} // Disable button while loading
+      />
+        </ScrollView>
+      );
+    };
 export default ChangePasswordScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

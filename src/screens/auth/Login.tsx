@@ -40,6 +40,7 @@ const Login = ({navigation}: any) => {
             photoUrl: user.photoURL,
             creationTime: user.metadata.creationTime,
             lastSignInTime: user.metadata.lastSignInTime,
+            
           };
           dispatch(addAuth(data));
           await AsyncStorage.setItem(localDataNames.auth, JSON.stringify(data));
