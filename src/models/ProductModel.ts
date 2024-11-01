@@ -11,8 +11,9 @@ export interface ProductModel {
   categories: string[];
   createdAt: number;
   updatedAt: number;
-  rate: string;
+  rate: number;
   selled: number;
+  brand:string
 }
 
 export interface SubProduct {

@@ -25,37 +25,43 @@ import { ProductModel } from '../../models/ProductModel';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { BrandModel } from '../../models/BrandModel';
 
 const FilterScreen = ({navigation}: any) => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [maxPrice, setMaxPrice] = useState(1000);
-  const [sortBySelected, setSortBySelected] = useState('today');
-  const [isLoading, setIsLoading] = useState(false);
-  const [rateSelected, setRateSelected] = useState(5);
+  //const [sortBySelected, setSortBySelected] = useState('today');
+  const [brands, setBrands] = useState<BrandModel[]>([]);
+const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
+
+  const [rateSelected, setRateSelected] = useState(2);
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [filterValues, setFilterValues] = useState<{
     categories: string[];
+    brands: string[];
     price: {
       low: number;
       high: number;
     };
-    sortby: string;
-    rate: number;
+   // sortby: string;
+   // rate: number;
   }>({
     categories: [],
+    brands: [],
     price: {
       low: 0,
       high: 1000,
     },
-    sortby: 'today',
-    rate: 5,
+  //  sortby: 'today',
+    //rate: 5,
   });
 
-  const sortByValues = [
-    { key: 'today', title: 'New Today' },
-    { key: 'thisweek', title: 'New This Week' },
-    { key: 'bestseller', title: 'Best Seller' },
-  ];
+  // const sortByValues = [
+  //   { key: 'today', title: 'New Today' },
+  //   { key: 'thisweek', title: 'New This Week' },
+  //   { key: 'bestseller', title: 'Best Seller' },
+  // ];
 
   useEffect(() => {
     getData();
@@ -64,6 +70,7 @@ const FilterScreen = ({navigation}: any) => {
   const getData = async () => {
     setIsLoading(true);
     try {
+      await getBrands(); 
       await getCategories();
       await handleGetMaxPrice();
       setIsLoading(false);
@@ -71,7 +78,27 @@ const FilterScreen = ({navigation}: any) => {
       setIsLoading(false);
     }
   };
-
+  const getBrands = async () => {
+    const snap = await firestore().collection('brands').get();
+    if (!snap.empty) {
+      const items: BrandModel[] = [];
+      snap.forEach((item: any) => items.push({ id: item.id, ...item.data() }));
+      //mặc định chọn trường đầu tiên
+      handleSelectedBrand(items[0].id);
+      setBrands(items);
+    }
+  };
+  const handleSelectedBrand = (id: string) => {
+    const items = [...brandsSelected];
+    const index = items.findIndex((element) => element === id);
+    if (index !== -1) {
+      items.splice(index, 1);
+    } else {
+      items.push(id);
+    }
+   setBrandsSelected(items);
+  };
+  
   const getCategories = async () => {
     const snap = await firestore().collection('categories').get();
     if (!snap.empty) {
@@ -81,6 +108,8 @@ const FilterScreen = ({navigation}: any) => {
       handleSelectedCategory(items[0].id);
       setCategories(items);
     }
+
+    
   };
 
   const handleSelectedCategory = (id: string) => {
@@ -122,7 +151,7 @@ const FilterScreen = ({navigation}: any) => {
           <Button
             inline
             title="Apply Now"
-            onPress={() => navigation.navigate('ResultScreen',{filterValues: {...filterValues, categories: categoriesSelected}})}
+            onPress={() => navigation.navigate('ResultScreen',{filterValues: {...filterValues, categories: categoriesSelected, brands: brandsSelected}})}
             color={colors.black}
           />
         </Section>
@@ -248,7 +277,7 @@ const FilterScreen = ({navigation}: any) => {
         />
       </Section>
 
-      <Section>
+      {/* <Section>
         <Tabbar
           showSeeMore={false}
           titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 18 }}
@@ -278,9 +307,46 @@ const FilterScreen = ({navigation}: any) => {
             </TouchableOpacity>
           ))}
         </Row>
+      </Section> */}
+    <Section>
+        <Tabbar
+          showSeeMore={false}
+          titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 18 }}
+          title="Brands"
+        />
+        <Row wrap="wrap" justifyContent="flex-start">
+          {brands.map((item) => (
+            <TouchableOpacity
+              onPress={() => handleSelectedBrand(item.id)}
+              style={[
+                globalStyles.tag,
+                {
+                  borderWidth: 1,
+                  borderRadius: 100,
+                  paddingVertical: 8,
+                  paddingHorizontal: 20,
+                  backgroundColor: brandsSelected.includes(item.id)
+                    ? colors.black
+                    : colors.white,
+                },
+              ]}
+              key={item.id}
+            >
+              <TextComponent
+                color={
+                  brandsSelected.includes(item.id)
+                    ? colors.white
+                    : colors.black
+                }
+                font={fontFamilies.poppinsMedium}
+                text={item.title}
+              />
+            </TouchableOpacity>
+          ))}
+        </Row>
       </Section>
 
-      <Section>
+      {/* <Section>
         <Tabbar
           showSeeMore={false}
           titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 18 }}
@@ -311,7 +377,7 @@ const FilterScreen = ({navigation}: any) => {
               </Row>
             ),
         )}
-      </Section>
+      </Section> */}
     </Container>
   );
 };
