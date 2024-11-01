@@ -260,7 +260,7 @@ const CartScreen = () => {
 
   const handleCheckOut = () => {
     const selectedItems = cartItems.filter(item =>
-      selectedProducts.includes(item.id),
+      selectedProducts.includes(item.productId),
     );
 
     if (selectedItems.length > 0) {

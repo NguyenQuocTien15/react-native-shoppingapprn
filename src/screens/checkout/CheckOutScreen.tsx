@@ -300,7 +300,7 @@ const CheckOutScreen = ({route}) => {
             ]}
             onPress={showDialogAndAddOrders}
             disabled={!selectedPaymentMethod}>
-            <Text style={styles.textCheckOut}>Order</Text>
+            <Text style={styles.textCheckOut}>Mua</Text>
           </TouchableOpacity>
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
