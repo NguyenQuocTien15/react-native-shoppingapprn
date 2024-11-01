@@ -11,9 +11,8 @@ import CategoriesList from './components/CategoriesList';
  import OffersList from './components/OffersList';
  import PopularProduct from './components/PopularProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
-import FilterScreen from './FilterScreen';
 
-const HomeScreen = ({navigation}:any) => {
+const HomeScreen = () => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);
@@ -24,7 +23,7 @@ const HomeScreen = ({navigation}:any) => {
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16, marginTop:16}}>
+      <Section styles={{paddingTop: 16}}>
         <Row justifyContent="space-between">
           <Button
             inline
@@ -63,12 +62,11 @@ const HomeScreen = ({navigation}:any) => {
                 styles={{width: 48, height: 48}}
                 icon={<Setting4 variant="TwoTone" size={24} color="white" />}
                 color="black"
-                onPress={() => navigation.navigate('FilterScreen')}
+                onPress={() => {}}
               />
             </Row>
           </Section>
         </>
-       
         <OffersList />
         <Space height={20} />
         <CategoriesList />

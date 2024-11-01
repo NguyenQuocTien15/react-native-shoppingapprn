@@ -14,13 +14,13 @@ type Props = {
     color?:string;
     styles?:StyleProp<TextStyle>;
     type?:'bigTitle' | 'title' | 'text'|'description';
-   height?:number
+   
 
 };
 
 const TextComponent = (props: Props) => {
 
-    const{text,size,font,flex,numberOfLine,color,styles,type,height} = props
+    const{text,size,font,flex,numberOfLine,color,styles,type} = props
 
     let fontSize: number = sizes.text
     let fontFamily: string = fontFamilies.poppinsRegular;
@@ -40,7 +40,7 @@ const TextComponent = (props: Props) => {
             break;
     }
   return (
-   <Text text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} lineHeight={height} size={size ?? sizes.text} color = {color ?? colors.dark} styles={[{},styles]}
+   <Text text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} size={size ?? sizes.text} color = {color ?? colors.dark} styles={[{},styles]}
    weight={
     !type || (type !== 'bigTitle' && type !== 'title' ) ? '400' : 'bold'}
    />

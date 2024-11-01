@@ -1,193 +1,64 @@
 import {
-  ActivityIndicator,
   Alert,
+  Button,
+  FlatList,
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  CartItem,
+  cartSelector,
+  removeCartItem,
+  updateQuantity,
+} from '../../redux/reducers/cartReducer';
 import {Col, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {TextComponent} from '../../components';
 import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
-import auth from '@react-native-firebase/auth';
-import {dbFirestore, productRef, userRef} from '../../firebase/firebaseConfig';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
+
 const CartScreen = () => {
   const navigation = useNavigation();
+  const cartData: CartItem[] = useSelector(cartSelector);
+  const dispatch = useDispatch();
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [userId, setUserId] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null); // Track the item to delete
 
-  useEffect(() => {
-    const currentUser = auth().currentUser;
-    if (currentUser) {
-      setUserId(currentUser.uid);
-
-      const cartRef = userRef
-        .doc(currentUser.uid)
-        .collection('cart')
-        .doc('cartDoc');
-
-      const unsubscribe = cartRef.onSnapshot(async doc => {
-        if (doc.exists) {
-          const products = doc.data().products;
-
-          const productDetails = await Promise.all(
-            Object.keys(products).map(async productId => {
-              const productDoc = await firebase
-                .firestore()
-                .collection('products')
-                .doc(productId)
-                .get();
-
-              const addedAt = products[productId].addedAt;
-
-              return {
-                productId,
-                imageUrl: productDoc.data().imageUrl,
-                quantity: products[productId].quantity,
-                title: productDoc.data().title,
-                description: productDoc.data().description,
-                sizes: productDoc.data().size,
-                price: productDoc.data().price,
-                addedAt: addedAt ? new Date(addedAt) : new Date(),
-              };
-            }),
-          );
-
-          const sortedProductDetails = productDetails.sort(
-            (a, b) => b.addedAt - a.addedAt,
-          );
-
-          setCartItems(sortedProductDetails);
-        } else {
-          console.log('Giỏ hàng trống');
-        }
-      });
-
-      return () => unsubscribe(); // Hủy theo dõi khi component bị unmount
-    } else {
-      console.log('Không có người dùng đăng nhập');
-    }
-  }, []);
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      const cartRef = dbFirestore.collection('carts').doc('userId');
-      const doc = await cartRef.get();
-      if (doc.exists) {
-        setCartItems(doc.data().products);
-      }
-    };
-
-    fetchCartItems();
-  }, []);
-
-  const updateCart = async (userId, productId, quantity) => {
-    const cartRef = firebase
-      .firestore()
-      .collection('users')
-      .doc(userId)
-      .collection('cart')
-      .doc('cartDoc');
-
-    try {
-      await firebase.firestore().runTransaction(async transaction => {
-        const cartDoc = await transaction.get(cartRef);
-
-        if (!cartDoc.exists) {
-          console.log('Cart does not exist.');
-          return;
-        }
-
-        const currentProducts = cartDoc.data().products || {};
-        const currentQuantity = currentProducts[productId]?.quantity || 0;
-
-        if (currentQuantity + quantity < 0) {
-          return;
-        }
-
-        transaction.update(cartRef, {
-          [`products.${productId}`]: {quantity: currentQuantity + quantity},
-        });
-
-        setCartItems(prevItems => {
-          const updatedItems = [...prevItems];
-          const itemIndex = updatedItems.findIndex(
-            item => item.productId === productId,
-          );
-          if (itemIndex > -1) {
-            updatedItems[itemIndex].quantity += quantity;
-
-            if (updatedItems[itemIndex].quantity <= 0) {
-              updatedItems.splice(itemIndex, 1);
-            }
-          }
-          return updatedItems;
-        });
-      });
-
-      console.log('Cart updated successfully!');
-    } catch (error) {
-      console.error('Error updating cart: ', error);
-    }
+  const showDialog = item => {
+    setSelectedItem(item); // Set the selected item for deletion
+    setDialogVisible(true); // Show the dialog
   };
 
-  const handleDecrease = productId => {
-    const currentProduct = cartItems.find(item => item.productId === productId);
-    if (currentProduct && currentProduct.quantity > 0) {
-      updateCart(userId, productId, -1);
-    }
-  };
-
-  const handleIncrease = productId => {
-    updateCart(userId, productId, 1);
-  };
-
-  const showDialog = (item: React.SetStateAction<null>) => {
-    setSelectedItem(item);
-    setDialogVisible(true);
-  };
-  const getUserId = () => {
-    const currentUser = auth().currentUser;
-
-    if (currentUser) {
-      return currentUser.uid;
-    } else {
-      console.log('No user is signed in.');
-      return null;
-    }
-  };
-  const userID = getUserId();
   const handleCancel = () => {
     setDialogVisible(false);
   };
 
-  const toggleSelectProduct = item => {
-    setSelectedProducts(prevSelected => {
-      const isSelected = prevSelected.includes(item.productId);
-      const updatedSelected = isSelected
-        ? prevSelected.filter(id => id !== item.productId)
-        : [...prevSelected, item.productId];
+  const toggleSelectProduct = (item: CartItem) => {
+    let updatedSelectedProducts;
+    if (selectedProducts.includes(item.id)) {
+      updatedSelectedProducts = selectedProducts.filter(id => id !== item.id);
+    } else {
+      updatedSelectedProducts = [...selectedProducts, item.id];
+    }
+    setSelectedProducts(updatedSelectedProducts);
 
-      // Check if all items are selected
-      if (updatedSelected.length === cartItems.length) {
-        setIsSelectAll(true); // All items are selected
-      } else {
-        setIsSelectAll(false); // Not all items are selected
-      }
+    if (updatedSelectedProducts.length !== cartData.length) {
+      setIsSelectAll(false);
+    }
 
-      return updatedSelected;
-    });
+    if (updatedSelectedProducts.length === cartData.length) {
+      setIsSelectAll(true);
+    }
   };
 
   const handleChooseAll = () => {
@@ -195,72 +66,23 @@ const CartScreen = () => {
       setSelectedProducts([]);
       setIsSelectAll(false);
     } else {
-      setSelectedProducts(cartItems.map(item => item.productId)); // Use productId here
+      setSelectedProducts(cartData.map(item => item.id));
       setIsSelectAll(true);
     }
   };
-
   const calculateTotalPrice = () => {
-    if (isSelectAll) {
-      return cartItems.reduce(
-        (total, item) => total + item.quantity * item.price,
-        0,
-      );
-    } else if (selectedProducts.length > 0) {
-      return cartItems
-        .filter(item => selectedProducts.includes(item.productId)) // Use productId here
-        .reduce((total, item) => total + item.quantity * item.price, 0);
-    }
-
-    return 0;
+    return cartData
+      .filter(item => selectedProducts.includes(item.id))
+      .reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  const handleRemoveFromCart = async (
-    userId: string | null | undefined,
-    productId: string | number,
-  ) => {
-    if (!userId) {
-      console.error('User ID is required');
-      return;
-    }
-
-    const cartRef = firebase
-      .firestore()
-      .collection('users')
-      .doc(userId)
-      .collection('cart')
-      .doc('cartDoc');
-
-    try {
-      await firebase.firestore().runTransaction(async transaction => {
-        const cartDoc = await transaction.get(cartRef);
-
-        if (cartDoc.exists) {
-          const currentProducts = cartDoc.data()?.products || {};
-
-          if (currentProducts[productId]) {
-            delete currentProducts[productId];
-
-            transaction.update(cartRef, {
-              products: currentProducts,
-            });
-            setDialogVisible(false);
-            console.log('Product removed from cart successfully!');
-          } else {
-            console.warn('Product not found in cart:', productId);
-          }
-        } else {
-          console.warn('Cart does not exist.');
-        }
-      });
-    } catch (error) {
-      console.error('Error removing product from cart: ', error);
-    }
+  const handleDeleteItem = item => {
+    dispatch(removeCartItem(item.id));
+    setDialogVisible(false);
   };
-
   const handleCheckOut = () => {
-    const selectedItems = cartItems.filter(item =>
-      selectedProducts.includes(item.productId),
+    const selectedItems = cartData.filter(item =>
+      selectedProducts.includes(item.id),
     );
 
     if (selectedItems.length > 0) {
@@ -272,20 +94,20 @@ const CartScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.textCart}>Carts({cartItems.length})</Text>
-      {cartItems.length > 0 ? (
+      <Text style={styles.textCart}>Carts({cartData.length})</Text>
+      {cartData.length > 0 ? (
         <View style={{flex: 1, marginTop: 10}}>
+          {/* Listcart */}
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
-            data={cartItems}
-            keyExtractor={item => item.id}
+            data={cartData}
             renderItem={({item, index}) => (
-              <View key={item.productId} style={styles.itemListProduct}>
+              <View key={item.id} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
                   <Col flex={0.15}>
                     <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
-                        {selectedProducts.includes(item.productId) && (
+                        {selectedProducts.includes(item.id) && (
                           <View style={styles.selectedRb} />
                         )}
                       </View>
@@ -298,35 +120,21 @@ const CartScreen = () => {
                       height: 110,
                       borderRadius: 12,
                       resizeMode: 'cover',
-                    }}
-                  />
-                  <Space width={12} />
+                    }}></Image>
+                  <Space width={12}></Space>
                   <Col>
                     <TextComponent
                       type="title"
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
                       text={item.title}
-                      size={20}
-                    />
-                    <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.description}
-                    />
-                    <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.sizes}
-                    />
-                    <TextComponent text={item.size} />
+                      size={20}></TextComponent>
+                    <TextComponent text={item.description}></TextComponent>
+                    <TextComponent text={item.size}></TextComponent>
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
                           type="title"
                           text={`$${item.price * item.quantity}`}
-                          size={20}
-                        />
+                          size={20}></TextComponent>
                       </Col>
                       <Row
                         styles={{
@@ -336,15 +144,30 @@ const CartScreen = () => {
                           paddingHorizontal: 12,
                         }}>
                         <TouchableOpacity
-                          onPress={() => handleDecrease(item.productId)}>
-                          <Minus size={20} color="black" />
+                          onPress={() =>
+                            dispatch(
+                              updateQuantity({
+                                id: item.id,
+                                quantity: -1,
+                              }),
+                            )
+                          }>
+                          <Minus size={20} color="black"></Minus>
                         </TouchableOpacity>
-                        <Space width={6} />
-                        <TextComponent text={`${item.quantity}`} />
-                        <Space width={6} />
+                        <Space width={6}></Space>
+                        <TextComponent
+                          text={`${item.quantity}`}></TextComponent>
+                        <Space width={6}></Space>
                         <TouchableOpacity
-                          onPress={() => handleIncrease(item.productId)}>
-                          <Add size={20} color="black" />
+                          onPress={() =>
+                            dispatch(
+                              updateQuantity({
+                                id: item.id,
+                                quantity: 1,
+                              }),
+                            )
+                          }>
+                          <Add size={20} color="black"></Add>
                         </TouchableOpacity>
                       </Row>
                     </Row>
@@ -371,9 +194,7 @@ const CartScreen = () => {
                   <Dialog.Button label="Cancel" onPress={handleCancel} />
                   <Dialog.Button
                     label="Delete"
-                    onPress={() =>
-                      handleRemoveFromCart(userID, selectedItem?.productId)
-                    }
+                    onPress={() => handleDeleteItem(selectedItem)}
                   />
                 </Dialog.Container>
               </View>
@@ -384,6 +205,7 @@ const CartScreen = () => {
           <View style={styles.flexDirectionChooseAll}>
             <TouchableOpacity onPress={handleChooseAll}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                {/* Radio check cho nút chọn tất cả */}
                 <TouchableOpacity onPress={handleChooseAll}>
                   <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
                     {isSelectAll && <View style={styles.selectedRb} />}
@@ -395,10 +217,15 @@ const CartScreen = () => {
               </View>
             </TouchableOpacity>
             <Text style={{fontSize: 25, color: 'black', fontWeight: 'bold'}}>
+              {/* {isSelectAll === true
+                ? `$${cartData
+                    .reduce((a, b) => a + b.quantity * b.price, 0)
+                    .toLocaleString()}`
+                : '0'}  */}
               {`$${calculateTotalPrice().toLocaleString()}`}
             </Text>
           </View>
-
+          
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
@@ -407,13 +234,15 @@ const CartScreen = () => {
                   selectedProducts.length > 0 ? '#ff7891' : 'gray',
               },
             ]}
-            disabled={selectedProducts.length === 0}
+            disabled={selectedProducts.length < 0}
             onPress={handleCheckOut}>
             <Text style={styles.textCheckOut}>Check Out</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <ActivityIndicator size="small" color="#0000ff" />
+        <Section>
+          <TextComponent text="No product in your cart"></TextComponent>
+        </Section>
       )}
     </View>
   );

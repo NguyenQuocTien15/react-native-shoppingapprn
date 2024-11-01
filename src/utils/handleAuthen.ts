@@ -15,9 +15,7 @@ export class Auth {
           emailVerified: user.emailVerified,
           photoUrl: user.photoURL,
           creationTime: user.metadata.creationTime,
-          lastSignInTime: user.metadata.lastSignInTime,
-          phoneNumber: user.phoneNumber,
-          address: user.address
+          lastSignInTime: user.metadata.lastSignInTime
         };
 
         await firestore().collection('users').doc(user.uid).set(data);

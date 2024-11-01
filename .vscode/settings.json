@@ -1,4 +1,3 @@
 {
-  "java.compile.nullAnalysis.mode": "automatic",
-  "cSpell.words": ["firestore"]
+    "java.compile.nullAnalysis.mode": "automatic"
 }

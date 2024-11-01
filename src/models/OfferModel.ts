@@ -1,5 +1,5 @@
 export interface OfferModel {
-  //code: string;
+  code: string;
   description: string;
   endAt: number;
   files: string[];

@@ -19,21 +19,20 @@ const OfferItem = (props: Props) => {
       <TextComponent
         type="title"
         size={28}
-        styles={{margin:5}}
         font={fontFamilies.poppinsBold}
         text={`${item.percent}% Off`}
       />
-      <TextComponent text={item.title} color={colors.light} size={16} />
-      {/* <TextComponent
+      <TextComponent text={item.title} color={colors.gray2} size={16} />
+      <TextComponent
         text={`With code: ${item.code}`}
         size={16}
         styles={{paddingVertical: 12}}
-      /> */}
+      />
       <Row justifyContent="flex-start">
         <Button
           size="small"
           title="Get Now"
-          styles={{paddingHorizontal: 20, marginTop:25}}
+          styles={{paddingHorizontal: 20}}
           color={colors.dark}
           onPress={() => {}}
         />

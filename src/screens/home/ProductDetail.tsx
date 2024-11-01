@@ -10,7 +10,7 @@ import {
 } from '@bsdaoquang/rncomponent';
 import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, ScrollView, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {TextComponent} from '../../components';
@@ -23,9 +23,14 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {useStatusBar} from '../../utils/useStatusBar';
 import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
-
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  CartItem,
+  addCart,
+  cartSelector,
+} from '../../redux/reducers/cartReducer';
 import {sizes} from '../../constants/sizes';
-import auth from '@react-native-firebase/auth';
+
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
 
@@ -35,12 +40,14 @@ const ProductDetail = ({navigation, route}: any) => {
   const [count, setCount] = useState(1);
   const [sizeSelected, setSizeSelected] = useState('');
 
+  const cartData: CartItem[] = useSelector(cartSelector);
+  const dispatch = useDispatch();
 
   useStatusBar('dark-content');
 
   useEffect(() => {
     getProductDetail();
-   getSubProducts();
+    getSubProducts();
   }, [id]);
 
   useEffect(() => {
@@ -48,17 +55,18 @@ const ProductDetail = ({navigation, route}: any) => {
     setSizeSelected('');
   }, [subProductSelected]);
 
-  const getUserId = () => {
-    const currentUser = auth().currentUser;
+  useEffect(() => {
+    if (subProductSelected) {
+      const item = cartData.find(
+        element => element.id === subProductSelected.id,
+      );
 
-    if (currentUser) {
-      return currentUser.uid;
-    } else {
-      console.log('No user is signed in.');
-      return null;
+      if (item) {
+        setCount(item.quantity);
+      }
     }
-  };
-  //onsnap cập nhật ngay lập tức
+  }, [cartData, subProductSelected]);
+
   const getProductDetail = () => {
     productRef.doc(id).onSnapshot((snap: any) => {
       if (snap.exists) {
@@ -72,7 +80,7 @@ const ProductDetail = ({navigation, route}: any) => {
     });
   };
 
-   const getSubProducts = async () => {
+  const getSubProducts = async () => {
     try {
       const snap = await firestore()
         .collection('subProducts')
@@ -100,53 +108,28 @@ const ProductDetail = ({navigation, route}: any) => {
     }
   };
 
-  const handleAddToCart = async (
-    userId: string | null | undefined,
-    productId: string | number,
-    quantity: number,
-  ) => {
-     if (!sizeSelected) {
+  const handleAddToCard = (item: SubProduct) => {
+    const data = {
+      id: item.id,
+      title: productDetail?.title,
+      size: sizeSelected,
+      quantity: count,
+      description: productDetail?.description,
+      color: item.color,
+      price: item.price,
+      imageUrl: item.imageUrl,
+    };
+
+    const sub: any = {...subProductSelected};
+    sub.quantity = subProductSelected
+      ? subProductSelected?.quantity - count
+      : 0;
+    if (sizeSelected) {
+      dispatch(addCart(data));
+
+      setSubProductSelected(sub);
+    } else {
       Alert.alert('Bạn chưa chọn size');
-      return;
-    }
-    const cartRef = firestore()
-      .collection('users')
-      .doc(userId)
-      .collection('cart')
-      .doc('cartDoc');
-
-    try {
-      await firestore().runTransaction(async transaction => {
-        const cartDoc = await transaction.get(cartRef);
-
-        if (!cartDoc.exists) {
-          
-          transaction.set(cartRef, {
-            products: {
-              [productId]: {
-                quantity: quantity,
-                addedAt: new Date().toISOString(),
-              },
-            },
-          });
-        } else {
-
-          const currentProducts = cartDoc.data().products || {};
-          const currentQuantity = currentProducts[productId]?.quantity || 0;
-
-         
-          transaction.update(cartRef, {
-            [`products.${productId}`]: {
-              quantity: currentQuantity + quantity,
-              addedAt: new Date().toISOString(), 
-            },
-          });
-        }
-      });
-
-      console.log('Product added to cart successfully!');
-    } catch (error) {
-      console.error('Error adding product to cart: ', error);
     }
   };
 
@@ -157,7 +140,7 @@ const ProductDetail = ({navigation, route}: any) => {
           disable={subProductSelected.quantity === 0}
           icon={<FontAwesome6 name="bag-shopping" size={18} color={'white'} />}
           inline
-          onPress={() => handleAddToCart(getUserId(), id, count)}
+          onPress={() => handleAddToCard(subProductSelected)}
           color={colors.black}
           title={'Add to cart'}
         />
@@ -175,7 +158,6 @@ const ProductDetail = ({navigation, route}: any) => {
           right: 0,
           left: 0,
           padding: 20,
-          marginTop:15
         }}>
         <Row
           styles={{backgroundColor: 'transparent'}}
@@ -199,7 +181,7 @@ const ProductDetail = ({navigation, route}: any) => {
               color={colors.white}
             />
           </TouchableOpacity>
-          <Badge>
+          <Badge count={cartData.length}>
             <TouchableOpacity
               style={[
                 globalStyles.center,
@@ -230,14 +212,12 @@ const ProductDetail = ({navigation, route}: any) => {
           style={[
             globalStyles.container,
             {
-              
               height: sizes.height * 0.5,
             },
           ]}>
           {subProductSelected && (
             <View
               style={{
-                // marginTop:35,
                 width: sizes.width,
                 height: sizes.height * 0.5,
               }}>
@@ -256,14 +236,13 @@ const ProductDetail = ({navigation, route}: any) => {
             },
           ]}>
           {productDetail && subProductSelected && (
-            <Section styles={{paddingVertical: 12, backgroundColor:colors.gray100, borderTopStartRadius:30,borderTopEndRadius:30}}>
+            <Section styles={{paddingVertical: 12}}>
               <Row>
                 <Col>
                   <TextComponent
                     text={productDetail?.title}
                     font={fontFamilies.RobotoBold}
                     size={20}
-                   
                   />
                   <TextComponent
                     text={productDetail.type}
@@ -383,7 +362,7 @@ const ProductDetail = ({navigation, route}: any) => {
                           <MaterialCommunityIcons
                             name="check"
                             size={18}
-                            color={colors.red700}
+                            color="white"
                           />
                         )}
                       </TouchableOpacity>
