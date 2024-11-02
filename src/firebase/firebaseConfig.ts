@@ -5,7 +5,7 @@ const productRef = firestore().collection('products');
 const categoriesRef = firestore().collection('categories');
 const userRef = firestore().collection('users');
 const orderRef = firestore().collection('orders')
-
+const cartRef = firestore().collection('carts');
 
 export {
   productRef,

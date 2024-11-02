@@ -5,20 +5,17 @@ import {
   Image,
   StyleSheet,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {TouchableOpacity} from 'react-native';
 import {orderRef} from '../../firebase/firebaseConfig';
-import Dialog from 'react-native-dialog';
 import auth from '@react-native-firebase/auth';
 
-const OrderWaitingForConfirmationScreen = () => {
+const OrderProcessing = () => {
   const [userId, setUserId] = useState('');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [selectedProductIndex, setSelectedProductIndex] = useState(null);
+
 
   useEffect(() => {
     const currentUser = auth().currentUser;
@@ -28,86 +25,58 @@ const OrderWaitingForConfirmationScreen = () => {
       console.log('No user is signed in.');
     }
   }, []);
+ useEffect(() => {
+   if (!userId) return;
 
-  useEffect(() => {
-    if (!userId) return;
+   setLoading(true);
 
-    setLoading(true);
+   const unsubscribe = orderRef
+     .where('orderStatusId', '==', '2') // Ensure this matches Firestore's field type
+     .where('userId', '==', userId)
+     .onSnapshot(
+       (snapshot: {docs: any[]}) => {
+         const ordersData = snapshot.docs.map(doc => ({
+           id: doc.id,
+           ...doc.data(),
+         }));
+         setOrders(ordersData);
+         setLoading(false);
+       },
+       (error: any) => {
+         console.error('Error fetching real-time orders: ', error);
+         setLoading(false);
+       },
+     );
 
-    const unsubscribe = orderRef
-      .where('orderStatusId', '==', '1') // Ensure this matches Firestore's field type
-      .where('userId', '==', userId)
-      .onSnapshot(
-        (snapshot: {docs: any[]}) => {
-          const ordersData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setOrders(ordersData);
-          setLoading(false);
-        },
-        (error: any) => {
-          console.error('Error fetching real-time orders: ', error);
-          setLoading(false);
-        },
-      );
+   // Cleanup listener on component unmount or userId change
+   return () => unsubscribe();
+ }, [userId]);
+//   useEffect(() => {
+//     if (!userId) return;
 
-    // Cleanup listener on component unmount or userId change
-    return () => unsubscribe();
-  }, [userId]);
+//     const fetchOrders = async () => {
+//       setLoading(true);
+//       try {
+//         const snapshot = await orderRef
+//           .where('orderStatusId', '==', '2')
+//           .where('userId', '==', userId) // Filter by userId
+//           .get();
 
-  const showDialog = (
-    orderId: React.SetStateAction<null>,
-    productIndex: React.SetStateAction<null>,
-  ) => {
-    setSelectedOrder(orderId);
-    setSelectedProductIndex(productIndex);
-    setDialogVisible(true);
-  };
+//         const ordersData = snapshot.docs.map(doc => ({
+//           id: doc.id,
+//           ...doc.data(),
+//         }));
+//         setOrders(ordersData);
+//       } catch (error) {
+//         console.error('Error fetching orders: ', error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
 
-  const handleCancelDialog = () => {
-    setDialogVisible(false);
-  };
+//     fetchOrders();
+//   }, [userId]);
 
-  const handleCancelOrderProduct = async () => {
-    if (selectedOrder === null || selectedProductIndex === null) return;
-
-    try {
-      const orderToUpdate = orders.find(order => order.id === selectedOrder);
-      if (!orderToUpdate) return;
-
-      // Remove the product from the local state
-      const updatedItems = [...orderToUpdate.items];
-      updatedItems.splice(selectedProductIndex, 1);
-
-      const orderDocRef = orderRef.doc(selectedOrder);
-
-      if (updatedItems.length === 0) {
-        // Delete the entire order if no items remain
-        await orderDocRef.delete();
-        setOrders(prevOrders =>
-          prevOrders.filter(order => order.id !== selectedOrder),
-        );
-      } else {
-        // Update the order in Firebase
-        await orderDocRef.update({items: updatedItems});
-        setOrders(prevOrders =>
-          prevOrders.map(order =>
-            order.id === selectedOrder
-              ? {...order, items: updatedItems}
-              : order,
-          ),
-        );
-      }
-      setDialogVisible(false);
-    } catch (error) {
-      console.error('Error deleting product or order from Firebase: ', error);
-    }
-  };
-
-  const handleConfirm = () => {
-    // Implement confirmation logic here
-  };
 
   const renderItem = ({item}) => (
     <View style={styles.itemListProduct}>
@@ -155,26 +124,7 @@ const OrderWaitingForConfirmationScreen = () => {
                       borderRadius: 100,
                       alignItems: 'center',
                     },
-                  ]}>
-                  <TouchableOpacity
-                    style={[
-                      styles.touch,
-                      {
-                        backgroundColor: 'white',
-                      },
-                    ]}
-                    onPress={() => showDialog(item.id, index)}>
-                    <Text
-                      style={[
-                        styles.textTouch,
-                        {
-                          color: 'black',
-                        },
-                      ]}>
-                      Cancel
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                  ]}></View>
               </View>
             </View>
           </View>
@@ -190,11 +140,10 @@ const OrderWaitingForConfirmationScreen = () => {
       </View>
     </View>
   );
-
   return (
     <View style={styles.container}>
       {loading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator color='blue' size='small'></ActivityIndicator>
       ) : (
         <FlatList
           data={orders}
@@ -203,27 +152,18 @@ const OrderWaitingForConfirmationScreen = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      {/* Dialog for cancellation */}
-      <Dialog.Container visible={dialogVisible}>
-        <Dialog.Description>
-          Do you want to cancel the selected product?
-        </Dialog.Description>
-        <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
-        <Dialog.Button label="Yes" onPress={handleCancelOrderProduct} />
-      </Dialog.Container>
     </View>
   );
 };
 
-export default OrderWaitingForConfirmationScreen;
+export default OrderProcessing;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    paddingLeft:10, paddingRight:10,
-    //backgroundColor: '#DCDCDC',
+    paddingLeft: 10,
+    paddingRight: 10,
   },
 
   flexDirection: {

@@ -3,7 +3,6 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {CartScreen} from '../screens';
 import CheckOutScreen from '../screens/checkout/CheckOutScreen';
-import TopTabNavigator from './TopTabNavigator';
 import MyOrders from '../screens/order/MyOrders';
 
 const Stack = createNativeStackNavigator();

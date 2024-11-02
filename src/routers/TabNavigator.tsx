@@ -94,6 +94,7 @@ const TabNavigator = () => {
             if (routeName === 'CheckOut') {
               return {display: 'none'};
             }
+            
             return {
               backgroundColor: colors.white,
               borderTopLeftRadius: 30,
@@ -113,9 +114,7 @@ const TabNavigator = () => {
         options={({route}) => ({
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-            if (routeName === 'MyOrders') {
-              return {display: 'none'};
-            }
+            
             if (routeName === 'ChangePassword') {
               return {display: 'none'};
             }

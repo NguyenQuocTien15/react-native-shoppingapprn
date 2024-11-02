@@ -8,6 +8,10 @@ export interface OrderModel {
     orderStatusId: number;
 }
 export interface OrderStatus {
-  orderStatusId: number;
-  orderStatusName: string
+  orderStatusId: string;
+  orderStatusName: string;
+}
+export interface PaymentMethodModel {
+  PaymentMethodId: string;
+  PaymentMethodName: string;
 }
