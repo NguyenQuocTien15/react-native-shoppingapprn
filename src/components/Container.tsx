@@ -27,7 +27,7 @@ const Container = (props: Props) => {
         (back || left || title || right) && 
         <Row
           styles={{
-            marginTop: 16,
+            marginTop: 28,
             padding: 1,
             paddingHorizontal: 16,
             paddingVertical: 12,

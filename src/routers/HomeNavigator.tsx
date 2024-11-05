@@ -9,6 +9,7 @@ const HomeNavigator = () => {
     <Stack.Navigator screenOptions={{headerShown:false}}>
     <Stack.Screen name='HomeScreen' component={HomeScreen}/>
     <Stack.Screen name='SearchResultsScreen' component={SearchResultsScreen}/>
+ 
    </Stack.Navigator>
   )
 }

@@ -8,7 +8,7 @@ import FilterScreen from "./home/FilterScreen";
 import HomeScreen from "./home/HomeScreen";
 import ProductDetail from "./home/ProductDetail";
 import RatingScreen from "./home/RatingScreen";
-import ResultScreen from "./home/ResultScreen";
+import ResultScreen from "./home/FilterResultScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 //import NotificationsScreen from "./notifications/NotificationsScreen";
 import ProfileScreen from "./profiles/ProfileScreen";

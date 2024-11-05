@@ -3,6 +3,8 @@ import React from 'react';
 import { CartScreen, FilterScreen, RatingScreen, ResultScreen,SearchResultsScreen } from '../screens';
 import ProductDetail from '../screens/home/ProductDetail';
 import TabNavigator from './TabNavigator';
+import ProductScreen from '../screens/home/ProductsScreen';
+import ProductPromotion from '../screens/home/ProductPromotion';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -16,7 +18,8 @@ const MainNavigator = () => {
     */}
     <Stack.Screen name='FilterScreen' component={FilterScreen}/>
     <Stack.Screen name='ResultScreen' component={ResultScreen}/>
-    {/* <Stack.Screen name='SearchReultsScreen' component={SearchResultsScreen}/> */}
+    <Stack.Screen name='ProductScreen' component={ProductScreen}/>
+    <Stack.Screen name='ProductPromotion' component={ProductPromotion}/>
     </Stack.Navigator>
   )
 }

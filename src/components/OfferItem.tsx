@@ -6,6 +6,7 @@ import {fontFamilies} from '../constants/fontFamilies';
 import {sizes} from '../constants/sizes';
 import {OfferModel} from '../models/OfferModel';
 import TextComponent from './TextComponent';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = {
   item: OfferModel;
@@ -13,6 +14,7 @@ type Props = {
 
 const OfferItem = (props: Props) => {
   const {item} = props;
+  const navigation = useNavigation();
 
   const renderOfferChildren = () => (
     <>
@@ -24,18 +26,18 @@ const OfferItem = (props: Props) => {
         text={`${item.percent}% Off`}
       />
       <TextComponent text={item.title} color={colors.light} size={16} />
-      {/* <TextComponent
+      <TextComponent
         text={`With code: ${item.code}`}
         size={16}
         styles={{paddingVertical: 12}}
-      /> */}
+      />
       <Row justifyContent="flex-start">
         <Button
           size="small"
           title="Get Now"
           styles={{paddingHorizontal: 20, marginTop:25}}
           color={colors.dark}
-          onPress={() => {}}
+          onPress={() =>navigation.navigate('ProductPromotion', {offer:item})}
         />
       </Row>
     </>

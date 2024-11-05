@@ -14,6 +14,7 @@ import CategoriesList from './components/CategoriesList';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
 import { ProductModel } from '../../models/ProductModel';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const HomeScreen = ({navigation}:any) => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
@@ -32,12 +33,11 @@ const HomeScreen = ({navigation}:any) => {
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16, marginTop:16}}>
+      <Section styles={{paddingTop: 16, marginTop:24}}>
         <Row justifyContent="space-between">
           <Button
             inline
-            styles={{width: 48, height: 48}}
-            icon={<HambergerMenu size={24} color="white" />}
+            icon={<Entypo name="home" size={24} color="white" />}
             color="black"
             onPress={() => {}}
           />
@@ -57,6 +57,7 @@ const HomeScreen = ({navigation}:any) => {
           <Section>
             <Row>
             <View style={{ flex: 1 }}>
+            {/* @ts-ignore */}
               <SearchProduct onSearchResults={(results) => {
                   handleSearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
                   navigation.navigate('SearchResultsScreen', { results }); // Điều hướng sang màn hình SearchResultsScreen
