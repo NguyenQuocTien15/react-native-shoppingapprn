@@ -12,6 +12,7 @@ import ResultScreen from "./home/FilterResultScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 //import NotificationsScreen from "./notifications/NotificationsScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
+import OfferProductsList from "./home/OfferProductsList";
 
 export {
   HomeScreen,
@@ -27,5 +28,6 @@ export {
   RatingScreen,
   FilterScreen,
   ResultScreen,
-  SearchResultsScreen
+  SearchResultsScreen,
+  OfferProductsList,
 };

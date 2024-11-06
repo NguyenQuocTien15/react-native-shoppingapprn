@@ -7,6 +7,7 @@ import {sizes} from '../constants/sizes';
 import {OfferModel} from '../models/OfferModel';
 import TextComponent from './TextComponent';
 import { useNavigation } from '@react-navigation/native';
+import { linkProductToOffer } from '../firebase/linkProductToOffer';
 
 type Props = {
   item: OfferModel;
@@ -15,6 +16,20 @@ type Props = {
 const OfferItem = (props: Props) => {
   const {item} = props;
   const navigation = useNavigation();
+
+  const testLinking = async () => {
+    const productId = "BZlSBinauOn5tIHBMgH2"; // Thay thế bằng ID sản phẩm thật
+    const offerId = item.id; // Sử dụng offer.id từ props
+    const success = await linkProductToOffer(productId, offerId);
+
+    if (success) {
+      console.log('Liên kết thành công!');
+      // Sau khi liên kết thành công, điều hướng đến màn hình chi tiết sản phẩm hoặc trang khác
+      navigation.navigate('OfferProductsList', { productId });
+    } else {
+      console.log('Liên kết thất bại.');
+    }
+  };
 
   const renderOfferChildren = () => (
     <>
@@ -32,13 +47,8 @@ const OfferItem = (props: Props) => {
         styles={{paddingVertical: 12}}
       />
       <Row justifyContent="flex-start">
-        <Button
-          size="small"
-          title="Get Now"
-          styles={{paddingHorizontal: 20, marginTop:25}}
-          color={colors.dark}
-          onPress={() =>navigation.navigate('ProductPromotion', {offer:item})}
-        />
+        {/* Nút Liên kết sản phẩm với khuyến mãi */}
+        <Button title="Liên kết sản phẩm với khuyến mãi" onPress={testLinking} />
       </Row>
     </>
   );

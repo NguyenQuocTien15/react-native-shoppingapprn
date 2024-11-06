@@ -1,4 +1,5 @@
 import { FileModel } from "./FileModel";
+import { OfferModel } from "./OfferModel";
 
 export class Product {
   id: string;
@@ -76,7 +77,10 @@ export interface ProductModel {
   updatedAt: number;
   rate: number;
   sold: number;
-  brand:string
+  brand:string;
+  discount_id?: number;
+  quantity:number;
+  offer?:OfferModel;
 }
 
 export interface SubProduct {
