@@ -380,10 +380,6 @@ const CheckOutScreen = ({route}) => {
                 Order Successfully!
               </Text>
             </View>
-            {/* <Button
-              title="My Orders"
-              onPress={handleNavigationMyOrder}
-              color="#ff7891"></Button> */}
           </Dialog.Container>
         </View>
       </View>
