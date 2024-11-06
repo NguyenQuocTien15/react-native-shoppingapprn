@@ -27,7 +27,6 @@ const CartScreen = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [userId, setUserId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
-const [hasPaid, setHasPaid] = useState(false);
 
   useEffect(() => {
     const currentUser = auth().currentUser;
@@ -260,14 +259,6 @@ const [hasPaid, setHasPaid] = useState(false);
     const selectedItems = cartItems.filter(item =>
       selectedProducts.includes(item.productId),
     );
-
-    
-    if (hasPaid) {
-      Alert.alert(
-        'You have already placed your order. You cannot checkout again.',
-      );
-      return; // Prevent further execution if the order has been paid
-    }
 
     if (selectedItems.length > 0) {
       navigation.navigate('CheckOut', {selectedItems});
