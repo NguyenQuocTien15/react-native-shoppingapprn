@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: 10,
     borderRadius: 15,
-    padding: 3,
+    padding: 10,
   },
 
   orderTitle: {
