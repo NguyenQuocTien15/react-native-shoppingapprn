@@ -23,9 +23,10 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {useStatusBar} from '../../utils/useStatusBar';
 import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
-
+import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
+import { Image } from 'react-native';
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
 
@@ -34,6 +35,7 @@ const ProductDetail = ({navigation, route}: any) => {
   const [subProductSelected, setSubProductSelected] = useState<SubProduct>();
   const [count, setCount] = useState(1);
   const [sizeSelected, setSizeSelected] = useState('');
+  const [visible, setVisible] = useState(false);
 
   useStatusBar('dark-content');
 
@@ -46,7 +48,7 @@ const ProductDetail = ({navigation, route}: any) => {
     setCount(1);
     setSizeSelected('');
   }, [subProductSelected]);
-
+const hideDialog = () => setVisible(false);
   const getUserId = () => {
     const currentUser = auth().currentUser;
 
@@ -138,7 +140,13 @@ const ProductDetail = ({navigation, route}: any) => {
         }
       });
 
-      Alert.alert('Product added to cart successfully!');
+      
+      setVisible(true); 
+      setTimeout(() => {
+        setVisible(false); 
+        navigation.navigate('CartScreen'); 
+      }, 2000);
+     
     } catch (error) {
       console.error('Error adding product to cart: ', error);
     }
@@ -155,7 +163,9 @@ const ProductDetail = ({navigation, route}: any) => {
           color={colors.black}
           title={'Add to cart'}
         />
+        
       )
+      
     );
   };
 
@@ -259,7 +269,7 @@ const ProductDetail = ({navigation, route}: any) => {
               <Row>
                 <Col>
                   <TextComponent
-                  numberOfLine={1}
+                    numberOfLine={1}
                     text={productDetail?.title}
                     font={fontFamilies.RobotoBold}
                     size={20}
@@ -425,6 +435,30 @@ const ProductDetail = ({navigation, route}: any) => {
             )}
           </Col>
           <Col>{renderCartButton()}</Col>
+
+          <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                source={require('../../assets/images/cartSuccess.png')}
+                style={{
+                  width: 50,
+                  height: 50,
+                  marginTop: 20,
+                  marginBottom: 20,
+                }}
+              />
+              <Text
+                style={{
+                  textAlign:'center',
+                  marginTop: 10,
+                  marginBottom: 10,
+                  fontSize: 30,
+                  color: 'black',
+                }}>
+                Thêm vào giỏ hàng thành công
+              </Text>
+            </View>
+          </Dialog.Container>
         </Row>
       </Section>
     </>
