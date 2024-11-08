@@ -47,36 +47,8 @@ const OrderProcessing = () => {
          setLoading(false);
        },
      );
-
-   // Cleanup listener on component unmount or userId change
    return () => unsubscribe();
  }, [userId]);
-//   useEffect(() => {
-//     if (!userId) return;
-
-//     const fetchOrders = async () => {
-//       setLoading(true);
-//       try {
-//         const snapshot = await orderRef
-//           .where('orderStatusId', '==', '2')
-//           .where('userId', '==', userId) // Filter by userId
-//           .get();
-
-//         const ordersData = snapshot.docs.map(doc => ({
-//           id: doc.id,
-//           ...doc.data(),
-//         }));
-//         setOrders(ordersData);
-//       } catch (error) {
-//         console.error('Error fetching orders: ', error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchOrders();
-//   }, [userId]);
-
 
   const renderItem = ({item}) => (
     <View style={styles.itemListProduct}>
