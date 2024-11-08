@@ -46,11 +46,11 @@ const TopTabNavigator = () => {
         name="Shipping"
         component={OrderShipping}
         options={{tabBarLabel: 'Đang vận chuyển'}}></Tab.Screen>
-      <Tab.Screen name="Reviews" component={OrderReview}></Tab.Screen>
+      {/* <Tab.Screen name="Reviews" component={OrderReview}></Tab.Screen> */}
       <Tab.Screen
         name="History"
         component={OrderHistory}
-        options={{}}></Tab.Screen>
+        options={{tabBarLabel: 'Lịch sử'}}></Tab.Screen>
     </Tab.Navigator>
   );
 }
