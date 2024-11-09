@@ -38,7 +38,7 @@ const OrderWaitingShippingScreen = () => {
 
       <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
       {item.items.map((orderItem, index) => (
-        <View style={styles.itemListProduct}>
+        <View>
           <View key={index} style={styles.orderProduct}>
             <Image
               source={{uri: orderItem.imageUrl}}

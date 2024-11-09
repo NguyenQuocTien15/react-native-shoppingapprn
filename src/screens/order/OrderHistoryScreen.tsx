@@ -1,10 +1,11 @@
-import {View, Text, Image} from 'react-native';
+import {View, Text, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 import {orderRef} from '../../firebase/firebaseConfig';
 import { StyleSheet } from 'react-native';
 import { FlatList } from 'react-native';
 import { ActivityIndicator } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 const OrderHistoryScreen = () => {
   const [orders, setOrders] = useState([]);
@@ -38,7 +39,7 @@ const OrderHistoryScreen = () => {
 
        <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
        {item.items.map((orderItem, index) => (
-         <View style={styles.itemListProduct}>
+         <View>
            <View key={index} style={styles.orderProduct}>
              <Image
                source={{uri: orderItem.imageUrl}}
@@ -87,6 +88,27 @@ const OrderHistoryScreen = () => {
            ${item.totalPrice.toLocaleString()}
          </Text>
        </View>
+       <View style={{alignItems: 'flex-end'}}>
+        <TouchableOpacity
+          style={[
+            styles.touch,
+            {
+              backgroundColor: 'white',
+              width: '35%',
+            },
+          ]}
+          onPress={()=>Alert.alert('aa')}>
+          <Text
+            style={[
+              styles.textTouch,
+              {
+                color: 'black',
+              },
+            ]}>
+            Đánh giá
+          </Text>
+        </TouchableOpacity>
+        </View>
      </View>
    );
   return (

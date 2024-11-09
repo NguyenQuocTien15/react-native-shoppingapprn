@@ -63,6 +63,7 @@ const PopularProduct = (props: Props) => {
               />
               <Col styles={{paddingHorizontal: 12}}>
                 <TextComponent
+                numberOfLine={1}
                   text={item.title}
                   font={fontFamilies.poppinsBold}
                   size={16}
