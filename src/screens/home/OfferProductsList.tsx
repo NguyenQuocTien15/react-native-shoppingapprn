@@ -16,6 +16,7 @@ const OfferProductsList = ({ offerId }: { offerId: string }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       const fetchedProducts = await getProductsByOffer(offerId);
+      //@ts-ignore
       setProducts(fetchedProducts);
       setIsLoading(false);
     };
