@@ -88,27 +88,47 @@ const OrderHistoryScreen = () => {
            ${item.totalPrice.toLocaleString()}
          </Text>
        </View>
-       <View style={{alignItems: 'flex-end'}}>
-        <TouchableOpacity
-          style={[
-            styles.touch,
-            {
-              backgroundColor: 'white',
-              width: '35%',
-            },
-          ]}
-          onPress={()=>Alert.alert('aa')}>
-          <Text
-            style={[
-              styles.textTouch,
-              {
-                color: 'black',
-              },
-            ]}>
-            Đánh giá
-          </Text>
-        </TouchableOpacity>
-        </View>
+       <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+         <TouchableOpacity
+           style={[
+             styles.touch,
+             {
+               backgroundColor: 'white',
+               width: '30%',
+               marginRight:7
+             },
+           ]}
+           onPress={() => Alert.alert('aa')}>
+           <Text
+             style={[
+               styles.textTouch,
+               {
+                 color: 'black',
+               },
+             ]}>
+              Trả hàng
+           </Text>
+         </TouchableOpacity>
+         <TouchableOpacity
+           style={[
+             styles.touch,
+             {
+               backgroundColor: '#ff7891',
+               width: '30%',
+             },
+           ]}
+           onPress={() => Alert.alert('aa')}>
+           <Text
+             style={[
+               styles.textTouch,
+               {
+                 color: 'white',
+               },
+             ]}>
+             Đánh giá
+           </Text>
+         </TouchableOpacity>
+       </View>
      </View>
    );
   return (
