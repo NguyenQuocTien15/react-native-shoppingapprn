@@ -57,7 +57,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
           color={colors.dark}
           onPress={() => {}}
         />
-      </Row>
+      {/* </Row> */}
     </>
   );
 
