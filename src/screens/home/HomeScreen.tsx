@@ -13,16 +13,8 @@ import CategoriesList from './components/CategoriesList';
  import SearchProduct from './components/SearchProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
-import { ProductModel } from '../../models/ProductModel';
-import Entypo from 'react-native-vector-icons/Entypo';
 
 const HomeScreen = ({navigation}:any) => {
-  const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
-  
-  const handleSearchResults = (results: ProductModel[]) => {
-    setFilteredProducts(results);
-  };
-  
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);
@@ -33,7 +25,7 @@ const HomeScreen = ({navigation}:any) => {
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16, marginTop:24}}>
+      <Section styles={{paddingTop: 16, marginTop:16}}>
         <Row justifyContent="space-between">
           <Button
             inline
@@ -69,12 +61,11 @@ const HomeScreen = ({navigation}:any) => {
                 styles={{width: 48, height: 48}}
                 icon={<Setting4 variant="TwoTone" size={24} color="white" />}
                 color="black"
-                onPress={() => navigation.navigate('FilterScreen')}
+                onPress={() => {}}
               />
             </Row>
           </Section>
         </>
-       
         <OffersList />
         <Space height={20} />
         <CategoriesList />

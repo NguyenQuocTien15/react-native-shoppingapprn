@@ -81,18 +81,15 @@ export interface ProductModel {
   id: string;
   type: string;
   description: string;
-  price: number;
+  price: string;
   title: string;
   imageUrl: string;
   files: string[];
   categories: string[];
   createdAt: number;
   updatedAt: number;
-  averageRating: number;
-  sold: number;
-  brand:string;
-  quantity:number;
-  offer?:OfferModel;
+  rate: string;
+  selled: number;
 }
 
 export interface SubProduct {
@@ -100,7 +97,7 @@ export interface SubProduct {
   files: FileModel[];
   id: string;
   imageUrl: string;
-  price: number;
+  price: string;
   productId: string;
   size: string[];
   quantity: number;

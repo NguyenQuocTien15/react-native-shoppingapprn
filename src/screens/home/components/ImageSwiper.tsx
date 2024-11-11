@@ -25,7 +25,6 @@ const ImageSwiper = (props: Props) => {
           style={[
             globalStyles.center,
             {
-              
               width: 16,
               height: 16,
               borderWidth: 1,
@@ -36,7 +35,6 @@ const ImageSwiper = (props: Props) => {
           ]}>
           <View
             style={{
-              
               width: 8,
               height: 8,
               backgroundColor: 'white',

@@ -1,7 +1,9 @@
-import firestore, { getFirestore } from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 
-export const db = firestore(); 
-export const dbFirestore = getFirestore(); 
+
+
+
+export const db = firestore();
 export const productRef = db.collection('products');
 export const categoriesRef = db.collection('categories');
 export const brandsRef = db.collection('brands');
