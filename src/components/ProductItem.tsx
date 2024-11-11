@@ -80,16 +80,11 @@ const ProductItem = (props: Props) => {
           color={colors.gray2}
           numberOfLine={1}
         />
-        {/* Nếu sản phẩm có offer thì hiển thị giá cũ gạch bỏ và giá mới */}
-        {hasOffer ? (
-          <PriceWithOffer originalPrice={product.price} offerPrice={offerPrice} />
-        ) : (
-          <TextComponent
-            text={`$${product.price.toLocaleString()}`}
-            size={20}
-            font={fontFamilies.poppinsSemiBold}
-          />
-        )}
+        <TextComponent
+          text={`$${product.price.toLocaleString()}`}
+          size={20}
+          font={fontFamilies.poppinsSemiBold}
+        />
       </View>
     </TouchableOpacity>
   );

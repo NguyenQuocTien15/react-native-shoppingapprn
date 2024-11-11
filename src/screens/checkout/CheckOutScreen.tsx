@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -7,28 +8,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
-import {Button} from '@bsdaoquang/rncomponent';
-import {
-  orderRef,
-} from '../../firebase/firebaseConfig';
-import {
-  firebase,
-} from '@react-native-firebase/firestore';
-import EvilIcons from 'react-native-vector-icons//EvilIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-import {
-  PaymentMethodModel,
-} from '../../models/OrderModel';
-import { useDispatch } from 'react-redux';
-import { removeCartItem } from '../../redux/reducers/cartReducer';
+import {orderRef} from '../../firebase/firebaseConfig';
+import {firebase} from '@react-native-firebase/firestore';
+import {PaymentMethodModel} from '../../models/OrderModel';
 import auth from '@react-native-firebase/auth';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 const CheckOutScreen = ({route}) => {
-  const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
@@ -37,20 +27,21 @@ const CheckOutScreen = ({route}) => {
   const [items, setItems] = useState(route.params.selectedItems);
   const [totalPrice, setTotalPrice] = useState(0);
   const [visible, setVisible] = useState(false);
+
   const [user, setUser] = useState('');
+  const timerRef = useRef(null); // Create a ref to store the timer ID
+  
 
-  const [userId, setUserId] = useState(null);
+  const getUserId = () => {
+    const currentUser = auth().currentUser;
 
-    const getUserId = () => {
-      const currentUser = auth().currentUser;
-
-      if (currentUser) {
-        return currentUser.uid;
-      } else {
-        console.log('No user is signed in.');
-        return null;
-      }
-    };
+    if (currentUser) {
+      return currentUser.uid;
+    } else {
+      console.log('No user is signed in.');
+      return null;
+    }
+  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -84,13 +75,66 @@ const CheckOutScreen = ({route}) => {
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
-
+  useEffect(() => {
+    // Cleanup the timer if the component unmounts
+    return () => {
+      clearTimeout(timerRef.current); // Clear the timer
+    };
+  }, []);
   const showDialogAndAddOrders = async () => {
     try {
+      if (!selectedPaymentMethod) {
+        console.error('Payment method is not selected.');
+        return;
+      }
+
+      if (!items || items.length === 0) {
+        console.error('No items found.');
+        return;
+      }
+      if (!user.phoneNumber) {
+        Alert.alert(
+          'Thông báo',
+          'Vui lòng nhập số điện thoại',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+            },
+          ],
+          {cancelable: false},
+        );
+        return;
+      }
+      if (!user.fullAddress) {
+        Alert.alert(
+          'Thông báo',
+          'Vui lòng nhập địa chỉ',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+            },
+          ],
+          {cancelable: false},
+        );
+        return;
+      }
+
+      if (totalPrice <= 0) {
+        console.error('Total price must be greater than 0.');
+        return;
+      }
+
+      const sanitizedItems = items.map(item => ({
+        ...item,
+        sizes: item.sizes !== undefined ? item.sizes : null,
+      }));
+
       const orderData = {
         userId: getUserId(),
-        address: `${user.houseNumber}, ${user.selectedWard}, ${user.selectedDistrict}, ${user.selectedProvince}, Việt Nam`,
-        items: items,
+        address: user.fullAddress,
+        items: sanitizedItems,
         totalPrice: totalPrice,
         shipperId: null,
         paymentMethodId: selectedPaymentMethod,
@@ -98,17 +142,56 @@ const CheckOutScreen = ({route}) => {
         timestamp: getCurrentDateTime(),
       };
 
+      // Thêm đơn hàng vào Firestore
       await orderRef.add(orderData);
-      dispatch(removeCartItem(items.map((item: { id: any; }) => item.id)));
+      await removeItemsFromCart(items);
+      
       setVisible(true);
+      setTimeout(() => {
+        setVisible(false); 
+        navigation.replace('CartScreen'); 
+      }, 2000);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
   };
+  const removeItemsFromCart = async (itemsToRemove: { productId: string; }[]) => {
+    try {
+      const userId = getUserId();
+      // Update the path to match your Firestore structure
+      const cartRef = firebase.firestore().collection('carts').doc(userId);
 
-  const handleNavigationMyOrder = () => {
-    navigation.navigate('MyOrder');
-    setVisible(false);
+      // Fetch the current cart data
+      const cartDoc = await cartRef.get();
+      if (cartDoc.exists) {
+        const currentCart = cartDoc.data();
+        const currentProducts = currentCart.products || {};
+
+        // Create a new object with the remaining items
+        const updatedProducts = Object.keys(currentProducts).reduce(
+          (acc, key) => {
+            // Only add items that are not in the itemsToRemove list
+            if (
+              !itemsToRemove.some(
+                (item: {productId: string}) => item.productId === key,
+              )
+            ) {
+              acc[key] = currentProducts[key];
+            }
+            return acc;
+          },
+          {},
+        );
+
+        // Update the cart in Firestore with the remaining items
+        await cartRef.update({products: updatedProducts});
+        console.log('Items removed from cart successfully.');
+      } else {
+        console.log('Cart does not exist for this user.');
+      }
+    } catch (error) {
+      console.error('Error removing items from cart: ', error);
+    }
   };
 
   const calculateTotalPrice = () => {
@@ -188,11 +271,8 @@ const CheckOutScreen = ({route}) => {
                   {user.houseNumber}
                 </Text>
                 <Text style={{color: 'black', fontSize: 13}}>
-                  {user.selectedWard}
-                  {', '}
-                  {user.selectedDistrict}
-                  {', '}
-                  {user.selectedProvince}
+                  {user.ward + ','} {user.district + ','} {user.province + ','}{' '}
+                  {user.country}
                 </Text>
               </View>
             </>
@@ -300,7 +380,7 @@ const CheckOutScreen = ({route}) => {
             ]}
             onPress={showDialogAndAddOrders}
             disabled={!selectedPaymentMethod}>
-            <Text style={styles.textCheckOut}>Order</Text>
+            <Text style={styles.textCheckOut}>Mua</Text>
           </TouchableOpacity>
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
@@ -318,10 +398,6 @@ const CheckOutScreen = ({route}) => {
                 Order Successfully!
               </Text>
             </View>
-            <Button
-              title="My Orders"
-              onPress={handleNavigationMyOrder}
-              color="#ff7891"></Button>
           </Dialog.Container>
         </View>
       </View>

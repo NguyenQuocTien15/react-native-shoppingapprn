@@ -1,35 +1,59 @@
-import {View, Text, FlatList, StyleSheet, ActivityIndicator, Image} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import auth from '@react-native-firebase/auth';
 import {orderRef} from '../../firebase/firebaseConfig';
-import { doc } from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { colors } from '../../constants/colors';
 
-const OrderShippingScreen = () => {
+
+const OrderPackaged = () => {
+  const [userId, setUserId] = useState('');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const userId = auth().currentUser?.uid;
-    if (!userId) {
-      console.log('User not found!');
-      return;
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      setUserId(currentUser.uid);
+    } else {
+      console.log('No user is signed in.');
     }
-    setLoading(true)
-    const unsubscribe = orderRef
-      .where('orderStatusId', '==', '5')
-      .where('userId', '==', userId)
-      .onSnapshot((snapShop : {docs: any[]}) => {
-        const orderData = snapShop.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-          setOrders(orderData);
-          setLoading(false)
-      });
-    return()=> unsubscribe()
   }, []);
-  const renderItem = ({item}: any) => (
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+
+    const unsubscribe = orderRef
+      .where('orderStatusId', '==', '3')
+      .where('userId', '==', userId)
+      .onSnapshot(
+        (snapshot: {docs: any[]}) => {
+          const ordersData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setOrders(ordersData);
+          setLoading(false);
+        },
+        (error: any) => {
+          console.error('Error fetching real-time orders: ', error);
+          setLoading(false);
+        },
+      );
+
+    return () => unsubscribe();
+  }, [userId]);
+  const renderItem = ({item} : any) => (
     <View style={styles.itemListProduct}>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', marginTop:5}}>
         <Image
           source={require('../../assets/images/logofs.jpg')}
           style={{width: 25, height: 25, marginRight: 10}}></Image>
@@ -38,7 +62,7 @@ const OrderShippingScreen = () => {
 
       <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
       {item.items.map((orderItem, index) => (
-        <View style={styles.itemListProduct}>
+        <View>
           <View key={index} style={styles.orderProduct}>
             <Image
               source={{uri: orderItem.imageUrl}}
@@ -105,7 +129,9 @@ const OrderShippingScreen = () => {
   );
 };
 
-export default OrderShippingScreen;
+
+export default OrderPackaged;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -172,5 +198,4 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
-
 

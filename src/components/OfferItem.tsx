@@ -39,12 +39,11 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
       <TextComponent
         type="title"
         size={28}
-        styles={{margin:5}}
         font={fontFamilies.poppinsBold}
         text={`${item.percent}% Off`}
       />
       <TextComponent text={item.title} color={colors.light} size={16} />
-      <TextComponent
+      {/* <TextComponent
         text={`With code: ${item.code}`}
         size={16}
         styles={{paddingVertical: 12}}
@@ -52,18 +51,12 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
       <Row justifyContent="flex-start">
         {/* Nút Liên kết sản phẩm với khuyến mãi */}
         <Button
-                title="Get Now"
-                onPress={() =>
-                  //@ts-ignore
-                 onPress()}
-                
-                color={colors.dark}
-                styles={{
-                  paddingVertical: 4,
-                  paddingHorizontal: 20,
-                }}
-                inline
-              />
+          size="small"
+          title="Get Now"
+          styles={{paddingHorizontal: 20, marginTop:25}}
+          color={colors.dark}
+          onPress={() => {}}
+        />
       </Row>
     </>
   );

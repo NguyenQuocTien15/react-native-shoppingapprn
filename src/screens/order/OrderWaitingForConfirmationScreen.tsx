@@ -8,46 +8,65 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
-import {orderRef, orderStatusRef} from '../../firebase/firebaseConfig';
+import {orderRef} from '../../firebase/firebaseConfig';
 import Dialog from 'react-native-dialog';
-
+import auth from '@react-native-firebase/auth';
+import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
 
 const OrderWaitingForConfirmationScreen = () => {
-  const [user, setUser] = useState('');
+  const [userId, setUserId] = useState('');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedProductIndex, setSelectedProductIndex] = useState(null);
 
-
-
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      setUserId(currentUser.uid);
+    } else {
+      console.log('No user is signed in.');
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const snapshot = await orderRef.where('orderStatusId', '==', '1').get();
-        const ordersData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setOrders(ordersData);
-      } catch (error) {
-        console.error('Error fetching orders: ', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!userId) return;
 
-    fetchOrders();
-  }, []);
- 
-  const showDialog = (
-    orderId: React.SetStateAction<null>,
-    productIndex: React.SetStateAction<null>,
-  ) => {
+    setLoading(true);
+
+    const unsubscribe = orderRef
+      .where('orderStatusId', '==', '1') 
+      .where('userId', '==', userId)
+      .onSnapshot(
+        (snapshot: {docs: any[]}) => {
+          const ordersData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setOrders(ordersData);
+          setLoading(false);
+        },
+        (error: any) => {
+          console.error('Error fetching real-time orders: ', error);
+          setLoading(false);
+        },
+      );
+
+    // Cleanup listener on component unmount or userId change
+    return () => unsubscribe();
+  }, [userId]);
+
+  // const showDialog = (
+  //   orderId: React.SetStateAction<null>,
+  //   productIndex: React.SetStateAction<null>,
+  // ) => {
+  //   setSelectedOrder(orderId);
+  //   setSelectedProductIndex(productIndex);
+  //   setDialogVisible(true);
+  // };
+  const showDialog = (orderId: React.SetStateAction<null>) => {
     setSelectedOrder(orderId);
-    setSelectedProductIndex(productIndex);
     setDialogVisible(true);
   };
 
@@ -90,14 +109,21 @@ const OrderWaitingForConfirmationScreen = () => {
       console.error('Error deleting product or order from Firebase: ', error);
     }
   };
-
-  const handleConfirm = () => {
-    // Implement confirmation logic here
+  const handleCancelOrder = async() => {
+    try {
+      if (!selectedOrder) return;
+      const orderRef = doc(firebase.firestore(), 'orders', selectedOrder);
+      await deleteDoc(orderRef);
+      console.log('Đơn hàng đã được hủy thành công!');
+      setDialogVisible(false);
+    } catch (error) {
+      console.error('Lỗi khi xóa đơn hàng:', error);
+    }
   };
 
   const renderItem = ({item}) => (
-    <View style={styles.orderItem}>
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+    <View style={styles.itemListProduct}>
+      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
         <Image
           source={require('../../assets/images/logofs.jpg')}
           style={{width: 25, height: 25, marginRight: 10}}></Image>
@@ -106,14 +132,19 @@ const OrderWaitingForConfirmationScreen = () => {
 
       <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
       {item.items.map((orderItem, index) => (
-        <View style={styles.itemListProduct}>
+        <View>
           <View key={index} style={styles.orderProduct}>
             <Image
               source={{uri: orderItem.imageUrl}}
               style={styles.productImage}
             />
             <View style={{flex: 1, flexDirection: 'column'}}>
-              <Text style={styles.customText}>{orderItem.title}</Text>
+              <Text
+                style={styles.customText}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {orderItem.title}
+              </Text>
               <Text style={{color: 'black', fontSize: 18}}>
                 Quantity: {orderItem.quantity}
               </Text>
@@ -137,7 +168,7 @@ const OrderWaitingForConfirmationScreen = () => {
                       alignItems: 'center',
                     },
                   ]}>
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     style={[
                       styles.touch,
                       {
@@ -154,7 +185,7 @@ const OrderWaitingForConfirmationScreen = () => {
                       ]}>
                       Cancel
                     </Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
               </View>
             </View>
@@ -169,20 +200,27 @@ const OrderWaitingForConfirmationScreen = () => {
           ${item.totalPrice.toLocaleString()}
         </Text>
       </View>
-      {/* <View style={{alignItems: 'flex-end'}}>
+      <View style={{alignItems: 'flex-end'}}>
         <TouchableOpacity
-          style={[styles.touch, {backgroundColor: '#ff7891', width: '30%'}]}>
+          style={[
+            styles.touch,
+            {
+              backgroundColor: 'white',
+              width: '35%',
+            },
+          ]}
+          onPress={() => showDialog(item.id)}>
           <Text
             style={[
               styles.textTouch,
               {
-                color: 'white',
+                color: 'black',
               },
             ]}>
-            Confirm
+            Hủy
           </Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
     </View>
   );
 
@@ -201,11 +239,12 @@ const OrderWaitingForConfirmationScreen = () => {
 
       {/* Dialog for cancellation */}
       <Dialog.Container visible={dialogVisible}>
+        <Dialog.Title>Cancel Order</Dialog.Title>
         <Dialog.Description>
-          Do you want to cancel the selected product?
+          Do you want to cancel order?
         </Dialog.Description>
         <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
-        <Dialog.Button label="Yes" onPress={handleCancelOrderProduct} />
+        <Dialog.Button label="Yes" onPress={handleCancelOrder} />
       </Dialog.Container>
     </View>
   );
@@ -216,7 +255,9 @@ export default OrderWaitingForConfirmationScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    paddingTop: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
 
   flexDirection: {
@@ -242,15 +283,17 @@ const styles = StyleSheet.create({
   },
   itemListProduct: {
     backgroundColor: 'white',
-    marginBottom: 10,
     borderRadius: 15,
+    padding: 10,
+    marginBottom: 10,
+    paddingBottom:10,
+    shadowColor: '#000',          // Shadow color
+    shadowOffset: { width: 0, height:  2}, // Shadow offset
+    shadowOpacity: 1,          // Shadow opacity
+    shadowRadius: 5,           // Shadow radius
+    elevation: 5,                 // Elevation for Android
   },
 
-  //
-  orderItem: {
-    marginBottom: 15,
-    borderRadius: 10,
-  },
   orderTitle: {
     fontSize: 18,
     fontWeight: 'bold',
