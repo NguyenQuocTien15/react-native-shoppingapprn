@@ -12,7 +12,10 @@ import ResultScreen from "./home/FilterResultScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 //import NotificationsScreen from "./notifications/NotificationsScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
-import OfferProductsList from "./home/OfferProductsList";
+
+import ProductsByOfferListScreen from "./home/ProductsByOfferListScreen";
+import OffersList from "./home/components/OffersList";
+import ChatScreen from "./home/ChatScreen";
 
 export {
   HomeScreen,
@@ -29,5 +32,7 @@ export {
   FilterScreen,
   ResultScreen,
   SearchResultsScreen,
-  OfferProductsList,
+  ProductsByOfferListScreen,
+  OffersList,
+  ChatScreen
 };

@@ -9,27 +9,30 @@ import TextComponent from './TextComponent';
 import { useNavigation } from '@react-navigation/native';
 import { linkProductToOffer } from '../firebase/linkProductToOffer';
 
-type Props = {
+type OfferItemProps  = {
   item: OfferModel;
+  onPress: () => void; // Nhận hàm `onPress` từ OffersList
+
+
 };
 
-const OfferItem = (props: Props) => {
-  const {item} = props;
-  const navigation = useNavigation();
+const OfferItem = ({ item,onPress}: OfferItemProps) => {
+  
+ const navigation = useNavigation();
 
-  const testLinking = async () => {
-    const productId = "BZlSBinauOn5tIHBMgH2"; // Thay thế bằng ID sản phẩm thật
-    const offerId = item.id; // Sử dụng offer.id từ props
-    const success = await linkProductToOffer(productId, offerId);
+  // const testLinking = async () => {
+  //   const productId = "BZlSBinauOn5tIHBMgH2"; // Thay thế bằng ID sản phẩm thật
+  //   const offerId = item.id; // Sử dụng offer.id từ props
+  //   const success = await linkProductToOffer(productId, offerId);
 
-    if (success) {
-      console.log('Liên kết thành công!');
-      // Sau khi liên kết thành công, điều hướng đến màn hình chi tiết sản phẩm hoặc trang khác
-      navigation.navigate('OfferProductsList', { productId });
-    } else {
-      console.log('Liên kết thất bại.');
-    }
-  };
+  //   if (success) {
+  //     console.log('Liên kết thành công!');
+  //     // Sau khi liên kết thành công, điều hướng đến màn hình chi tiết sản phẩm hoặc trang khác
+  //     navigation.navigate('OfferProductsList', { productId });
+  //   } else {
+  //     console.log('Liên kết thất bại.');
+  //   }
+  // }; 
 
   const renderOfferChildren = () => (
     <>
@@ -48,7 +51,19 @@ const OfferItem = (props: Props) => {
       />
       <Row justifyContent="flex-start">
         {/* Nút Liên kết sản phẩm với khuyến mãi */}
-        <Button title="Liên kết sản phẩm với khuyến mãi" onPress={testLinking} />
+        <Button
+                title="Get Now"
+                onPress={() =>
+                  //@ts-ignore
+                 onPress()}
+                
+                color={colors.dark}
+                styles={{
+                  paddingVertical: 4,
+                  paddingHorizontal: 20,
+                }}
+                inline
+              />
       </Row>
     </>
   );

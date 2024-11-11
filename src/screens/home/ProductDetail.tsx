@@ -149,7 +149,21 @@ const ProductDetail = ({navigation, route}: any) => {
       console.error('Error adding product to cart: ', error);
     }
   };
-
+const handleChatting = () => {}
+  const renderChatButton = () => {
+    return (
+      subProductSelected && (
+        <Button
+          disable={subProductSelected.quantity === 0}
+          icon={<FontAwesome6 name="comment-dots" size={18} color={'white'} />}
+          inline
+          onPress={() => navigation.navigate('ChatScreen')}
+          color={colors.gray}
+          title={'Chat'}
+        />
+      )
+    );
+  };
   const renderCartButton = () => {
     return (
       subProductSelected && (
@@ -425,6 +439,8 @@ const ProductDetail = ({navigation, route}: any) => {
               </>
             )}
           </Col>
+          <Col>{renderChatButton()}</Col>
+          <Space width={4}></Space>
           <Col>{renderCartButton()}</Col>
         </Row>
       </Section>

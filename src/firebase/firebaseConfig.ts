@@ -11,4 +11,6 @@ export const orderDetailRef = db.collection('order_details');
 export const orderStatusRef = db.collection('orderStatus');
 export const cartRef = db.collection('carts');
 export const offerRef = db.collection('offer');
+export const reviewsRef = db.collection('reviews');
+export const chatsRef = db.collection('chats');
 export const offerId = offerRef.id;
