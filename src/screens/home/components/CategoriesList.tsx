@@ -1,12 +1,14 @@
-import { View, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Button, Tabbar } from '@bsdaoquang/rncomponent';
-import { TextComponent } from '../../../components';
-import { fontFamilies } from '../../../constants/fontFamilies';
-import { colors } from '../../../constants/colors';
-import { CategoryModel } from '../../../models/CategoryModel';
+import {View, Text, FlatList} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Button, Tabbar} from '@bsdaoquang/rncomponent';
+import {TextComponent} from '../../../components';
+import {fontFamilies} from '../../../constants/fontFamilies';
+import {colors} from '../../../constants/colors';
+import {CategoryModel} from '../../../models/CategoryModel';
 import { categoriesRef } from '../../../firebase/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
+//import {categoriesRef} from '../../../firebase/firebaseConfig';
+
 
 const CategoriesList = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);

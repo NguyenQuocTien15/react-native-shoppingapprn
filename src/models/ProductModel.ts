@@ -15,6 +15,8 @@ export class Product {
   rate: number;
   sold: number;
   brand: string;
+  offer?: OfferModel;
+
 
   constructor(data: {
     id: string;
@@ -30,6 +32,8 @@ export class Product {
     rate: number;
     sold: number;
     brand: string;
+    offer?: OfferModel;
+
   }) {
     this.id = data.id;
     this.type = data.type;
@@ -44,9 +48,18 @@ export class Product {
     this.rate = data.rate;
     this.sold = data.sold;
     this.brand = data.brand;
+    this.offer = data.offer;
+
   }
 
-  // Phương thức tính giảm giá cho sản phẩm
+   // Phương thức tính giá cuối cùng
+   getDiscountedPrice(): number {
+    if (this.offer && this.offer.percent) {
+      return this.applyDiscount(this.offer.percent);
+    }
+    return this.price;
+  }
+
   applyDiscount(discountPercentage: number): number {
     return this.price - (this.price * discountPercentage) / 100;
   }
@@ -68,19 +81,15 @@ export interface ProductModel {
   id: string;
   type: string;
   description: string;
-  price: number;
+  price: string;
   title: string;
   imageUrl: string;
   files: string[];
   categories: string[];
   createdAt: number;
   updatedAt: number;
-  rate: number;
-  sold: number;
-  brand:string;
-  discount_id?: number;
-  quantity:number;
-  offer?:OfferModel;
+  rate: string;
+  selled: number;
 }
 
 export interface SubProduct {
@@ -88,9 +97,12 @@ export interface SubProduct {
   files: FileModel[];
   id: string;
   imageUrl: string;
-  price: number;
+  price: string;
   productId: string;
   size: string[];
   quantity: number;
+  offer?:OfferModel;
+  // Phương thức tính giá sau khi giảm
+  getDiscountedPrice?: () => number;
 }
 

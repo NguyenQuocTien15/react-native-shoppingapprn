@@ -23,9 +23,10 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {useStatusBar} from '../../utils/useStatusBar';
 import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
-
+import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
+import { Image } from 'react-native';
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
 
@@ -34,20 +35,20 @@ const ProductDetail = ({navigation, route}: any) => {
   const [subProductSelected, setSubProductSelected] = useState<SubProduct>();
   const [count, setCount] = useState(1);
   const [sizeSelected, setSizeSelected] = useState('');
-
+  const [visible, setVisible] = useState(false);
 
   useStatusBar('dark-content');
 
   useEffect(() => {
     getProductDetail();
-   getSubProducts();
+    getSubProducts();
   }, [id]);
 
   useEffect(() => {
     setCount(1);
     setSizeSelected('');
   }, [subProductSelected]);
-
+const hideDialog = () => setVisible(false);
   const getUserId = () => {
     const currentUser = auth().currentUser;
 
@@ -72,7 +73,7 @@ const ProductDetail = ({navigation, route}: any) => {
     });
   };
 
-   const getSubProducts = async () => {
+  const getSubProducts = async () => {
     try {
       const snap = await firestore()
         .collection('subProducts')
@@ -105,51 +106,66 @@ const ProductDetail = ({navigation, route}: any) => {
     productId: string | number,
     quantity: number,
   ) => {
-     if (!sizeSelected) {
+    if (!sizeSelected) {
       Alert.alert('Bạn chưa chọn size');
       return;
     }
     const cartRef = firestore()
-      .collection('users')
+      .collection('carts')
       .doc(userId)
-      .collection('cart')
-      .doc('cartDoc');
-
+      
     try {
       await firestore().runTransaction(async transaction => {
         const cartDoc = await transaction.get(cartRef);
 
         if (!cartDoc.exists) {
-          // Nếu giỏ hàng chưa tồn tại, tạo mới với sản phẩm đầu tiên
           transaction.set(cartRef, {
             products: {
               [productId]: {
                 quantity: quantity,
-                addedAt: new Date().toISOString(), // Thêm thời gian thêm vào
+                addedAt: new Date().toISOString(),
               },
             },
           });
         } else {
-          // Nếu giỏ hàng đã tồn tại, cập nhật số lượng sản phẩm
           const currentProducts = cartDoc.data().products || {};
           const currentQuantity = currentProducts[productId]?.quantity || 0;
 
-          // Cập nhật số lượng và thời gian thêm vào
           transaction.update(cartRef, {
             [`products.${productId}`]: {
               quantity: currentQuantity + quantity,
-              addedAt: new Date().toISOString(), // Cập nhật thời gian thêm vào
+              addedAt: new Date().toISOString(),
             },
           });
         }
       });
 
-      console.log('Product added to cart successfully!');
+      
+      setVisible(true); 
+      setTimeout(() => {
+        setVisible(false); 
+        navigation.navigate('CartScreen'); 
+      }, 2000);
+     
     } catch (error) {
       console.error('Error adding product to cart: ', error);
     }
   };
-
+const handleChatting = () => {}
+  const renderChatButton = () => {
+    return (
+      subProductSelected && (
+        <Button
+          disable={subProductSelected.quantity === 0}
+          icon={<FontAwesome6 name="comment-dots" size={18} color={'white'} />}
+          inline
+          onPress={() => navigation.navigate('ChatScreen')}
+          color={colors.gray}
+          title={'Chat'}
+        />
+      )
+    );
+  };
   const renderCartButton = () => {
     return (
       subProductSelected && (
@@ -161,7 +177,9 @@ const ProductDetail = ({navigation, route}: any) => {
           color={colors.black}
           title={'Add to cart'}
         />
+        
       )
+      
     );
   };
 
@@ -175,7 +193,7 @@ const ProductDetail = ({navigation, route}: any) => {
           right: 0,
           left: 0,
           padding: 20,
-          marginTop:15
+          marginTop: 15,
         }}>
         <Row
           styles={{backgroundColor: 'transparent'}}
@@ -230,7 +248,6 @@ const ProductDetail = ({navigation, route}: any) => {
           style={[
             globalStyles.container,
             {
-              
               height: sizes.height * 0.5,
             },
           ]}>
@@ -256,14 +273,20 @@ const ProductDetail = ({navigation, route}: any) => {
             },
           ]}>
           {productDetail && subProductSelected && (
-            <Section styles={{paddingVertical: 12, backgroundColor:colors.gray100, borderTopStartRadius:30,borderTopEndRadius:30}}>
+            <Section
+              styles={{
+                paddingVertical: 12,
+                backgroundColor: colors.gray100,
+                borderTopStartRadius: 30,
+                borderTopEndRadius: 30,
+              }}>
               <Row>
                 <Col>
                   <TextComponent
+                    numberOfLine={1}
                     text={productDetail?.title}
                     font={fontFamilies.RobotoBold}
                     size={20}
-                   
                   />
                   <TextComponent
                     text={productDetail.type}
@@ -425,7 +448,33 @@ const ProductDetail = ({navigation, route}: any) => {
               </>
             )}
           </Col>
+          <Col>{renderChatButton()}</Col>
+          <Space width={4}></Space>
           <Col>{renderCartButton()}</Col>
+
+          <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                source={require('../../assets/images/cartSuccess.png')}
+                style={{
+                  width: 50,
+                  height: 50,
+                  marginTop: 20,
+                  marginBottom: 20,
+                }}
+              />
+              <Text
+                style={{
+                  textAlign:'center',
+                  marginTop: 10,
+                  marginBottom: 10,
+                  fontSize: 30,
+                  color: 'black',
+                }}>
+                Thêm vào giỏ hàng thành công
+              </Text>
+            </View>
+          </Dialog.Container>
         </Row>
       </Section>
     </>

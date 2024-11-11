@@ -1,10 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { CartScreen, FilterScreen, RatingScreen, ResultScreen,SearchResultsScreen } from '../screens';
+import { CartScreen, FilterScreen, RatingScreen } from '../screens';
 import ProductDetail from '../screens/home/ProductDetail';
 import TabNavigator from './TabNavigator';
-import ProductScreen from '../screens/home/ProductsScreen';
-import OfferProductsList from '../screens/home/OfferProductsList';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -17,10 +15,7 @@ const MainNavigator = () => {
     {/* <Stack.Screen name='Payment' component={AddPayment}/>
     */}
     <Stack.Screen name='FilterScreen' component={FilterScreen}/>
-    <Stack.Screen name='ResultScreen' component={ResultScreen}/>
-    <Stack.Screen name='ProductScreen' component={ProductScreen}/>
-    <Stack.Screen name='OfferProductsList' component={OfferProductsList}/>
-
+    {/* <Stack.Screen name='ResultScreen' component={ResultScreen}/> */}
     </Stack.Navigator>
   )
 }

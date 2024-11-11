@@ -8,7 +8,7 @@ import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
 import {useNavigation} from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
+
 type Props = {};
 
 const PopularProduct = (props: Props) => {
@@ -17,24 +17,39 @@ const PopularProduct = (props: Props) => {
   const navigation: any = useNavigation();
 
   useEffect(() => {
-    productRef
-      .orderBy('rate')
-      .limit(5)
-      .onSnapshot(snap => {
-        if (snap.empty) {
-          console.log(`Products not found!`);
-        } else {
-          const items: ProductModel[] = [];
-          snap.forEach((item: any) =>
-            items.push({
-              id: item.id,
-              ...item.data(),
-            }),
-          );
+    const currentTime = new Date().getTime();
 
-          setProducts(items);
+    const unsubscribe = productRef
+      .orderBy('averageRating', 'desc')
+      .limit(5)
+      .onSnapshot(
+        snap => {
+          if (!snap || snap.empty) {
+            console.log(`Products not found!`);
+            setProducts([]);
+          } else {
+            const items: ProductModel[] = [];
+            snap.forEach((item: any) => {
+              const data = item.data();
+
+              // Kiểm tra sản phẩm không có khuyến mãi hoặc khuyến mãi đã hết hạn
+              if (!data.offer || (data.offer.endAt && data.offer.endAt < currentTime)) {
+                items.push({
+                  id: item.id,
+                  ...data,
+                });
+              }
+            });
+
+            setProducts(items);
+          }
+        },
+        error => {
+          console.error("Error fetching popular products:", error);
         }
-      });
+      );
+
+    return () => unsubscribe();
   }, []);
 
 const handleUpdateProduct = () => {
@@ -72,6 +87,7 @@ await firestore()
               />
               <Col styles={{paddingHorizontal: 12}}>
                 <TextComponent
+                numberOfLine={1}
                   text={item.title}
                   font={fontFamilies.poppinsBold}
                   size={16}
@@ -84,7 +100,7 @@ await firestore()
                 <Row justifyContent="flex-start">
                   <AntDesign name="star" color={colors.success} size={18} />
                   <Space width={8} />
-                  <TextComponent text={`(${item.rate})`} />
+                  <TextComponent text={`(${item.averageRating})`} />
                 </Row>
               </Col>
               <TextComponent

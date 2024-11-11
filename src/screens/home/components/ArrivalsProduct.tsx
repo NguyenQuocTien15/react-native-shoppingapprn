@@ -12,11 +12,10 @@ type Props = {};
 const ArrivalsProduct = (props: Props) => {
   const [products, setProducts] = useState<ProductModel[]>([]);
 
-
   useEffect(() => {
     productRef
-      .orderBy('createdAt','desc')
-      .limit(5)
+      .orderBy('createdAt')
+      .limit(10)
       .onSnapshot(snap => {
         if (snap.empty) {
           console.log(`Products not found!`);

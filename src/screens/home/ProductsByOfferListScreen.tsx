@@ -8,14 +8,22 @@ import { getProductsByOffer } from './getProductsByOffer';
 import { Section } from '@bsdaoquang/rncomponent';
 import { globalStyles } from '../../styles/globalStyles';
 import { colors } from '../../constants/colors';
+import { useRoute } from '@react-navigation/native';
+import ProductByOfferItem from '../../components/ProductByOfferItem';
 
-const OfferProductsList = ({ offerId }: { offerId: string }) => {
+const ProductsByOfferListScreen = () => {
+  //const [offers, setOffers] = useState<OfferModel[]>([]);
+  const route = useRoute();
+  const { offerId } = route.params as { offerId: string };
+
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchProducts = async () => {
       const fetchedProducts = await getProductsByOffer(offerId);
+      //@ts-ignore
       setProducts(fetchedProducts);
       setIsLoading(false);
     };
@@ -28,7 +36,7 @@ const OfferProductsList = ({ offerId }: { offerId: string }) => {
   }
 
   return (
-    <Container back title='Search Results' isScroll={false}>
+    <Container back title='Your Offer' isScroll={false}>
       {isLoading ? (
         <Section styles={[globalStyles.center, { flex: 1 }]}>
           <ActivityIndicator size={24} color={colors.gray} />
@@ -53,17 +61,6 @@ const OfferProductsList = ({ offerId }: { offerId: string }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  productItem: {
-    marginBottom: 20,
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-});
 
-export default OfferProductsList;
+
+export default ProductsByOfferListScreen;
