@@ -5,19 +5,22 @@ import { Container, ProductItem, TextComponent } from '../../components';
 import {Section } from '@bsdaoquang/rncomponent';
 import {colors} from '../../constants/colors';
 import { globalStyles } from '../../styles/globalStyles';
-import firestore from '@react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+
 const ResultScreen = ({navigation,route}:any) => {
   const {
     filterValues,
   }: {
   filterValues : {
     categories: string[];
+    brands: string[];
     price: {
       low: number;
       high: number;
     };
-    sortby: string;
-    rate: number;
+    // sortby: string;
+    // rate: number;
   };
   } = route.params;
 
@@ -34,31 +37,57 @@ console.log(filterValues)
   const getProducts = async () => {
     setIsLoading(true);
     try {
-      const snap = await firestore()
-      .collection('products')
-      .where('categories','array-contains-any',filterValues.categories)
-       .where('price', '>=',filterValues.price.low)
-       .where('price', '<',filterValues.price.high)
-       .where('rate', '>=', filterValues.rate) // Lọc theo rating
-      .get()
+      // Bắt đầu với query cơ bản từ collection 'products'
+      let query: FirebaseFirestoreTypes.Query<FirebaseFirestoreTypes.DocumentData> = firestore().collection('products');
+
+  
+      // Lọc theo danh mục nếu có
+      if (filterValues.categories?.length > 0) {
+        query = query.where('categories', 'array-contains-any', filterValues.categories);
+      }
+  // Lọc theo thương hiệu nếu có
+  if (filterValues.brands?.length > 0 && filterValues.brands.length <= 10) {
+    query = query.where('brands', 'in', filterValues.brands);
+  }
+      // Lọc theo khoảng giá nếu có giá trị
+      if (filterValues.price) {
+        if (filterValues.price.low !== undefined) {
+          query = query.where('price', '>=', filterValues.price.low);
+        }
+        if (filterValues.price.high !== undefined) {
+          query = query.where('price', '<', filterValues.price.high);
+        }
+      }
+  //hh
+      // // Lọc theo rating nếu có
+      // if (filterValues.rate !== undefined) {
+      //   query = query.where('rate', '==', filterValues.rate);
+      // }
+  
+      // Thực hiện truy vấn
+      const snap = await query.get();
+  
+      // Xử lý kết quả trả về
       if (!snap.empty) {
-        const items:ProductModel[]=[]
-        snap.forEach((item:any)=>{
+        const items: ProductModel[] = [];
+        snap.forEach((item: any) => {
           items.push({
             id: item.id,
             ...item.data()
-          })
+          });
         });
-        setProducts(items); // Đặt dữ liệu cho products
-      }else{
-        setProducts([]); // Trường hợp không có dữ liệu
+        setProducts(items); // Cập nhật dữ liệu vào state
+      } else {
+        setProducts([]); // Không có sản phẩm nào khớp với bộ lọc
       }
-      setIsLoading(false);
     } catch (error) {
-      console.error(error);
-      setIsLoading(false);
+      console.error("Lỗi khi lấy sản phẩm:", error);
+    } finally {
+      setIsLoading(false); // Tắt trạng thái tải
     }
-  }
+  };
+  
+  
   return <Container  back title='Results' isScroll={false}>
     {
       isLoading ? (
@@ -85,3 +114,4 @@ console.log(filterValues)
 }
 
 export default ResultScreen
+
