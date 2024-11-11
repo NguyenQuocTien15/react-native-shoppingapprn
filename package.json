@@ -24,6 +24,7 @@
     "@react-navigation/stack": "^6.4.0",
     "@reduxjs/toolkit": "^2.2.6",
     "@types/react-redux": "^7.1.33",
+    "expo-image-picker": "^15.0.7",
     "iconsax-react-native": "^0.0.8",
     "react": "18.2.0",
     "react-native": "0.74.3",
