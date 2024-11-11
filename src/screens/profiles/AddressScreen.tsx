@@ -30,6 +30,7 @@ const AddressSelector = () => {
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
+  const country = 'Việt Nam'
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -93,28 +94,6 @@ const AddressSelector = () => {
     }
   }, [selectedDistrict]);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const userId = getAuth().currentUser?.uid;
-  //       if (!userId) {
-  //         console.log('User not logged in');
-  //         return;
-  //       }
-  //       const userDoc = await userRef.doc(userId).get();
-  //       if (userDoc.exists) {
-  //         const userData = userDoc.data();
-  //         setUserName(userData?.displayName || '');
-  //         setPhoneNumber(userData?.phoneNumber || '');
-  //         setHouseNumber(userData?.houseNumber || '');
-  //         setFullAddress(userData?.fullAddress || ''); // Fetch and display fullAddress if exists
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching user data:', error);
-  //     }
-  //   };
-  //   fetchUser();
-  // }, []);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -172,16 +151,17 @@ const AddressSelector = () => {
       const districtName =
         districts.find(d => d.code === selectedDistrict)?.name || '';
       const wardName = wards.find(w => w.code === selectedWard)?.name || '';
-      const fullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}`;
+      const fullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}, ${country}`;
 
       const updatedData = {
         displayName: userName,
         phoneNumber: phoneNumber,
         houseNumber: houseNumber || '',
+        country: country,
         province: provinceName,
         district: districtName,
         ward: wardName,
-        fullAddress: fullAddress, // Use the concatenated full address
+        fullAddress: fullAddress, 
       };
 
       await updateDoc(userDocRef, updatedData);
