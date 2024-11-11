@@ -7,8 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
-import {userRef} from '../../firebase/firebaseConfig'; // Make sure the path is correct
+import {userRef} from '../../firebase/firebaseConfig';
 import {getAuth} from '@react-native-firebase/auth';
 import {
   doc,
@@ -17,38 +18,40 @@ import {
   updateDoc,
 } from '@react-native-firebase/firestore';
 import {Picker} from '@react-native-picker/picker';
-const db = getFirestore();
 const AddressSelector = () => {
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
-
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
-  const country = 'Việt Nam'
+  const [loading, setLoading] = useState(false); // Loading state
+  const country = 'Việt Nam';
 
   useEffect(() => {
     const fetchProvinces = async () => {
+      setLoading(true);
       try {
         const response = await fetch('https://provinces.open-api.vn/api/p/');
         const data = await response.json();
-
         setProvinces(data);
       } catch (error) {
         console.error('Error fetching provinces:', error);
       } finally {
+        setLoading(false);
       }
     };
     fetchProvinces();
   }, []);
+
   useEffect(() => {
     if (selectedProvince) {
       const fetchDistricts = async () => {
+        setLoading(true);
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`,
@@ -61,6 +64,7 @@ const AddressSelector = () => {
           setWards([]);
           setSelectedDistrict('');
           setSelectedWard('');
+          setLoading(false);
         }
       };
       fetchDistricts();
@@ -75,6 +79,7 @@ const AddressSelector = () => {
   useEffect(() => {
     if (selectedDistrict) {
       const fetchWards = async () => {
+        setLoading(true);
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`,
@@ -85,6 +90,7 @@ const AddressSelector = () => {
           console.error('Error fetching wards:', error);
         } finally {
           setSelectedWard('');
+          setLoading(false);
         }
       };
       fetchWards();
@@ -96,6 +102,7 @@ const AddressSelector = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      setLoading(true);
       try {
         const userId = getAuth().currentUser?.uid;
         if (!userId) {
@@ -110,7 +117,6 @@ const AddressSelector = () => {
           setHouseNumber(userData?.houseNumber || '');
           setFullAddress(userData?.fullAddress || '');
 
-          // Set selected values for province, district, and ward
           const provinceCode =
             provinces.find(p => p.name === userData?.province)?.code || '';
           const districtCode =
@@ -124,10 +130,11 @@ const AddressSelector = () => {
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    // Fetch user data and set the province, district, and ward values
     fetchUser();
   }, [provinces, districts, wards]);
 
@@ -137,6 +144,7 @@ const AddressSelector = () => {
       return;
     }
 
+    setLoading(true);
     try {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
@@ -145,7 +153,6 @@ const AddressSelector = () => {
       }
       const userDocRef = doc(userRef, userId);
 
-      // Concatenate to create the full address
       const provinceName =
         provinces.find(p => p.code === selectedProvince)?.name || '';
       const districtName =
@@ -161,7 +168,7 @@ const AddressSelector = () => {
         province: provinceName,
         district: districtName,
         ward: wardName,
-        fullAddress: fullAddress, 
+        fullAddress: fullAddress,
       };
 
       await updateDoc(userDocRef, updatedData);
@@ -170,100 +177,108 @@ const AddressSelector = () => {
     } catch (error) {
       console.error('Error updating user data: ', error);
       Alert.alert('Lỗi khi lưu thông tin');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <View>
-          <Text style={styles.label}>Thông tin liên hệ</Text>
-          <View style={styles.customView}>
-            <TextInput
-              style={styles.input}
-              placeholder="Họ và tên...."
-              value={userName}
-              onChangeText={setUserName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập số điện thoại hợp lệ..."
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="numeric"
-            />
-          </View>
-          <Text style={styles.label}>Thông tin địa chỉ</Text>
-          <View style={styles.customView}>
-            <Picker
-              selectedValue={selectedProvince}
-              onValueChange={value => setSelectedProvince(value)}>
-              <Picker.Item label="Chọn tỉnh/thành phố" value="" />
-              {provinces.map(province => (
-                <Picker.Item
-                  key={province.code}
-                  label={province.name}
-                  value={province.code}
-                />
-              ))}
-            </Picker>
-            <Picker
-              selectedValue={selectedDistrict}
-              onValueChange={value => setSelectedDistrict(value)}
-              enabled={!!selectedProvince}>
-              <Picker.Item label="Chọn quận/huyện" value="" />
-              {districts.map(district => (
-                <Picker.Item
-                  key={district.code}
-                  label={district.name}
-                  value={district.code}
-                />
-              ))}
-            </Picker>
-            <Picker
-              selectedValue={selectedWard}
-              onValueChange={value => setSelectedWard(value)}
-              enabled={!!selectedDistrict}>
-              <Picker.Item label="Chọn xã/phường" value="" />
-              {wards.map(ward => (
-                <Picker.Item
-                  key={ward.code}
-                  label={ward.name}
-                  value={ward.code}
-                />
-              ))}
-            </Picker>
-          </View>
-
-          <Text style={styles.label}>Thông tin địa chỉ</Text>
-          <View style={styles.customView}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập thông tin địa chỉ..."
-              value={houseNumber}
-              onChangeText={setHouseNumber}
-            />
-          </View>
-          {selectedWard &&
-          selectedDistrict &&
-          selectedProvince &&
-          houseNumber ? (
-            <View>
-              <Text style={styles.label}>Địa chỉ của bạn</Text>
-              <View style={styles.customView}>
-                <Text style={{color:'black', fontSize:18}}>{fullAddress}</Text>
-              </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#ff7891" />
+      ) : (
+        <ScrollView>
+          <View>
+            <Text style={styles.label}>Thông tin liên hệ</Text>
+            <View style={styles.customView}>
+              <TextInput
+                style={styles.input}
+                placeholder="Họ và tên...."
+                value={userName}
+                onChangeText={setUserName}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập số điện thoại hợp lệ..."
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="numeric"
+              />
             </View>
-          ) : (
-            <Text>''</Text>
-          )}
-        </View>
-      </ScrollView>
+            <Text style={styles.label}>Thông tin địa chỉ</Text>
+            <View style={styles.customView}>
+              <Picker
+                selectedValue={selectedProvince}
+                onValueChange={value => setSelectedProvince(value)}>
+                <Picker.Item label="Chọn tỉnh/thành phố" value="" />
+                {provinces.map(province => (
+                  <Picker.Item
+                    key={province.code}
+                    label={province.name}
+                    value={province.code}
+                  />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={selectedDistrict}
+                onValueChange={value => setSelectedDistrict(value)}
+                enabled={!!selectedProvince}>
+                <Picker.Item label="Chọn quận/huyện" value="" />
+                {districts.map(district => (
+                  <Picker.Item
+                    key={district.code}
+                    label={district.name}
+                    value={district.code}
+                  />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={selectedWard}
+                onValueChange={value => setSelectedWard(value)}
+                enabled={!!selectedDistrict}>
+                <Picker.Item label="Chọn xã/phường" value="" />
+                {wards.map(ward => (
+                  <Picker.Item
+                    key={ward.code}
+                    label={ward.name}
+                    value={ward.code}
+                  />
+                ))}
+              </Picker>
+            </View>
 
+            <Text style={styles.label}>Thông tin địa chỉ</Text>
+            <View style={styles.customView}>
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập thông tin địa chỉ..."
+                value={houseNumber}
+                onChangeText={setHouseNumber}
+              />
+            </View>
+            {selectedWard &&
+            selectedDistrict &&
+            selectedProvince &&
+            houseNumber ? (
+              <View>
+                <Text style={styles.label}>Địa chỉ của bạn</Text>
+                <View style={styles.customView}>
+                  <Text style={{color: 'black', fontSize: 18}}>
+                    {fullAddress}
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <Text>''</Text>
+            )}
+          </View>
+        </ScrollView>
+      )}
       <View style={{margin: 10}}>
         <TouchableOpacity
           style={styles.touchCheckOut}
-          onPress={handleConfirmAddress}>
+          onPress={handleConfirmAddress}
+          disabled={loading}>
           <Text style={styles.textCheckOut}>Lưu</Text>
         </TouchableOpacity>
       </View>
