@@ -31,11 +31,11 @@ const TopTabNavigator = () => {
         component={OrderWaitingForConfirmationNavigator}
         options={{tabBarLabel: 'Chờ xác nhận'}}></Tab.Screen>
       <Tab.Screen
-        name="OrderProcessing"
+        name="OrderProcessingNavigator"
         component={OrderProcessingNavigator}
         options={{tabBarLabel: 'Đang xử lí'}}></Tab.Screen>
       <Tab.Screen
-        name="OrderPackaged"
+        name="OrderPackagedNavigator"
         component={OrderPackagedNavigator}
         options={{tabBarLabel: 'Đã đóng gói'}}></Tab.Screen>
       <Tab.Screen
