@@ -34,7 +34,7 @@ const AddressSelector = () => {
 
   useEffect(() => {
     const fetchProvinces = async () => {
-      setLoading(true);
+     
       try {
         const response = await fetch('https://provinces.open-api.vn/api/p/');
         const data = await response.json();
@@ -42,7 +42,7 @@ const AddressSelector = () => {
       } catch (error) {
         console.error('Error fetching provinces:', error);
       } finally {
-        setLoading(false);
+       
       }
     };
     fetchProvinces();
@@ -51,7 +51,7 @@ const AddressSelector = () => {
   useEffect(() => {
     if (selectedProvince) {
       const fetchDistricts = async () => {
-        setLoading(true);
+       
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`,
@@ -64,7 +64,7 @@ const AddressSelector = () => {
           setWards([]);
           setSelectedDistrict('');
           setSelectedWard('');
-          setLoading(false);
+         
         }
       };
       fetchDistricts();
@@ -79,7 +79,7 @@ const AddressSelector = () => {
   useEffect(() => {
     if (selectedDistrict) {
       const fetchWards = async () => {
-        setLoading(true);
+       
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`,
@@ -90,7 +90,7 @@ const AddressSelector = () => {
           console.error('Error fetching wards:', error);
         } finally {
           setSelectedWard('');
-          setLoading(false);
+         
         }
       };
       fetchWards();
@@ -102,7 +102,7 @@ const AddressSelector = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      setLoading(true);
+     
       try {
         const userId = getAuth().currentUser?.uid;
         if (!userId) {
@@ -131,7 +131,7 @@ const AddressSelector = () => {
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
-        setLoading(false);
+       
       }
     };
 
@@ -144,7 +144,7 @@ const AddressSelector = () => {
       return;
     }
 
-    setLoading(true);
+   
     try {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
@@ -178,15 +178,13 @@ const AddressSelector = () => {
       console.error('Error updating user data: ', error);
       Alert.alert('Lỗi khi lưu thông tin');
     } finally {
-      setLoading(false);
+     
     }
   };
 
   return (
     <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#ff7891" />
-      ) : (
+
         <ScrollView>
           <View>
             <Text style={styles.label}>Thông tin liên hệ</Text>
@@ -273,12 +271,12 @@ const AddressSelector = () => {
             )}
           </View>
         </ScrollView>
-      )}
+
       <View style={{margin: 10}}>
         <TouchableOpacity
           style={styles.touchCheckOut}
           onPress={handleConfirmAddress}
-          disabled={loading}>
+         >
           <Text style={styles.textCheckOut}>Lưu</Text>
         </TouchableOpacity>
       </View>
