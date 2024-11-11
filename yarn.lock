@@ -10166,10 +10166,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-select-dropdown@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "react-native-select-dropdown@npm:4.0.1"
-  checksum: 0f841ec81921e4f79959c883a1c83570e60b9fe28bbf075892aec75edf9bfd5506a7d71221fce388bf664a9d863785fc10a87dac3a27a9cdac248da909611ddd
+"react-native-size-matters@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "react-native-size-matters@npm:0.3.1"
+  peerDependencies:
+    react-native: "*"
+  checksum: f8fa7f301d97dae96df029771445648b4778562c982b3d0625ae78cb397b35efd0e2b482b240531dad68fde0d18cc23f5181a3904259c6e1ff155823ac34996d
   languageName: node
   linkType: hard
 
