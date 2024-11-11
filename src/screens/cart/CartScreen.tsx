@@ -15,7 +15,6 @@ import {Minus, Add} from 'iconsax-react-native';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
 import auth from '@react-native-firebase/auth';
-import {dbFirestore, productRef, userRef} from '../../firebase/firebaseConfig';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
 const CartScreen = () => {
@@ -49,20 +48,24 @@ const CartScreen = () => {
                 .doc(productId)
                 .get();
 
-              const addedAt = products[productId].addedAt;
+              const productData = productDoc.data();
+              if (!productData) {
+                console.warn(`Product with ID ${productId} is missing data`);
+                return null; // Skip this product if data is missing
+              }
 
               return {
                 productId,
-                imageUrl: productDoc.data().imageUrl,
+                imageUrl: productData.imageUrl || '', // Default to an empty string if imageUrl is missing
                 quantity: products[productId].quantity,
-                title: productDoc.data().title,
-                description: productDoc.data().description,
-                sizes: productDoc.data().size,
-                price: productDoc.data().price,
-                addedAt: addedAt ? new Date(addedAt) : new Date(),
+                title: productData.title,
+                description: productData.description,
+                sizes: productData.size,
+                price: productData.price,
+                addedAt: new Date(products[productId].addedAt || Date.now()),
               };
             }),
-          );
+          ).then(results => results.filter(item => item !== null)); // Filter out null results
 
           const sortedProductDetails = productDetails.sort(
             (a, b) => b.addedAt - a.addedAt,

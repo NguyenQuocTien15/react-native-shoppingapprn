@@ -36,7 +36,7 @@ const OrderWaitingForConfirmationScreen = () => {
     setLoading(true);
 
     const unsubscribe = orderRef
-      .where('orderStatusId', '==', '1') // Ensure this matches Firestore's field type
+      .where('orderStatusId', '==', '1') 
       .where('userId', '==', userId)
       .onSnapshot(
         (snapshot: {docs: any[]}) => {
@@ -114,7 +114,7 @@ const OrderWaitingForConfirmationScreen = () => {
       if (!selectedOrder) return;
       const orderRef = doc(firebase.firestore(), 'orders', selectedOrder);
       await deleteDoc(orderRef);
-      console.log('Đơn hàng đã được xóa thành công!');
+      console.log('Đơn hàng đã được hủy thành công!');
       setDialogVisible(false);
     } catch (error) {
       console.error('Lỗi khi xóa đơn hàng:', error);
@@ -190,37 +190,37 @@ const OrderWaitingForConfirmationScreen = () => {
               </View>
             </View>
           </View>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
-              Total:
-            </Text>
-            <Text style={styles.customText}>
-              ${item.totalPrice.toLocaleString()}
-            </Text>
-          </View>
-          <View style={{alignItems: 'flex-end'}}>
-            <TouchableOpacity
-              style={[
-                styles.touch,
-                {
-                  backgroundColor: 'white',
-                  width: '35%',
-                },
-              ]}
-              onPress={() => showDialog(item.id)}>
-              <Text
-                style={[
-                  styles.textTouch,
-                  {
-                    color: 'black',
-                  },
-                ]}>
-                Hủy
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
       ))}
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
+          Total:
+        </Text>
+        <Text style={styles.customText}>
+          ${item.totalPrice.toLocaleString()}
+        </Text>
+      </View>
+      <View style={{alignItems: 'flex-end'}}>
+        <TouchableOpacity
+          style={[
+            styles.touch,
+            {
+              backgroundColor: 'white',
+              width: '35%',
+            },
+          ]}
+          onPress={() => showDialog(item.id)}>
+          <Text
+            style={[
+              styles.textTouch,
+              {
+                color: 'black',
+              },
+            ]}>
+            Hủy
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -239,8 +239,9 @@ const OrderWaitingForConfirmationScreen = () => {
 
       {/* Dialog for cancellation */}
       <Dialog.Container visible={dialogVisible}>
+        <Dialog.Title>Cancel Order</Dialog.Title>
         <Dialog.Description>
-          Do you want to cancel the selected product?
+          Do you want to cancel order?
         </Dialog.Description>
         <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
         <Dialog.Button label="Yes" onPress={handleCancelOrder} />
@@ -257,7 +258,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingLeft: 10,
     paddingRight: 10,
-    backgroundColor: '#DCDCDC',
   },
 
   flexDirection: {
@@ -286,6 +286,12 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 10,
     marginBottom: 10,
+    paddingBottom:10,
+    shadowColor: '#000',          // Shadow color
+    shadowOffset: { width: 0, height:  2}, // Shadow offset
+    shadowOpacity: 1,          // Shadow opacity
+    shadowRadius: 5,           // Shadow radius
+    elevation: 5,                 // Elevation for Android
   },
 
   orderTitle: {

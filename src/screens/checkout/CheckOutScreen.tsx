@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -11,13 +12,12 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
-import {Button} from '@bsdaoquang/rncomponent';
 import {orderRef} from '../../firebase/firebaseConfig';
 import {firebase} from '@react-native-firebase/firestore';
-
 import {PaymentMethodModel} from '../../models/OrderModel';
-
 import auth from '@react-native-firebase/auth';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
 
@@ -92,6 +92,34 @@ const CheckOutScreen = ({route}) => {
         console.error('No items found.');
         return;
       }
+      if (!user.phoneNumber) {
+        Alert.alert(
+          'Thông báo',
+          'Vui lòng nhập số điện thoại',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+            },
+          ],
+          {cancelable: false},
+        );
+        return;
+      }
+      if (!user.fullAddress) {
+        Alert.alert(
+          'Thông báo',
+          'Vui lòng nhập địa chỉ',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+            },
+          ],
+          {cancelable: false},
+        );
+        return;
+      }
 
       if (totalPrice <= 0) {
         console.error('Total price must be greater than 0.');
@@ -105,7 +133,7 @@ const CheckOutScreen = ({route}) => {
 
       const orderData = {
         userId: getUserId(),
-        address: 'Cao Đẳng Công Nghệ Thủ Đức',
+        address: user.fullAddress,
         items: sanitizedItems,
         totalPrice: totalPrice,
         shipperId: null,
@@ -120,14 +148,14 @@ const CheckOutScreen = ({route}) => {
       
       setVisible(true);
       setTimeout(() => {
-        setVisible(false); // Hide the dialog
-        navigation.replace('CartScreen'); // Navigate back to Cart
+        setVisible(false); 
+        navigation.replace('CartScreen'); 
       }, 2000);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
   };
-  const removeItemsFromCart = async itemsToRemove => {
+  const removeItemsFromCart = async (itemsToRemove: { productId: string; }[]) => {
     try {
       const userId = getUserId();
       // Update the path to match your Firestore structure
@@ -164,13 +192,6 @@ const CheckOutScreen = ({route}) => {
     } catch (error) {
       console.error('Error removing items from cart: ', error);
     }
-  };
-
-  const handleNavigationMyOrder = () => {
-    // Switch to the MyOrders tab
-    navigation.navigate('MyOrders');
-    setVisible(false);
-    
   };
 
   const calculateTotalPrice = () => {
@@ -232,7 +253,7 @@ const CheckOutScreen = ({route}) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.navigate('Address')}>
-        {/* <View style={{marginBottom: 10}}>
+        <View style={{marginBottom: 10}}>
           {user ? (
             <>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -250,11 +271,8 @@ const CheckOutScreen = ({route}) => {
                   {user.houseNumber}
                 </Text>
                 <Text style={{color: 'black', fontSize: 13}}>
-                  {user.selectedWard}
-                  {', '}
-                  {user.selectedDistrict}
-                  {', '}
-                  {user.selectedProvince}
+                  {user.ward + ','} {user.district + ','} {user.province + ','}{' '}
+                  {user.country}
                 </Text>
               </View>
             </>
@@ -262,7 +280,7 @@ const CheckOutScreen = ({route}) => {
             <Text>Loading...</Text>
           )}
           <View style={styles.lineRed} />
-        </View> */}
+        </View>
       </TouchableOpacity>
 
       <View style={{flex: 1}}>
