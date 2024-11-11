@@ -106,20 +106,20 @@ const CheckOutScreen = ({route}) => {
         );
         return;
       }
-      // if (!user.fullAddress) {
-      //   Alert.alert(
-      //     'Thông báo',
-      //     'Vui lòng nhập số điện thoại',
-      //     [
-      //       {
-      //         text: 'OK',
-      //         onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
-      //       },
-      //     ],
-      //     {cancelable: false},
-      //   );
-      //   return;
-      // }
+      if (!user.fullAddress) {
+        Alert.alert(
+          'Thông báo',
+          'Vui lòng nhập địa chỉ',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+            },
+          ],
+          {cancelable: false},
+        );
+        return;
+      }
 
       if (totalPrice <= 0) {
         console.error('Total price must be greater than 0.');
@@ -133,7 +133,7 @@ const CheckOutScreen = ({route}) => {
 
       const orderData = {
         userId: getUserId(),
-        address: 'Cao Đẳng Công Nghệ Thủ Đức',
+        address: user.fullAddress,
         items: sanitizedItems,
         totalPrice: totalPrice,
         shipperId: null,
@@ -253,7 +253,6 @@ const CheckOutScreen = ({route}) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.navigate('Address')}>
-      
         <View style={{marginBottom: 10}}>
           {user ? (
             <>
@@ -263,18 +262,17 @@ const CheckOutScreen = ({route}) => {
                   <Text style={styles.customText}>{user.displayName}</Text>
                   <Text style={[styles.customText, {marginLeft: 7}]}>
                     {user.phoneNumber}
-                   
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={24} color="black" />
               </View>
               <View style={{marginLeft: 20, flexDirection: 'column'}}>
                 <Text style={{color: 'black', fontSize: 13}}>
-                 
+                  {user.houseNumber}
                 </Text>
                 <Text style={{color: 'black', fontSize: 13}}>
-                  
-                 
+                  {user.ward + ','} {user.district + ','} {user.province + ','}{' '}
+                  {user.country}
                 </Text>
               </View>
             </>
