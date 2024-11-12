@@ -5,34 +5,43 @@ import {TextComponent} from '../../../components';
 import {fontFamilies} from '../../../constants/fontFamilies';
 import {colors} from '../../../constants/colors';
 import {CategoryModel} from '../../../models/CategoryModel';
-import {categoriesRef} from '../../../firebase/firebaseConfig';
+import { categoriesRef } from '../../../firebase/firebaseConfig';
+//import {categoriesRef} from '../../../firebase/firebaseConfig';
+
 
 const CategoriesList = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
+    // Fetch categories from Firebase
     categoriesRef.onSnapshot(snap => {
       if (snap.empty) {
-        console.log(`Products not found!`);
+        console.log('Categories not found!');
       } else {
         const items: CategoryModel[] = [];
         snap.forEach((item: any) =>
           items.push({
             id: item.id,
             ...item.data(),
-          }),
+          } as CategoryModel),
         );
         setCategories(items);
       }
     });
   }, []);
 
+  const handleCategoryPress = (categoryId: string, categoryTitle: string) => {
+    // @ts-ignore
+    navigation.navigate('ProductScreen', { categoryId , categoryTitle});
+  };
+
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <Tabbar
         title="Categories"
-        tabbarStylesProps={{paddingHorizontal: 16}}
-        titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
+        tabbarStylesProps={{ paddingHorizontal: 16 }}
+        titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 20 }}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
         onSeeMore={() => {}}
       />
@@ -42,16 +51,17 @@ const CategoriesList = () => {
           showsHorizontalScrollIndicator={false}
           horizontal
           data={categories}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <View
               key={item.id}
               style={{
                 marginLeft: 16,
                 marginRight: index === categories.length - 1 ? 16 : 0,
-              }}>
+              }}
+            >
               <Button
                 title={item.title}
-                onPress={() => {}}
+                onPress={() => handleCategoryPress(item.id,item.title)}
                 color={colors.dark}
                 styles={{
                   paddingVertical: 4,
