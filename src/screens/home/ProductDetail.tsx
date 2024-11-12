@@ -151,7 +151,21 @@ const hideDialog = () => setVisible(false);
       console.error('Error adding product to cart: ', error);
     }
   };
-
+const handleChatting = () => {}
+  const renderChatButton = () => {
+    return (
+      subProductSelected && (
+        <Button
+          disable={subProductSelected.quantity === 0}
+          icon={<FontAwesome6 name="comment-dots" size={18} color={'white'} />}
+          inline
+          onPress={() => navigation.navigate('ChatScreen')}
+          color={colors.gray}
+          title={'Chat'}
+        />
+      )
+    );
+  };
   const renderCartButton = () => {
     return (
       subProductSelected && (
@@ -434,6 +448,8 @@ const hideDialog = () => setVisible(false);
               </>
             )}
           </Col>
+          <Col>{renderChatButton()}</Col>
+          <Space width={4}></Space>
           <Col>{renderCartButton()}</Col>
 
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>

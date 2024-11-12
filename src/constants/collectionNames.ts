@@ -1,4 +1,5 @@
 export const collectionNames = {
   users: 'users',
-  offers: 'offers'
+  offers: 'offers',
+  chats:'chats'
 };

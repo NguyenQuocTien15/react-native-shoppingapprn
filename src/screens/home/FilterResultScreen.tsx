@@ -14,7 +14,7 @@ const ResultScreen = ({navigation,route}:any) => {
   }: {
   filterValues : {
     categories: string[];
-    brands: string[];
+    brand: string[];
     price: {
       low: number;
       high: number;
@@ -46,8 +46,8 @@ console.log(filterValues)
         query = query.where('categories', 'array-contains-any', filterValues.categories);
       }
   // Lọc theo thương hiệu nếu có
-  if (filterValues.brands?.length > 0 && filterValues.brands.length <= 10) {
-    query = query.where('brands', 'in', filterValues.brands);
+  if (filterValues.brand?.length > 0 && filterValues.brand.length <= 10) {
+    query = query.where('brands', 'in', filterValues.brand);
   }
       // Lọc theo khoảng giá nếu có giá trị
       if (filterValues.price) {
