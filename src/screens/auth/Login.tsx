@@ -69,7 +69,7 @@ const Login = ({navigation}: any) => {
       <Section>
         <Text text="Welcome!" font={fontFamilies.poppinsBold} size={18} />
         <Text
-          text="Please login or singup to contineu out app"
+          text="Please login or singup to continue our app"
           color={colors.description}
         />
       </Section>

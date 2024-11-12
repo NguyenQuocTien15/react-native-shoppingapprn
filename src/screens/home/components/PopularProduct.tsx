@@ -8,7 +8,7 @@ import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
 import {useNavigation} from '@react-navigation/native';
-import { query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 type Props = {};
 
 const PopularProduct = (props: Props) => {
@@ -39,38 +39,44 @@ const PopularProduct = (props: Props) => {
 
 
   useEffect(() => {
-    const productsQuery = query(productRef, orderBy('rate'), limit(5));
+    productRef
+      .orderBy('rate')
+      .limit(5)
+      .onSnapshot(snap => {
+        if (snap.empty) {
+          console.log(`Products not found!`);
+        } else {
+          const items: ProductModel[] = [];
+          snap.forEach((item: any) =>
+            items.push({
+              id: item.id,
+              ...item.data(),
+            }),
+          );
 
-    const unsubscribe = onSnapshot(productsQuery, (snap) => {
-      if (snap.empty) {
-        console.log(`Products not found!`);
-        setProducts([]); // Clear products if none found
-      } else {
-        const items: ProductModel[] = [];
-        snap.forEach((item) => {
-          items.push({
-            id: item.id,
-            ...item.data(),
-            type: '',
-            description: '',
-            price: '',
-            title: '',
-            imageUrl: '',
-            files: [],
-            categories: [],
-            createdAt: 0,
-            updatedAt: 0,
-            rate: ''
-          });
-        });
-        setProducts(items);
-      }
-    }, (error) => {
-      console.error("Error fetching products: ", error);
-    });
-
-    return () => unsubscribe(); // Cleanup on unmount
+          setProducts(items);
+        }
+      });
   }, []);
+  //HÀM UPDATE price từ kiểu string sang int
+// const handleUpdateProduct = async () => {
+// products.forEach(async item => {
+// await firestore()
+// .collection('products')
+// .doc(item.id)
+// .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
+// })
+// };
+
+//
+const handleUpdateProduct = () => {
+  products.forEach (async item => {
+await firestore()
+.collection('products')
+.doc(item.id)
+.update({seller: Math.floor(Math.random()*100)})
+  });
+};
   return (
     <View style={{flex: 1}}>
       <Tabbar
@@ -78,6 +84,7 @@ const PopularProduct = (props: Props) => {
         tabbarStylesProps={{paddingHorizontal: 16}}
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
+        // onSeeMore={() => handleUpdateProduct()}
         onSeeMore={() => {}}
       />
 
@@ -97,6 +104,7 @@ const PopularProduct = (props: Props) => {
               />
               <Col styles={{paddingHorizontal: 12}}>
                 <TextComponent
+                numberOfLine={1}
                   text={item.title}
                   font={fontFamilies.poppinsBold}
                   size={16}
@@ -109,7 +117,7 @@ const PopularProduct = (props: Props) => {
                 <Row justifyContent="flex-start">
                   <AntDesign name="star" color={colors.success} size={18} />
                   <Space width={8} />
-                  <TextComponent text={`(${item.rate})`} />
+                  <TextComponent text={`(${item.averageRating})`} />
                 </Row>
               </Col>
               <TextComponent

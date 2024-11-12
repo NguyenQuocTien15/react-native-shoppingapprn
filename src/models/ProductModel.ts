@@ -1,6 +1,7 @@
 import { FileModel } from "./FileModel";
+import { OfferModel } from "./OfferModel";
 
-export interface ProductModel {
+export class Product {
   id: string;
   type: string;
   description: string;
@@ -12,6 +13,7 @@ export interface ProductModel {
   createdAt: number;
   updatedAt: number;
   rate: string;
+  seller: number;
 }
 
 export interface SubProduct {
@@ -23,4 +25,8 @@ export interface SubProduct {
   productId: string;
   size: string[];
   quantity: number;
+  offer?:OfferModel;
+  // Phương thức tính giá sau khi giảm
+  getDiscountedPrice?: () => number;
 }
+

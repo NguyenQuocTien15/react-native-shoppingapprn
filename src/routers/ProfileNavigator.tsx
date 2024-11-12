@@ -22,10 +22,7 @@ const ProfileNavigator = () => {
         name="Personal"
         component={PersonalDetailsScreen}
         options={{title: 'Personal'}}></Stack.Screen>
-      <Stack.Screen
-        name="MyOrders"
-        component={MyOrders}
-        options={{title: 'My Orders'}}></Stack.Screen>
+      
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}

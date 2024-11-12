@@ -1,7 +1,10 @@
-import { View, Text, SafeAreaView, ScrollView } from 'react-native'
-import React, {ReactNode} from 'react'
+import { View, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import React, { ReactNode } from 'react';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Import MaterialIcons
+import { useNavigation } from '@react-navigation/native';
 import { globalStyles, Row } from '@bsdaoquang/rncomponent';
 import TextComponent from './TextComponent';
+import { colors } from '../constants/colors';
 
 type Props = {
     children: ReactNode;
@@ -12,15 +15,13 @@ type Props = {
     isScroll?: boolean;
 };
 
-
 const Container = (props: Props) => {
     const {children, title, back,left,right,isScroll} = props;
   return (
     <SafeAreaView style={[globalStyles.container]}>
-     
-        {
-          (back || left || title || right) && 
-          <Row
+      {
+        (back || left || title || right) && 
+        <Row
           styles={{
             backgroundColor:'coral',
             paddingHorizontal: 16,
@@ -36,11 +37,11 @@ const Container = (props: Props) => {
         }
         {!isScroll && isScroll !== false ? 
         (<ScrollView style={globalStyles.container}>
-            {children}
+          {children}
         </ScrollView>) : (<View style={globalStyles.container}>{children}</View>)
         }
     </SafeAreaView>
   );
 }
 
-export default Container
+export default Container;

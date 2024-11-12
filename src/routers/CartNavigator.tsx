@@ -3,8 +3,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {CartScreen} from '../screens';
 import CheckOutScreen from '../screens/checkout/CheckOutScreen';
-import TopTabNavigator from './TopTabNavigator';
-import MyOrders from '../screens/order/MyOrders';
+import AddressSelector from '../screens/profiles/AddressScreen';
 
 const Stack = createNativeStackNavigator();
 const CartNavigator = () => {
@@ -21,10 +20,8 @@ const CartNavigator = () => {
           name="CheckOut"
           component={CheckOutScreen}
           options={{headerTitle: 'Check Out'}}></Stack.Screen>
-        <Stack.Screen
-          name="MyOrder"
-          component={MyOrders}
-          options={{title: 'My Orders'}}></Stack.Screen>
+       <Stack.Screen
+       name='Address' component={AddressSelector}></Stack.Screen>
       </Stack.Navigator>
     </>
   );

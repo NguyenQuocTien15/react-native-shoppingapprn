@@ -11,12 +11,16 @@ import {
   CardTick1,
   Notification,
   Profile,
+  ShoppingBag,
   ShoppingCart,
 } from 'iconsax-react-native';
 import {TextComponent} from '../components';
 import {Row} from '@bsdaoquang/rncomponent';
 import {fontFamilies} from '../constants/fontFamilies';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import MyOrders from '../screens/order/MyOrders';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -32,7 +36,6 @@ const TabNavigator = () => {
           height: 70,
           justifyContent: 'center',
           alignItems: 'center',
-          
         },
         tabBarIcon: ({focused, size, color}) => {
           color = focused ? colors.white : colors.dark;
@@ -44,10 +47,15 @@ const TabNavigator = () => {
                 <ShoppingCart variant="TwoTone" size={size} color={color} />
               );
               break;
-            case 'Notification':
+            case 'MyOrders':
               icon = (
-                <Notification variant="TwoTone" size={size} color={color} />
+                <ShoppingBag variant="TwoTone" size={size} color={color} />
               );
+              break;
+            case 'Notification':
+              icon = 
+                <Notification variant="TwoTone" size={size} color={color} />
+            ;
               break;
             case 'Profile':
               icon = <Profile variant="TwoTone" size={size} color={color} />;
@@ -86,6 +94,7 @@ const TabNavigator = () => {
             if (routeName === 'CheckOut') {
               return {display: 'none'};
             }
+            
             return {
               backgroundColor: colors.white,
               borderTopLeftRadius: 30,
@@ -97,16 +106,15 @@ const TabNavigator = () => {
           })(route),
         })}
       />
-      <Tab.Screen name="Notification" component={NotificationNavigator}/>
+      <Tab.Screen name="MyOrders" component={MyOrders} />
+      <Tab.Screen name="Notification" component={NotificationNavigator} />
       <Tab.Screen
         name="Profile"
         component={ProfileNavigator}
         options={({route}) => ({
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-            if (routeName === 'MyOrders') {
-              return {display: 'none'};
-            }
+            
             if (routeName === 'ChangePassword') {
               return {display: 'none'};
             }

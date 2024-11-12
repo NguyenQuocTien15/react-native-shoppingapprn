@@ -15,6 +15,12 @@ import {fontFamilies} from '../constants/fontFamilies';
 import {Space} from '@bsdaoquang/rncomponent';
 import {colors} from '../constants/colors';
 import {useNavigation} from '@react-navigation/native';
+import PriceWithOffer from './PriceWithOffer';
+
+// Helper function to calculate discounted price
+const getDiscountedPrice = (price: number, percent: number) => {
+  return price - (price * percent) / 100;
+};
 
 type Props = {
   product: ProductModel;
@@ -24,13 +30,23 @@ type Props = {
 
 const ProductItem = (props: Props) => {
   const {product, styles, index} = props;
-
   const WIDTH = (sizes.width - 48) / 2;
   const navigation: any = useNavigation();
 
+  // Calculate the offer price if applicable
+  const offerPrice = product.offer && product.offer.percent
+    ? getDiscountedPrice(product.price, product.offer.percent)
+    : product.price;  // Default to product price if no offer
+
+  // Kiểm tra nếu sản phẩm có offer
+  const hasOffer = product.offer && product.offer.percent;
+
+  // Đặt một ảnh mặc định nếu imageUrl không hợp lệ
+  const imageUrl = product.imageUrl || 'https://via.placeholder.com/220';  // Ảnh placeholder mặc định
+
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('ProductDetail', {id: product.id})}
+      onPress={() => navigation.navigate('ProductDetail', {id: product.id, product: product})}
       style={[
         {
           width: (sizes.width - 48) / 2,
@@ -40,7 +56,7 @@ const ProductItem = (props: Props) => {
         styles,
       ]}>
       <Image
-        source={{uri: product.imageUrl}}
+        source={{uri: imageUrl}}  // Sử dụng imageUrl đã kiểm tra
         style={{
           flex: 1,
           width: WIDTH,
