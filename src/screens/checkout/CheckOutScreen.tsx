@@ -232,7 +232,24 @@ const CheckOutScreen = ({route}) => {
   const handlePaymentMethodSelect = (paymentMethodId: string) => {
     setSelectedPaymentMethod(paymentMethodId);
   };
-  const renderItemPaymentMethod = ({item}: {item: PaymentMethodModel}) => (
+  // const renderItemPaymentMethod = ({item}: {item: PaymentMethodModel}) => (
+  //   <View style={[styles.flexDirection, {alignItems: 'center'}]}>
+  //     <Text style={{color: 'black', fontSize: 20}}>
+  //       {item.paymentMethodName}
+  //     </Text>
+  //     <View>
+  //       <TouchableOpacity
+  //         onPress={() => handlePaymentMethodSelect(item.paymentMethodId)}>
+  //         <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
+  //           {selectedPaymentMethod === item.paymentMethodId && (
+  //             <View style={styles.selectedRb} />
+  //           )}
+  //         </View>
+  //       </TouchableOpacity>
+  //     </View>
+  //   </View>
+  // );
+  const renderItemPaymentMethod = ({item}) => (
     <View style={[styles.flexDirection, {alignItems: 'center'}]}>
       <Text style={{color: 'black', fontSize: 20}}>
         {item.paymentMethodName}
@@ -361,10 +378,15 @@ const CheckOutScreen = ({route}) => {
 
         <View style={{marginVertical: 10}}>
           <Text style={[{color: 'black', fontSize: 27}]}>Payment method</Text>
+          {/* <FlatList
+            data={paymentMethods}
+            renderItem={renderItemPaymentMethod}
+            keyExtractor={item => item.paymentMethodId}></FlatList> */}
           <FlatList
             data={paymentMethods}
             renderItem={renderItemPaymentMethod}
-            keyExtractor={item => item.paymentMethodId}></FlatList>
+            keyExtractor={item => item.paymentMethodId}
+          />
         </View>
         <View>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
