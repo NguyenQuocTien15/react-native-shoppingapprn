@@ -279,7 +279,7 @@ const CartScreen = () => {
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
             data={cartItems}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.productId}
             renderItem={({item, index}) => (
               <View key={item.productId} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
