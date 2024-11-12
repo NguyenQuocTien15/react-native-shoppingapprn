@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    color:"black"
   },
   inputContainer: {
     flexDirection: 'row',
