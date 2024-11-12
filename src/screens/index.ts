@@ -15,6 +15,7 @@ import ProductsByOfferListScreen from "./home/ProductsByOfferListScreen";
 import OffersList from "./home/components/OffersList";
 import ChatScreen from "./home/ChatScreen";
 import FilterScreen from "./home/FilterScreen";
+import SearchResultsScreen from "./home/SearchResultsScreen";
 
 export {
   HomeScreen,
@@ -29,5 +30,7 @@ export {
   ProductDetail,
   RatingScreen,
   FilterScreen,
+  SearchResultsScreen,
+  ChatScreen
   // ResultScreen
 };

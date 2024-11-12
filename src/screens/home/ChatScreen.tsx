@@ -12,7 +12,7 @@ interface MessageModel {
   id: string;
   text: string;
   senderId: string;
-  timestamp: firebase.firestore.Timestamp | null;
+  timestamp: Date | null;
 }
 
 const ChatScreen = ({ role }: { role: 'admin' | 'client' }) => {
