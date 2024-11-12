@@ -11,7 +11,7 @@ export interface ProductModel {
   categories: string[];
   createdAt: number;
   updatedAt: number;
-  rate: number;
+  averageRating: number;
   selled: number;
   brand:string
 }

@@ -18,7 +18,7 @@ const PopularProduct = (props: Props) => {
 
   useEffect(() => {
     productRef
-      .orderBy('rate')
+      .orderBy('averageRating')
       .limit(5)
       .onSnapshot(snap => {
         if (snap.empty) {
@@ -76,7 +76,7 @@ const PopularProduct = (props: Props) => {
                 <Row justifyContent="flex-start">
                   <AntDesign name="star" color={colors.success} size={18} />
                   <Space width={8} />
-                  <TextComponent text={`(${item.rate})`} />
+                  <TextComponent text={`(${item.averageRating})`} />
                 </Row>
               </Col>
               <TextComponent
