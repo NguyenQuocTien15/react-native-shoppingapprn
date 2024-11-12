@@ -1,11 +1,11 @@
 import {View, Text, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import auth from '@react-native-firebase/auth';
-import {orderRef} from '../../firebase/firebaseConfig';
-import { StyleSheet } from 'react-native';
-import { FlatList } from 'react-native';
-import { ActivityIndicator } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import {orderHistoryRef} from '../../firebase/firebaseConfig'; // Import your orderHistory reference
+import {StyleSheet} from 'react-native';
+import {FlatList} from 'react-native';
+import {ActivityIndicator} from 'react-native';
+import {TouchableOpacity} from 'react-native';
 
 const OrderHistoryScreen = () => {
   const [orders, setOrders] = useState([]);
@@ -14,9 +14,14 @@ const OrderHistoryScreen = () => {
   useEffect(() => {
     const userId = auth().currentUser?.uid;
     setLoading(true);
-    const unsubscribe = orderRef
-      .where('orderStatusId', '==', '6')
-      .where('userId', '==', userId)
+
+    if (!userId) return;
+
+    // Query the orderHistory collection for the userId
+    const unsubscribe = orderHistoryRef
+      .doc(userId) // user-specific collection
+      .collection('userOrders') // Orders collection inside user document
+      .where('orderStatusId', 'in', ['0', '6', '7']) // Fetch only canceled, delivered, or failed orders
       .onSnapshot((snapShot: {docs: any[]}) => {
         const orderData = snapShot.docs.map(doc => ({
           id: doc.id,
@@ -25,116 +30,136 @@ const OrderHistoryScreen = () => {
         setOrders(orderData);
         setLoading(false);
       });
+
     return () => unsubscribe();
   }, []);
+  const orderStatusMap = {
+    '0': 'Hủy đơn', // Canceled
+    '1': 'Đơn hàng mới', // New Order
+    '2': 'Đang chuẩn bị', // Preparing
+    '3': 'Đã đóng gói', // Packed
+    '4': 'Chờ vận chuyển', // Awaiting Shipment
+    '5': 'Đang vận chuyển', // In Transit
+    '6': 'Đã giao hàng', // Delivered
+    '7': 'Giao thất bại', // Failed Delivery
+    '8': 'Trả kho', // Returned to Warehouse
+  };
 
-   const renderItem = ({item}: any) => (
-     <View style={styles.itemListProduct}>
-       <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
-         <Image
-           source={require('../../assets/images/logofs.jpg')}
-           style={{width: 25, height: 25, marginRight: 10}}></Image>
-         <Text style={styles.customText}>Fashion Store</Text>
-       </View>
+  const renderItem = ({item}: any) => {
+    const orderStatusName =
+      orderStatusMap[item.orderStatusId] || 'Unknown Status';
 
-       <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
-       {item.items.map((orderItem, index) => (
-         <View>
-           <View key={index} style={styles.orderProduct}>
-             <Image
-               source={{uri: orderItem.imageUrl}}
-               style={styles.productImage}
-             />
-             <View style={{flex: 1, flexDirection: 'column'}}>
-               <Text
-                 style={styles.customText}
-                 numberOfLines={1}
-                 ellipsizeMode="tail">
-                 {orderItem.title}
-               </Text>
-               <Text style={{color: 'black', fontSize: 18}}>
-                 Quantity: {orderItem.quantity}
-               </Text>
+    return (
+      <View style={styles.itemListProduct}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
+            <Image
+              source={require('../../assets/images/logofs.jpg')}
+              style={{width: 25, height: 25, marginRight: 10}}
+            />
+            <Text style={styles.customText}>Fashion Store</Text>
+          </View>
+          <View style={{alignItems: 'center', marginTop: 5}}>
+            <Text style={styles.customText}>{orderStatusName}</Text>
+          </View>
+        </View>
 
-               <View
-                 style={{
-                   flex: 1,
-                   flexDirection: 'row',
-                   justifyContent: 'space-between',
-                   alignItems: 'flex-end',
-                 }}>
-                 <Text style={styles.customText}>
-                   Price: ${orderItem.price * orderItem.quantity}
-                 </Text>
-                 <View
-                   style={[
-                     styles.flexDirection,
-                     {
-                       paddingVertical: 4,
-                       borderRadius: 100,
-                       alignItems: 'center',
-                     },
-                   ]}></View>
-               </View>
-             </View>
-           </View>
-         </View>
-       ))}
-       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-         <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
-           Total:
-         </Text>
-         <Text style={styles.customText}>
-           ${item.totalPrice.toLocaleString()}
-         </Text>
-       </View>
-       <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-         <TouchableOpacity
-           style={[
-             styles.touch,
-             {
-               backgroundColor: 'white',
-               width: '30%',
-               marginRight:7
-             },
-           ]}
-           onPress={() => Alert.alert('aa')}>
-           <Text
-             style={[
-               styles.textTouch,
-               {
-                 color: 'black',
-               },
-             ]}>
+        <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
+
+        {item.items.map((orderItem, index) => (
+          <View key={index}>
+            <View style={styles.orderProduct}>
+              <Image
+                source={{uri: orderItem.imageUrl}}
+                style={styles.productImage}
+              />
+              <View style={{flex: 1, flexDirection: 'column'}}>
+                <Text
+                  style={styles.customText}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  {orderItem.title}
+                </Text>
+                <Text style={{color: 'black', fontSize: 18}}>
+                  Quantity: {orderItem.quantity}
+                </Text>
+
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                  }}>
+                  <Text style={styles.customText}>
+                    Price: ${orderItem.price * orderItem.quantity}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        ))}
+
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
+            Total:
+          </Text>
+          <Text style={styles.customText}>
+            ${item.totalPrice.toLocaleString()}
+          </Text>
+        </View>
+
+        {/* <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+          <TouchableOpacity
+            style={[
+              styles.touch,
+              {
+                backgroundColor: 'white',
+                width: '30%',
+                marginRight: 7,
+              },
+            ]}
+            onPress={() => Alert.alert('Returned')}>
+            <Text
+              style={[
+                styles.textTouch,
+                {
+                  color: 'black',
+                },
+              ]}>
               Trả hàng
-           </Text>
-         </TouchableOpacity>
-         <TouchableOpacity
-           style={[
-             styles.touch,
-             {
-               backgroundColor: '#ff7891',
-               width: '30%',
-             },
-           ]}
-           onPress={() => Alert.alert('aa')}>
-           <Text
-             style={[
-               styles.textTouch,
-               {
-                 color: 'white',
-               },
-             ]}>
-             Đánh giá
-           </Text>
-         </TouchableOpacity>
-       </View>
-     </View>
-   );
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.touch,
+              {
+                backgroundColor: '#ff7891',
+                width: '30%',
+              },
+            ]}
+            onPress={() => Alert.alert('Review')}>
+            <Text
+              style={[
+                styles.textTouch,
+                {
+                  color: 'white',
+                },
+              ]}>
+              Đánh giá
+            </Text>
+          </TouchableOpacity>
+        </View> */}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        <ActivityIndicator color="blue" size="small" />
       ) : (
         <FlatList
           data={orders}
@@ -148,6 +173,7 @@ const OrderHistoryScreen = () => {
 };
 
 export default OrderHistoryScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -214,5 +240,3 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
-
-
