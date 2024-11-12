@@ -2,17 +2,11 @@ import { View, Text, Button } from 'react-native';
 import React from 'react';
 import auth from '@react-native-firebase/auth';
 
-const LogoutScreen = ({ navigation }:any) => {
+const LogoutScreen = ({ navigation }: any) => {
   const handleLogout = async () => {
     try {
-      const user = auth().currentUser;
-      if (user) {
-        // Chỉ thực hiện đăng xuất nếu có người dùng đang đăng nhập
-        await auth().signOut();
-        navigation.replace('Login'); // Điều hướng về màn hình đăng nhập
-      } else {
-        console.log("No user currently signed in.");
-      }
+      await auth().signOut();
+      navigation.replace('Login'); // Navigate back to the login screen
     } catch (error) {
       console.error("Error logging out: ", error);
     }
