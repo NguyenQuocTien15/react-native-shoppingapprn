@@ -1,7 +1,7 @@
-import { firebase } from "@react-native-firebase/auth";
+
 interface MessageModel {
-        id: string;
-        text: string;
-        senderId: string;
-        timestamp: Date | null;
-      }
+  id: string;
+  message: string;
+  sender_ID: string;
+  createdAt: Date | null;
+}

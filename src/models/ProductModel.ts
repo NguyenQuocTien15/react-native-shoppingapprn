@@ -88,11 +88,7 @@ export interface ProductModel {
   categories: string[];
   createdAt: number;
   updatedAt: number;
-<<<<<<< HEAD
   averageRating: number;
-=======
-  rate: string;
->>>>>>> QuocTien
   selled: number;
 }
 
