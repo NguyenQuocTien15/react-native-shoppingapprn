@@ -13,6 +13,7 @@ import CategoriesList from './components/CategoriesList';
  import SearchProduct from './components/SearchProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const HomeScreen = ({navigation}:any) => {
   useEffect(() => {

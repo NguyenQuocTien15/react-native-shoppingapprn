@@ -144,7 +144,7 @@ const hideDialog = () => setVisible(false);
       setVisible(true); 
       setTimeout(() => {
         setVisible(false); 
-        navigation.navigate('CartScreen'); 
+        //navigation.navigate('CartScreen'); 
       }, 2000);
      
     } catch (error) {

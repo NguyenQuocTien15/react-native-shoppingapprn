@@ -11,7 +11,7 @@ import {TouchableOpacity} from 'react-native';
 import {orderRef} from '../../firebase/firebaseConfig';
 import Dialog from 'react-native-dialog';
 import auth from '@react-native-firebase/auth';
-import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
+import {deleteDoc, doc, firebase, getDoc, setDoc} from '@react-native-firebase/firestore';
 
 const OrderWaitingForConfirmationScreen = () => {
   const [userId, setUserId] = useState('');
@@ -109,17 +109,62 @@ const OrderWaitingForConfirmationScreen = () => {
       console.error('Error deleting product or order from Firebase: ', error);
     }
   };
-  const handleCancelOrder = async() => {
+  // const handleCancelOrder = async() => {
+  //   try {
+  //     if (!selectedOrder) return;
+  //     const orderRef = doc(firebase.firestore(), 'orders', selectedOrder);
+  //     await deleteDoc(orderRef);
+      
+  //     setDialogVisible(false);
+  //   } catch (error) {
+  //     console.error('Lỗi khi xóa đơn hàng:', error);
+  //   }
+  // };
+  const handleCancelOrder = async () => {
     try {
       if (!selectedOrder) return;
+
       const orderRef = doc(firebase.firestore(), 'orders', selectedOrder);
-      await deleteDoc(orderRef);
-      console.log('Đơn hàng đã được hủy thành công!');
+      const orderSnapshot = await getDoc(orderRef);
+
+      if (orderSnapshot.exists) {
+        // Retrieve order data
+        const orderData = orderSnapshot.data();
+
+        // Add canceled order to `orderHistory`
+        const userId = orderData.userId; // assuming userId is stored in the order data
+        const orderHistoryRef = doc(
+          firebase.firestore(),
+          'orderHistory',
+          userId,
+          'userOrders',
+          selectedOrder,
+        );
+
+        await setDoc(orderHistoryRef, {
+          ...orderData,
+          orderStatusId: '0', 
+          cancellationTimestamp:
+            firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        await setDoc(orderRef, {
+          ...orderData,
+          orderStatusId: '0',
+        });
+
+        // // Delete the order from `orders`
+        // await deleteDoc(orderRef);
+        // console.log('Order canceled and moved to orderHistory.');
+      } else {
+        console.log('Order not found.');
+      }
+
       setDialogVisible(false);
     } catch (error) {
-      console.error('Lỗi khi xóa đơn hàng:', error);
+      console.error('Error canceling order:', error);
     }
   };
+
 
   const renderItem = ({item}) => (
     <View style={styles.itemListProduct}>
@@ -133,7 +178,7 @@ const OrderWaitingForConfirmationScreen = () => {
       <Text style={styles.orderDate}>Date: {item.timestamp}</Text>
       {item.items.map((orderItem, index) => (
         <View>
-          <View key={index} style={styles.orderProduct}>
+          <View key={item.id} style={styles.orderProduct}>
             <Image
               source={{uri: orderItem.imageUrl}}
               style={styles.productImage}
