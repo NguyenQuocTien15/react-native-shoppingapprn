@@ -3,6 +3,7 @@ import React from 'react';
 import { CartScreen, ChatScreen, FilterScreen, RatingScreen, SearchResultsScreen } from '../screens';
 import ProductDetail from '../screens/home/ProductDetail';
 import TabNavigator from './TabNavigator';
+import FilterResultScreen from '../screens/home/FilterResultScreen';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -15,6 +16,7 @@ const MainNavigator = () => {
     {/* <Stack.Screen name='Payment' component={AddPayment}/>
     */}
     <Stack.Screen name='FilterScreen' component={FilterScreen}/>
+    <Stack.Screen name='FilterResultScreen' component={FilterResultScreen}/>
     <Stack.Screen name='SearchResultsScreen' component={SearchResultsScreen}/>
     <Stack.Screen name='ChatScreen' component={ChatScreen}/>
     {/* <Stack.Screen name='ResultScreen' component={ResultScreen}/> */}
