@@ -8,7 +8,7 @@ import { globalStyles } from '../../styles/globalStyles';
 import firestore from '@react-native-firebase/firestore';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
-const ResultScreen = ({navigation,route}:any) => {
+const FilterResultScreen = ({navigation,route}:any) => {
   const {
     filterValues,
   }: {
@@ -107,11 +107,11 @@ console.log(filterValues)
          data={products}
          showsVerticalScrollIndicator={false}
          columnWrapperStyle={{justifyContent:'space-between'}}
-         renderItem={({item})=><ProductItem key={item.id} product={item}/>}/>
+         renderItem={({item})=><ProductItem navigateTo='ProductDetail' key={item.id} product={item}/>}/>
         </Section>
       )}
   </Container>
 }
 
-export default ResultScreen
+export default FilterResultScreen
 

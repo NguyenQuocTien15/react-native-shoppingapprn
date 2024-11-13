@@ -54,6 +54,7 @@ const PopularProduct = (props: Props) => {
 
 const handleUpdateProduct = () => {
   products.forEach (async item => {
+    //@ts-ignore
 await firestore()
 .collection('products')
 .doc(item.id)

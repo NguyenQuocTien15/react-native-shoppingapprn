@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Container from '../../../components/Container';
 import { globalStyles } from '../../../styles/globalStyles';
 import SearchResultsScreen from '../SearchResultsScreen';
+import { color } from 'react-native-elements/dist/helpers';
 
 const SearchProduct = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,7 +26,7 @@ const SearchProduct = () => {
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
-        <Button title="Search" onPress={handleSearch} />
+        <Button color="black" title="Search" onPress={handleSearch} />
       </View>
     </Container>
   );

@@ -27,8 +27,15 @@ import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
 import { Image } from 'react-native';
+type RouteParams = {
+  ProductDetail: {
+    id: string;
+    product: ProductModel;
+  };
+};
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
+  console.log(route.params);
 
   const [productDetail, setProductDetail] = useState<ProductModel>();
   const [subProducts, setSubProducts] = useState<SubProduct[]>([]);
@@ -43,7 +50,8 @@ const ProductDetail = ({navigation, route}: any) => {
     getProductDetail();
     getSubProducts();
   }, [id]);
-
+  
+  
   useEffect(() => {
     setCount(1);
     setSizeSelected('');
@@ -112,6 +120,7 @@ const hideDialog = () => setVisible(false);
     }
     const cartRef = firestore()
       .collection('carts')
+      //@ts-ignore
       .doc(userId)
       
     try {
@@ -128,6 +137,7 @@ const hideDialog = () => setVisible(false);
             },
           });
         } else {
+          //@ts-ignore
           const currentProducts = cartDoc.data().products || {};
           const currentQuantity = currentProducts[productId]?.quantity || 0;
 

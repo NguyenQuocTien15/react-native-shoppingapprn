@@ -135,7 +135,9 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
       snap.forEach((item: any) => {
         items.push({ ...item.data() });
       });
+      //@ts-ignore
       items.length > 0 && setMaxPrice(items[0].price);
+            //@ts-ignore
       setFilterValues({ ...filterValues, price: { low: 0, high: items[0].price } });
     }
   };
@@ -151,7 +153,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
           <Button
             inline
             title="Apply Now"
-            onPress={() => navigation.navigate('ResultScreen',{filterValues: {...filterValues, categories: categoriesSelected, brands: brandsSelected}})}
+            onPress={() => navigation.navigate('FilterResultScreen',{filterValues: {...filterValues, categories: categoriesSelected, brands: brandsSelected}})}
             color={colors.black}
           />
         </Section>

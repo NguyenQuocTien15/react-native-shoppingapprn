@@ -34,7 +34,7 @@ const CategoriesList = () => {
 
   const handleCategoryPress = (categoryId: string, categoryTitle: string) => {
     // @ts-ignore
-    navigation.navigate('ProductScreen', { categoryId , categoryTitle});
+    navigation.navigate('ProductsCategoryScreen', { categoryId , categoryTitle});
   };
 
   return (

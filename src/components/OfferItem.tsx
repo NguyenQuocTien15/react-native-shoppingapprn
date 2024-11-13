@@ -8,12 +8,16 @@ import {OfferModel} from '../models/OfferModel';
 import TextComponent from './TextComponent';
 import { useNavigation } from '@react-navigation/native';
 import { linkProductToOffer } from '../firebase/linkProductToOffer';
+import { ProductModel } from '../models/ProductModel';
 
 type OfferItemProps  = {
   item: OfferModel;
   onPress: () => void; // Nhận hàm `onPress` từ OffersList
 
 
+};
+type Props = {
+  product: ProductModel;  // Đảm bảo kiểu dữ liệu đúng
 };
 
 const OfferItem = ({ item,onPress}: OfferItemProps) => {
@@ -42,7 +46,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
         font={fontFamilies.poppinsBold}
         text={`${item.percent}% Off`}
       />
-      <TextComponent text={item.title} color={colors.light} size={16} />
+      <TextComponent text={item.title} color={colors.gray} size={16} />
       {/* <TextComponent
         text={`With code: ${item.code}`}
         size={16}
@@ -55,7 +59,9 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
           title="Get Now"
           styles={{paddingHorizontal: 20, marginTop:25}}
           color={colors.dark}
-          onPress={() => {}}
+          //@ts-ignore
+          onPress={() =>  navigation.navigate('ProductsByOfferListScreen', { offerId: item.id  })
+        }
         />
       {/* </Row> */}
     </>

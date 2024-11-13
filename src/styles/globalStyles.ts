@@ -6,13 +6,14 @@ import { colors } from "../constants/colors";
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: 'gray2',
     borderRadius: 8,
     paddingHorizontal: 8,
   },
   searchInput: {
     flex: 1, // Makes the TextInput take available width
     paddingVertical: 8,
+    color:"black"
   },
   iconContainer: {
     paddingLeft: 8,
@@ -20,9 +21,10 @@ import { colors } from "../constants/colors";
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.gray,
+    backgroundColor: colors.gray2,
     borderRadius: 8,
     paddingHorizontal: 10,
+    
   },
   // searchInput: {
   //   flex: 1,
