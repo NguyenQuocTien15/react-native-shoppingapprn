@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {addAuth, authSelector} from '../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {localDataNames} from '../constants/localDataNames';
-import {addcart, syncLocalStorage} from '../redux/reducers/cartReducer';
+import {addCart, syncLocalStorage} from '../redux/reducers/cartReducer';
 
 const Router = () => {
   const [isWellcome, setIsWellcome] = useState(true);

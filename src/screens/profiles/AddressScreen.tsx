@@ -1,7 +1,187 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import {userRef} from '../../firebase/firebaseConfig';
+import {getAuth} from '@react-native-firebase/auth';
+import {
+  doc,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from '@react-native-firebase/firestore';
+import {Picker} from '@react-native-picker/picker';
+const AddressSelector = () => {
+  const [userName, setUserName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [fullAddress, setFullAddress] = useState('');
+  const [houseNumber, setHouseNumber] = useState('');
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedWard, setSelectedWard] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state
+  const country = 'Việt Nam';
 
-const AddressScreen = () => {
+  useEffect(() => {
+    const fetchProvinces = async () => {
+     
+      try {
+        const response = await fetch('https://provinces.open-api.vn/api/p/');
+        const data = await response.json();
+        setProvinces(data);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      } finally {
+       
+      }
+    };
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      const fetchDistricts = async () => {
+       
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`,
+          );
+          const data = await response.json();
+          setDistricts(data.districts || []);
+        } catch (error) {
+          console.error('Error fetching districts:', error);
+        } finally {
+          setWards([]);
+          setSelectedDistrict('');
+          setSelectedWard('');
+         
+        }
+      };
+      fetchDistricts();
+    } else {
+      setDistricts([]);
+      setWards([]);
+      setSelectedDistrict('');
+      setSelectedWard('');
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      const fetchWards = async () => {
+       
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`,
+          );
+          const data = await response.json();
+          setWards(data.wards || []);
+        } catch (error) {
+          console.error('Error fetching wards:', error);
+        } finally {
+          setSelectedWard('');
+         
+        }
+      };
+      fetchWards();
+    } else {
+      setWards([]);
+      setSelectedWard('');
+    }
+  }, [selectedDistrict]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+     
+      try {
+        const userId = getAuth().currentUser?.uid;
+        if (!userId) {
+          console.log('User not logged in');
+          return;
+        }
+        const userDoc = await userRef.doc(userId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setUserName(userData?.displayName || '');
+          setPhoneNumber(userData?.phoneNumber || '');
+          setHouseNumber(userData?.houseNumber || '');
+          setFullAddress(userData?.fullAddress || '');
+
+          const provinceCode =
+            provinces.find(p => p.name === userData?.province)?.code || '';
+          const districtCode =
+            districts.find(d => d.name === userData?.district)?.code || '';
+          const wardCode =
+            wards.find(w => w.name === userData?.ward)?.code || '';
+
+          setSelectedProvince(provinceCode);
+          setSelectedDistrict(districtCode);
+          setSelectedWard(wardCode);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+       
+      }
+    };
+
+    fetchUser();
+  }, [provinces, districts, wards]);
+
+  const handleConfirmAddress = async () => {
+    if (!phoneNumber) {
+      Alert.alert('Vui lòng nhập số điện thoại');
+      return;
+    }
+
+   
+    try {
+      const userId = getAuth().currentUser?.uid;
+      if (!userId) {
+        console.log('User not logged in');
+        return;
+      }
+      const userDocRef = doc(userRef, userId);
+
+      const provinceName =
+        provinces.find(p => p.code === selectedProvince)?.name || '';
+      const districtName =
+        districts.find(d => d.code === selectedDistrict)?.name || '';
+      const wardName = wards.find(w => w.code === selectedWard)?.name || '';
+      const fullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}, ${country}`;
+
+      const updatedData = {
+        displayName: userName,
+        phoneNumber: phoneNumber,
+        houseNumber: houseNumber || '',
+        country: country,
+        province: provinceName,
+        district: districtName,
+        ward: wardName,
+        fullAddress: fullAddress,
+      };
+
+      await updateDoc(userDocRef, updatedData);
+
+      Alert.alert('Thông tin đã được lưu');
+    } catch (error) {
+      console.error('Error updating user data: ', error);
+      Alert.alert('Lỗi khi lưu thông tin');
+    } finally {
+     
+    }
+  };
+
   return (
     <View style={styles.container}>
 
@@ -101,9 +281,48 @@ const AddressScreen = () => {
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default AddressScreen
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  customView: {
+    backgroundColor: 'white',
+    paddingTop: 10,
+    paddingRight: 10,
+    paddingLeft: 10,
+  },
+  label: {
+    fontSize: 18,
+    paddingTop: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+    marginBottom: 10,
+    color: 'gray',
+  },
+  input: {
+    height: 40,
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 10,
+  },
+  touchCheckOut: {
+    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: '#ff7891',
+  },
+  textCheckOut: {
+    color: 'white',
+    margin: 10,
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
 
-const styles = StyleSheet.create({})
+export default AddressSelector;

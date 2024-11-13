@@ -1,3 +1,4 @@
+
 import {Button, Input, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import messaging from '@react-native-firebase/messaging';
 import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
@@ -13,8 +14,9 @@ import CategoriesList from './components/CategoriesList';
  import SearchProduct from './components/SearchProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
+import Entypo from 'react-native-vector-icons/Entypo';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}:any) => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);

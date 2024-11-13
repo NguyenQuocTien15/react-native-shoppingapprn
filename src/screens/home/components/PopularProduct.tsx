@@ -8,7 +8,7 @@ import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
 import {useNavigation} from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
+
 type Props = {};
 
 const PopularProduct = (props: Props) => {
@@ -16,67 +16,50 @@ const PopularProduct = (props: Props) => {
 
   const navigation: any = useNavigation();
 
-  // useEffect(() => {
-  //   productRef
-  //     .orderBy('rate')
-  //     .limit(5)
-  //     .onSnapshot(snap => {
-  //       if (snap.empty) {
-  //         console.log(`Products not found!`);
-  //       } else {
-  //         const items: ProductModel[] = [];
-  //         snap.forEach((item: any) =>
-  //           items.push({
-  //             id: item.id,
-  //             ...item.data(),
-  //           }),
-  //         );
-
-  //         setProducts(items);
-  //       }
-  //     });
-  // }, []);
-
-
   useEffect(() => {
-    productRef
-      .orderBy('rate')
-      .limit(5)
-      .onSnapshot(snap => {
-        if (snap.empty) {
-          console.log(`Products not found!`);
-        } else {
-          const items: ProductModel[] = [];
-          snap.forEach((item: any) =>
-            items.push({
-              id: item.id,
-              ...item.data(),
-            }),
-          );
+    const currentTime = new Date().getTime();
 
-          setProducts(items);
+    const unsubscribe = productRef
+      .orderBy('averageRating', 'desc')
+      .limit(5)
+      .onSnapshot(
+        snap => {
+          if (!snap || snap.empty) {
+            console.log(`Products not found!`);
+            setProducts([]);
+          } else {
+            const items: ProductModel[] = [];
+            snap.forEach((item: any) => {
+              const data = item.data();
+
+              // Kiểm tra sản phẩm không có khuyến mãi hoặc khuyến mãi đã hết hạn
+              if (!data.offer || (data.offer.endAt && data.offer.endAt < currentTime)) {
+                items.push({
+                  id: item.id,
+                  ...data,
+                });
+              }
+            });
+
+            setProducts(items);
+          }
+        },
+        error => {
+          console.error("Error fetching popular products:", error);
         }
-      });
+      );
+
+    return () => unsubscribe();
   }, []);
-  //HÀM UPDATE price từ kiểu string sang int
-// const handleUpdateProduct = async () => {
-// products.forEach(async item => {
+
+// const handleUpdateProduct = () => {
+//   products.forEach (async item => {
 // await firestore()
 // .collection('products')
 // .doc(item.id)
-// .update({price: Math.floor(Math.random() * 500)}) //price random số ngẫu nhiên
-// })
+// .update({selled: Math.floor(Math.random()*100)})
+//   });
 // };
-
-//
-const handleUpdateProduct = () => {
-  products.forEach (async item => {
-await firestore()
-.collection('products')
-.doc(item.id)
-.update({seller: Math.floor(Math.random()*100)})
-  });
-};
   return (
     <View style={{flex: 1}}>
       <Tabbar
@@ -85,7 +68,7 @@ await firestore()
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
         // onSeeMore={() => handleUpdateProduct()}
-        onSeeMore={() => {}}
+       
       />
 
       {products.length > 0 &&

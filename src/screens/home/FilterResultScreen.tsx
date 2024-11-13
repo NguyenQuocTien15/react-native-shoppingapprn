@@ -114,4 +114,3 @@ console.log(filterValues)
 }
 
 export default ResultScreen
-

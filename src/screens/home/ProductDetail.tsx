@@ -48,19 +48,17 @@ const ProductDetail = ({navigation, route}: any) => {
     setCount(1);
     setSizeSelected('');
   }, [subProductSelected]);
+const hideDialog = () => setVisible(false);
+  const getUserId = () => {
+    const currentUser = auth().currentUser;
 
-  useEffect(() => {
-    if (subProductSelected) {
-      const item = cartData.find(
-        element => element.id === subProductSelected.id,
-      );
-
-      if (item) {
-        setCount(item.quantity);
-      }
+    if (currentUser) {
+      return currentUser.uid;
+    } else {
+      console.log('No user is signed in.');
+      return null;
     }
-  }, [cartData, subProductSelected]);
-
+  };
   //onsnap cập nhật ngay lập tức
   const getProductDetail = () => {
     productRef.doc(id).onSnapshot((snap: any) => {

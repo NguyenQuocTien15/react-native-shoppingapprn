@@ -9,7 +9,7 @@ import {
 import auth from '@react-native-firebase/auth';
 import {TickCircle, TickSquare} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
-import {Image, Platform} from 'react-native';
+import {Alert, Image, Platform} from 'react-native';
 import {Container} from '../../components';
 import {colors} from '../../constants/colors';
 import {fontFamilies} from '../../constants/fontFamilies';
@@ -21,7 +21,7 @@ const initState = {
   password: '',
   confirm: '',
 };
-//Register
+
 const SignUp = ({navigation}: any) => {
   const [registerForm, setRegisterForm] = useState(initState);
   const [isDisable, setIsDisable] = useState(true);
@@ -49,6 +49,30 @@ const SignUp = ({navigation}: any) => {
     }
   };
 
+  // const createNewAccount = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const userCredential = await auth().createUserWithEmailAndPassword(
+  //       registerForm.email,
+  //       registerForm.password,
+  //     );
+  //     const user = userCredential.user;
+  //     if (user) {
+  //       if (registerForm.username) {
+  //         await user.updateProfile({
+  //           displayName: registerForm.username,
+  //         });
+  //       }
+  //       await Auth.CreateProfile();
+  //       navigation.navigate('Result');
+  //     }
+  //     setIsLoading(false);
+  //   } catch (error: any) {
+  //     console.log(error);
+  //     setErrorText(error.message);
+  //     setIsLoading(false);
+  //   }
+  //};
   const createNewAccount = async () => {
     setIsLoading(true);
     try {
@@ -57,21 +81,61 @@ const SignUp = ({navigation}: any) => {
         registerForm.password,
       );
       const user = userCredential.user;
+
       if (user) {
         if (registerForm.username) {
           await user.updateProfile({
             displayName: registerForm.username,
           });
         }
-        await Auth.CreateProfile();
-        navigation.navigate('Result');
+
+        // Send Email Verification
+        await user.sendEmailVerification();
+        Alert.alert(
+          "Verification Email Sent",
+          "A verification link has been sent to your email. Please verify your account within 2 minutes.",
+        );
+
+        // Start the auto-delete countdown
+        startAccountDeletionCountdown(user);
+        
+        // Check verification status periodically
+        checkEmailVerification(user);
       }
-      setIsLoading(false);
     } catch (error: any) {
       console.log(error);
       setErrorText(error.message);
       setIsLoading(false);
     }
+  };
+  const startAccountDeletionCountdown = (user: any) => {
+    setTimeout(async () => {
+      const refreshedUser = await auth().currentUser?.reload();
+      if (user && !user.emailVerified) {
+        // If email is not verified after 5 minutes, delete the account
+        await user.delete();
+        Alert.alert(
+          "Account Deleted",
+          "Your account was deleted because it was not verified within 2 minutes.",
+        );
+        navigation.navigate('SignUp'); // Redirect back to SignUp screen
+      }
+    }, 2 * 60 * 1000); 
+  };
+
+  const checkEmailVerification = (user: any) => {
+    const intervalId = setInterval(async () => {
+      await user.reload(); // Reload the user data to check emailVerified status
+      if (user.emailVerified) {
+        clearInterval(intervalId); // Stop checking once verified
+        setIsLoading(false);
+        Alert.alert(
+          "Email Verified",
+          "Your email has been verified successfully. You can now use your account.",
+        );
+        navigation.navigate('Home'); // Redirect to Home or desired screen
+      }
+    }, 10000); // Check every 10 seconds
   };
 
   const renderButtonRegister = () => {

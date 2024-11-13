@@ -6,70 +6,31 @@ import {colors} from '../../../constants/colors';
 import {fontFamilies} from '../../../constants/fontFamilies';
 import {productRef} from '../../../firebase/firebaseConfig';
 import {ProductModel} from '../../../models/ProductModel';
-import { getDocs, query } from "firebase/firestore";
-import { limit, orderBy } from '@react-native-firebase/firestore';
 
 type Props = {};
 
 const ArrivalsProduct = (props: Props) => {
   const [products, setProducts] = useState<ProductModel[]>([]);
 
-  // useEffect(() => {
-  //   productRef
-  //     .orderBy('createdAt')
-  //     .limit(10)
-  //     .onSnapshot(snap => {
-  //       if (snap.empty) {
-  //         console.log(`Products not found!`);
-  //       } else {
-  //         const items: ProductModel[] = [];
-  //         snap.forEach((item: any) =>
-  //           items.unshift({
-  //             id: items.id,
-  //             ...items.data(),
-  //           }),
-  //         );
-
-  //         setProducts(items);
-  //       }
-  //     });
-  // }, []);
-
-
-  
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const q = query(productRef, orderBy('createdAt'), limit(10));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
+    productRef
+      .orderBy('createdAt')
+      .limit(10)
+      .onSnapshot(snap => {
+        if (snap.empty) {
           console.log(`Products not found!`);
         } else {
           const items: ProductModel[] = [];
-          querySnapshot.forEach((doc) => {
+          snap.forEach((item: any) =>
             items.unshift({
-              id: doc.id,
-              ...doc.data(),
-              type: '',
-              description: '',
-              price: '',
-              title: '',
-              imageUrl: '',
-              files: [],
-              categories: [],
-              createdAt: 0,
-              updatedAt: 0,
-              rate: ''
-            });
-          });
+              id: item.id,
+              ...item.data(),
+            }),
+          );
+
           setProducts(items);
         }
-      } catch (error) {
-        console.error("Error getting products: ", error);
-      }
-    };
-  
-    getProducts();
+      });
   }, []);
 
   return (
