@@ -27,13 +27,7 @@ const HomeScreen = ({navigation}:any) => {
   return (
     <Container isScroll={false}>
       <Section styles={{paddingTop: 16, marginTop:16}}>
-        <Row justifyContent="space-between">
-          <Button
-            inline
-            icon={<Entypo name="home" size={24} color="white" />}
-            color="black"
-            onPress={() => {}}
-          />
+        <Row justifyContent="flex-end">
         <Avatar />
         </Row>
       </Section>
