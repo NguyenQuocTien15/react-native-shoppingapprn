@@ -20,7 +20,7 @@ import {
 import { fontFamilies } from '../../constants/fontFamilies';
 import { CategoryModel } from '../../models/CategoryModel';
 import firestore from '@react-native-firebase/firestore';
-import RnRangeSlider from 'rn-range-slider';
+// import RnRangeSlider from 'rn-range-slider';
 import { ProductModel } from '../../models/ProductModel';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -228,7 +228,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
           title="Price"
         />
         <Space height={12} />
-        <RnRangeSlider
+        {/* <RnRangeSlider
           min={0}
           step={1}
           max={maxPrice}
@@ -274,7 +274,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
           )}
           onSliderTouchEnd={(low, high) => setFilterValues({ ...filterValues, price: { low, high } })}
           onValueChanged={(low, high) => {}}
-        />
+        /> */}
       </Section>
 
       {/* <Section>
