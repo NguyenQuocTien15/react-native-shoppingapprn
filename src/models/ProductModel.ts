@@ -89,9 +89,13 @@ export interface ProductModel {
   createdAt: number;
   updatedAt: number;
   averageRating: number;
+<<<<<<< HEAD
   offer?:OfferModel;
   sold: number;
 
+=======
+  selled: number;
+>>>>>>> chat
 }
 
 export interface SubProduct {

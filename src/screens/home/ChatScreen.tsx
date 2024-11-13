@@ -1,85 +1,121 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { chatsRef } from '../../firebase/firebaseConfig';
 import firestore from '@react-native-firebase/firestore';
-import { firebase } from '@react-native-firebase/auth';
-interface ChatModel {
-  id: string;
-  messages: MessageModel[];
-}
+import auth from '@react-native-firebase/auth';
 
-interface MessageModel {
-  id: string;
-  text: string;
-  senderId: string;
-  timestamp: Date | null;
-}
 
-const ChatScreen = ({ role }: { role: 'admin' | 'client' }) => {
+const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageModel[]>([
     {
       id: 'default',
-      text: 'Hello. How can I help you?',
-      senderId: 'admin',
-      timestamp: null,
+      message: 'Hello. How can I help you?',
+      sender_ID: 'admin',
+      createdAt: null,
     },
   ]);
   const [newMessage, setNewMessage] = useState<string>('');
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [adminId, setAdminId] = useState<string | null>(null);
 
-  const chatId = "rxc5ZaeOc3bwbEJy0wgI";  // Example chat ID
-  const userId = role === 'admin' ? 'adminId' : 'clientId';  // Example sender ID
+  useEffect(() => {
+    // Lấy userId từ Firebase Authentication
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      setUserId(currentUser.uid);
+      
+      // Kiểm tra và lấy hoặc tạo chatId từ Firestore
+      const fetchChatId = async () => {
+        const chatsRef = firestore().collection('chats'); 
+        const chatsSnapshot = await chatsRef
+          .where("user_ID", "==", currentUser.uid)
+          .limit(1)
+          .get();
+
+        if (!chatsSnapshot.empty) {
+          // Nếu chat đã tồn tại
+          setChatId(chatsSnapshot.docs[0].id);
+        } else {
+          // Nếu chưa có, tạo mới một chat và lưu user_ID
+          const newChatDoc = await chatsRef.add({
+            user_ID: currentUser.uid,
+          });
+          setChatId(newChatDoc.id);
+        }
+      };
+
+      fetchChatId();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (chatId) {
+      const unsubscribe = firestore()
+        .collection('chats')
+        .doc(chatId)
+        .collection("messages")
+        .orderBy("createdAt")
+        .onSnapshot((snapshot) => {
+          const newMsgs = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as MessageModel[];
+  
+          // Kiểm tra dữ liệu có thay đổi so với trước không
+          console.log("New messages:", newMsgs);
+  
+          // Loại bỏ các tin nhắn trùng lặp
+          const uniqueMsgs:any = [];
+          const seenIds = new Set();
+  
+          newMsgs.forEach((message) => {
+            if (!seenIds.has(message.id)) {
+              uniqueMsgs.push(message);
+              seenIds.add(message.id);
+            }
+          });
+  
+          // Cập nhật lại danh sách tin nhắn
+          setMessages(newMsgs);
+        });
+  
+      // Cleanup để hủy đăng ký khi component bị unmount hoặc chatId thay đổi
+      return () => unsubscribe();
+    }
+  }, [chatId]); // Lắng nghe khi chatId thay đổi
+  
 
   const handleSendMessage = async () => {
-    if (newMessage.trim().length === 0) return;
+    if (newMessage.trim().length === 0 || !chatId || !userId) return;
 
-    await chatsRef
+    await firestore()
+      .collection('chats')
       .doc(chatId)
       .collection("messages")
       .add({
-        text: newMessage,
-        senderId: userId,
-        timestamp: firestore.FieldValue.serverTimestamp(),
+        message: newMessage,
+        sender_ID: userId,
+        createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
-    setNewMessage(''); // Clear input after sending
+    setNewMessage("");
   };
 
-  useEffect(() => {
-    const unsubscribe = chatsRef
-      .doc(chatId)
-      .collection("messages")
-      .orderBy("timestamp")
-      .onSnapshot((snapshot) => {
-        const msgs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as MessageModel[];
-
-        // Update state only if there are new messages
-        if (JSON.stringify(msgs) !== JSON.stringify(messages)) {
-          setMessages(msgs);
-        }
-      });
-
-    return () => unsubscribe();
-  }, [messages]);
+ 
 
   const renderItem = ({ item }: { item: MessageModel }) => (
-    <View style={[styles.message, item.senderId === userId ? styles.userMessage : styles.botMessage]}>
-      <Text style={styles.messageText}>{item.text}</Text>
+    <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
+      <Text style={styles.messageText}>{item.message}</Text>
     </View>
   );
-
+  
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        inverted
+        //inverted
         style={styles.chatList}
       />
       <View style={styles.inputContainer}>
@@ -97,8 +133,10 @@ const ChatScreen = ({ role }: { role: 'admin' | 'client' }) => {
   );
 };
 
+// Styles go here
 const styles = StyleSheet.create({
   container: {
+    marginTop:25,
     flex: 1,
     justifyContent: 'space-between',
   },
@@ -116,12 +154,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#DCF8C6',
     alignSelf: 'flex-end',
   },
-  botMessage: {
+  adminMessage: {
     backgroundColor: '#E5E5E5',
     alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
+    color:"black"
   },
   inputContainer: {
     flexDirection: 'row',
@@ -153,5 +192,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
 export default ChatScreen;
