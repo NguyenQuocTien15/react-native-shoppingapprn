@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Keyboard
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-
 const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageModel[]>([
     {
@@ -16,30 +15,23 @@ const ChatScreen = () => {
   const [newMessage, setNewMessage] = useState<string>('');
   const [chatId, setChatId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [adminId, setAdminId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Lấy userId từ Firebase Authentication
     const currentUser = auth().currentUser;
     if (currentUser) {
       setUserId(currentUser.uid);
-      
-      // Kiểm tra và lấy hoặc tạo chatId từ Firestore
+
       const fetchChatId = async () => {
-        const chatsRef = firestore().collection('chats'); 
+        const chatsRef = firestore().collection('chats');
         const chatsSnapshot = await chatsRef
           .where("user_ID", "==", currentUser.uid)
           .limit(1)
           .get();
 
         if (!chatsSnapshot.empty) {
-          // Nếu chat đã tồn tại
           setChatId(chatsSnapshot.docs[0].id);
         } else {
-          // Nếu chưa có, tạo mới một chat và lưu user_ID
-          const newChatDoc = await chatsRef.add({
-            user_ID: currentUser.uid,
-          });
+          const newChatDoc = await chatsRef.add({ user_ID: currentUser.uid });
           setChatId(newChatDoc.id);
         }
       };
@@ -59,31 +51,15 @@ const ChatScreen = () => {
           const newMsgs = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate(),
           })) as MessageModel[];
-  
-          // Kiểm tra dữ liệu có thay đổi so với trước không
-          console.log("New messages:", newMsgs);
-  
-          // Loại bỏ các tin nhắn trùng lặp
-          const uniqueMsgs:any = [];
-          const seenIds = new Set();
-  
-          newMsgs.forEach((message) => {
-            if (!seenIds.has(message.id)) {
-              uniqueMsgs.push(message);
-              seenIds.add(message.id);
-            }
-          });
-  
-          // Cập nhật lại danh sách tin nhắn
+
           setMessages(newMsgs);
         });
-  
-      // Cleanup để hủy đăng ký khi component bị unmount hoặc chatId thay đổi
+
       return () => unsubscribe();
     }
-  }, [chatId]); // Lắng nghe khi chatId thay đổi
-  
+  }, [chatId]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim().length === 0 || !chatId || !userId) return;
@@ -101,21 +77,21 @@ const ChatScreen = () => {
     setNewMessage("");
   };
 
- 
-
   const renderItem = ({ item }: { item: MessageModel }) => (
     <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
       <Text style={styles.messageText}>{item.message}</Text>
+      {item.createdAt &&  (
+        <Text style={styles.timestamp}>{item.createdAt.toLocaleTimeString([],{hour: '2-digit',minute:'2-digit'})}</Text>
+      )}
     </View>
   );
-  
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        //inverted
         style={styles.chatList}
       />
       <View style={styles.inputContainer}>
@@ -133,10 +109,10 @@ const ChatScreen = () => {
   );
 };
 
-// Styles go here
+// Styles
 const styles = StyleSheet.create({
   container: {
-    marginTop:25,
+    marginTop: 25,
     flex: 1,
     justifyContent: 'space-between',
   },
@@ -160,7 +136,13 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    color:"black"
+    color: "black",
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "gray",
+    marginTop: 5,
+    alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -177,6 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     fontSize: 16,
+    color: "black",
   },
   sendButton: {
     justifyContent: 'center',
@@ -184,7 +167,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#0084ff',
+    backgroundColor: 'black',
     borderRadius: 20,
   },
   sendButtonText: {
@@ -192,4 +175,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
 export default ChatScreen;

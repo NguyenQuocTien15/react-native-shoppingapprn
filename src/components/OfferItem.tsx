@@ -46,7 +46,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
         font={fontFamilies.poppinsBold}
         text={`${item.percent}% Off`}
       />
-      <TextComponent text={item.title} color={colors.gray} size={16} />
+      <TextComponent  text={item.title} color={colors.dark} size={16} />
       {/* <TextComponent
         text={`With code: ${item.code}`}
         size={16}

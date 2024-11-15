@@ -28,13 +28,14 @@ const HomeScreen = ({navigation}:any) => {
     <Container isScroll={false}>
       <Section styles={{paddingTop: 16, marginTop:16}}>
         <Row justifyContent="space-between">
+        <Avatar />
           <Button
             inline
-            icon={<Entypo name="home" size={24} color="white" />}
+            icon={<Entypo name="message" size={24} color="white" />}
             color="black"
-            onPress={() => {}}
+            onPress={() => {navigation.navigate('ChatScreen')}}
           />
-        <Avatar />
+        
         </Row>
       </Section>
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
