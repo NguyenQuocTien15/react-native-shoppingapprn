@@ -26,12 +26,12 @@ const HomeScreen = ({navigation}:any) => {
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16, marginTop:16}}>
+      <Section styles={{padding: 10, marginTop:10}}>
         <Row justifyContent="space-between">
         <Avatar />
           <Button
             inline
-            icon={<Entypo name="message" size={24} color="white" />}
+            icon={<Entypo name="message" size={19} color="white" />}
             color="black"
             onPress={() => {navigation.navigate('ChatScreen')}}
           />

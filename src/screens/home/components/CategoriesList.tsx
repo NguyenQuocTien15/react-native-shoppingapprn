@@ -63,7 +63,7 @@ const CategoriesList = () => {
               <Button
                 title={item.title}
                 onPress={() => handleCategoryPress(item.id,item.title)}
-                color={colors.dark}
+                color={colors.black}
                 styles={{
                   paddingVertical: 4,
                   paddingHorizontal: 20,

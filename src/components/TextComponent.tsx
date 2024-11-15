@@ -40,7 +40,7 @@ const TextComponent = (props: Props) => {
             break;
     }
   return (
-   <Text text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} size={size ?? sizes.text} color = {color ?? colors.dark} styles={[{},styles]}
+   <Text text={text} font={font ?? fontFamilies.poppinsRegular } flex ={flex} numberOfLine = {numberOfLine} size={size ?? sizes.text} color = {color ?? colors.black} styles={[{},styles]}
    weight={
     !type || (type !== 'bigTitle' && type !== 'title' ) ? '400' : 'bold'}
    />

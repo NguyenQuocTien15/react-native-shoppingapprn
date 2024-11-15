@@ -19,34 +19,56 @@ type Props = {
 
 const Container = (props: Props) => {
     const {children, title, back,left,right,isScroll,bottomComponent} = props;
-  return (
-    <SafeAreaView style={[globalStyles.container]}>
-      {
-        (back || left || title || right) && 
-        <Row
-          styles={{
-            //backgroundColor:'white',
-            marginTop:16,
-            padding:1,
-            paddingHorizontal: 16,
-            paddingVertical:12,
-          }}>
-            {back && <TextComponent text='Back'/>}
-            {left && !back && <TextComponent text='Left'/>}
-            <View style={{paddingHorizontal: 16,flex:1}}>
-              {title && (<TextComponent text= {title}  type="bigTitle"/>)}
+    const navigation = useNavigation();
+
+    return (
+      <SafeAreaView style={[globalStyles.container]}>
+        {(back || left || title || right) && (
+          <Row
+            styles={{
+              marginTop: 5,
+              padding: 1,
+              paddingHorizontal: 5,
+              paddingVertical: 5,
+            }}>
+            {back && (
+              <TouchableOpacity
+                style={[
+                  globalStyles.center,
+                  {
+                    backgroundColor: colors.black,
+                    borderRadius: 100,
+                    padding: 0,
+                    width: 34,
+                    height: 34,
+                    marginTop: 26,
+                  },
+                ]}
+                onPress={() => navigation.goBack()}>
+                <MaterialIcons
+                  style={{ marginLeft: 8 }}
+                  name="arrow-back-ios"
+                  size={22}
+                  color={colors.white}
+                />
+              </TouchableOpacity>
+            )}
+            {left && !back && <TextComponent text='Left' />}
+            <View style={{ paddingHorizontal: 5, paddingVertical: 5,marginTop: 5,padding:1, flex: 1 }}>
+              {title && <TextComponent text={title} type="bigTitle"   styles={{marginTop:20,marginLeft:10}}/>}
             </View>
             {right && right}
           </Row>
-        }
-        {!isScroll && isScroll !== false ? 
-        (<ScrollView style={globalStyles.container}>
-          {children}
-        </ScrollView>) : (<View style={globalStyles.container}>{children}</View>)
-        }
-               {bottomComponent && bottomComponent}
-    </SafeAreaView>
-  );
-}
+        )}
+        {isScroll ? (
+          <ScrollView style={globalStyles.container}>{children}</ScrollView>
+        ) : (
+          <View style={globalStyles.container}>{children}</View>
+        )}
+        {bottomComponent && bottomComponent}
+      </SafeAreaView>
+    );
+  };
+
 
 export default Container;

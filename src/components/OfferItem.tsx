@@ -46,7 +46,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
         font={fontFamilies.poppinsBold}
         text={`${item.percent}% Off`}
       />
-      <TextComponent  text={item.title} color={colors.dark} size={16} />
+      <TextComponent  text={item.title} color={colors.black} size={16} />
       {/* <TextComponent
         text={`With code: ${item.code}`}
         size={16}
@@ -58,7 +58,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
           size="small"
           title="Get Now"
           styles={{paddingHorizontal: 20, marginTop:25}}
-          color={colors.dark}
+          color={colors.black}
           //@ts-ignore
           onPress={() =>  navigation.navigate('ProductsByOfferListScreen', { offerId: item.id  })
         }

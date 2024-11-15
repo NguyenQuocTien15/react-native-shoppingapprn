@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import { Container } from '../../components';
+import { Row, Section } from '@bsdaoquang/rncomponent';
+import Avatar from '../../components/Avatar';
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageModel[]>([
@@ -76,7 +79,7 @@ const ChatScreen = () => {
 
     setNewMessage("");
   };
-
+ 
   const renderItem = ({ item }: { item: MessageModel }) => (
     <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
       <Text style={styles.messageText}>{item.message}</Text>
@@ -87,6 +90,7 @@ const ChatScreen = () => {
   );
 
   return (
+    <Container back title='Chat' isScroll={false}> 
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={messages}
@@ -106,6 +110,7 @@ const ChatScreen = () => {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+    </Container>
   );
 };
 
