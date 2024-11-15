@@ -4,32 +4,32 @@ import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
 import {ScrollView, Text, View} from 'react-native';
 import {Container, TextComponent} from '../../components';
- import Avatar from '../../components/Avatar';
- import {colors} from '../../constants/colors';
+import Avatar from '../../components/Avatar';
+import {colors} from '../../constants/colors';
 import ArrivalsProduct from './components/ArrivalsProduct';
 import CategoriesList from './components/CategoriesList';
- import OffersList from './components/OffersList';
- import PopularProduct from './components/PopularProduct';
- import SearchProduct from './components/SearchProduct';
+import OffersList from './components/OffersList';
+import PopularProduct from './components/PopularProduct';
+import SearchProduct from './components/SearchProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { ProductModel } from '../../models/ProductModel';
 
-const HomeScreen = ({navigation}:any) => {
+const HomeScreen = ({navigation}: any) => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);
     });
   }, []);
 
- useStatusBar('dark-content');
+  useStatusBar('dark-content');
 
   return (
     <Container isScroll={false}>
-      <Section styles={{paddingTop: 16, marginTop:16}}>
+      <Section styles={{paddingTop: 16, marginTop: 16}}>
         <Row justifyContent="flex-end">
-        <Avatar />
+          <Avatar />
         </Row>
       </Section>
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
@@ -44,14 +44,17 @@ const HomeScreen = ({navigation}:any) => {
           </Section>
           <Section>
             <Row>
-            <View style={{ flex: 1 }}>
-            {/* @ts-ignore */}
-              <SearchProduct onSearchResults={(results) => {
-                  handleSearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
-                  navigation.navigate('SearchResultsScreen', { results }); // Điều hướng sang màn hình SearchResultsScreen
-                } } navigation={undefined}  />
-            </View>
-   
+              <View style={{flex: 1}}>
+                {/* @ts-ignore */}
+                <SearchProduct
+                  onSearchResults={results => {
+                    handleSearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
+                    navigation.navigate('SearchResultsScreen', {results}); // Điều hướng sang màn hình SearchResultsScreen
+                  }}
+                  navigation={undefined}
+                />
+              </View>
+
               <Space width={12} />
               <Button
                 styles={{width: 48, height: 48}}
@@ -74,12 +77,12 @@ const HomeScreen = ({navigation}:any) => {
   );
 };
 
-const SearchResults: React.FC<{ products: ProductModel[] }> = ({ products }) => (
+const SearchResults: React.FC<{products: ProductModel[]}> = ({products}) => (
   <View>
-    {products.map((product) => (
-      <View key={product.id} style={{ padding: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{product.title}</Text>
-        <Text style={{ color: colors.gray2 }}>{product.description}</Text>
+    {products.map(product => (
+      <View key={product.id} style={{padding: 10}}>
+        <Text style={{fontSize: 16, fontWeight: 'bold'}}>{product.title}</Text>
+        <Text style={{color: colors.gray2}}>{product.description}</Text>
       </View>
     ))}
   </View>
