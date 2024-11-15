@@ -14,6 +14,7 @@ import CategoriesList from './components/CategoriesList';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { ProductModel } from '../../models/ProductModel';
 
 const HomeScreen = ({navigation}:any) => {
   useEffect(() => {
@@ -27,13 +28,7 @@ const HomeScreen = ({navigation}:any) => {
   return (
     <Container isScroll={false}>
       <Section styles={{paddingTop: 16, marginTop:16}}>
-        <Row justifyContent="space-between">
-          {/* <Button
-            inline
-            icon={<Entypo name="home" size={24} color="white" />}
-            color="black"
-            onPress={() => {}}
-          /> */}
+        <Row justifyContent="flex-end">
         <Avatar />
         </Row>
       </Section>
