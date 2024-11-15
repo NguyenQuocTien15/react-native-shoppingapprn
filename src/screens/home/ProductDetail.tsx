@@ -422,6 +422,28 @@ const ProductDetail = ({navigation, route}: any) => {
                 size={12}
                 color={colors.gray700}
               />
+              <TouchableOpacity onPress={()=> navigation.navigate('RatingScreen')}>
+                <Row styles={{justifyContent: 'space-between', marginTop: 15, alignItems: 'center'}}>
+                  <Text
+                    style={{fontWeight: 'bold', color: 'black', fontSize: 18}}>
+                    Đánh giá của khách hàng
+                  </Text>
+                  <Row>
+                    <Text
+                      style={{
+                       
+                        fontSize: 18,
+                      }}>
+                      Xem thêm
+                    </Text>
+                    <MaterialIcons
+                      name="navigate-next"
+                      size={28}
+                      color="gray"
+                    />
+                  </Row>
+                </Row>
+              </TouchableOpacity>
             </Section>
           )}
         </View>
