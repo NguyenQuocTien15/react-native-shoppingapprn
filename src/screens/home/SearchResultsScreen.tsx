@@ -90,7 +90,6 @@ import { Section } from '@bsdaoquang/rncomponent';
 import { colors } from '../../constants/colors';
 import { globalStyles } from '../../styles/globalStyles';
 import firestore from '@react-native-firebase/firestore';
-import Fuse from 'fuse.js';
 
 const SearchResultProduct = ({ navigation, route }: any) => {
   const { searchTerm }: { searchTerm: string } = route.params;

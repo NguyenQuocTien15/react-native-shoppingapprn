@@ -63,15 +63,46 @@
 // });
 
 // export default RatingScreen;
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { StyleSheet } from 'react-native';
 
-const RatingScreen = () => {
+const AllReviews = () => {
+  const navigation = useNavigation();
   return (
-    <View>
-      <Text>RatingScreen</Text>
+    <View style={styles.container}>
+      <View
+        style={{
+          flexDirection: 'row',
+          paddingTop: 35,
+          alignItems: 'center',
+        }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="black" />
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 25,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: 'black',
+          }}>
+          Tất cả đánh giá
+        </Text>
+      </View>
+      <View style={{height:1, width:'100%', backgroundColor:'gray'}}></View>
     </View>
-  )
+  );
 }
 
-export default RatingScreen
+export default AllReviews
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },})

@@ -4,25 +4,25 @@ import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
 import {ScrollView, Text, View} from 'react-native';
 import {Container, TextComponent} from '../../components';
- import Avatar from '../../components/Avatar';
- import {colors} from '../../constants/colors';
+import Avatar from '../../components/Avatar';
+import {colors} from '../../constants/colors';
 import ArrivalsProduct from './components/ArrivalsProduct';
 import CategoriesList from './components/CategoriesList';
- import OffersList from './components/OffersList';
- import PopularProduct from './components/PopularProduct';
- import SearchProduct from './components/SearchProduct';
+import OffersList from './components/OffersList';
+import PopularProduct from './components/PopularProduct';
+import SearchProduct from './components/SearchProduct';
 import {useStatusBar} from '../../utils/useStatusBar';
 import FilterScreen from './FilterScreen';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-const HomeScreen = ({navigation}:any) => {
+const HomeScreen = ({navigation}: any) => {
   useEffect(() => {
     messaging().onMessage(mess => {
       console.log(mess);
     });
   }, []);
 
- useStatusBar('dark-content');
+  useStatusBar('dark-content');
 
   return (
     <Container isScroll={false}>
@@ -81,12 +81,12 @@ const HomeScreen = ({navigation}:any) => {
 };
 //@ts-ignore
 
-const SearchResults: React.FC<{ products: ProductModel[] }> = ({ products }) => (
+const SearchResults: React.FC<{products: ProductModel[]}> = ({products}) => (
   <View>
-    {products.map((product) => (
-      <View key={product.id} style={{ padding: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{product.title}</Text>
-        <Text style={{ color: colors.gray2 }}>{product.description}</Text>
+    {products.map(product => (
+      <View key={product.id} style={{padding: 10}}>
+        <Text style={{fontSize: 16, fontWeight: 'bold'}}>{product.title}</Text>
+        <Text style={{color: colors.gray2}}>{product.description}</Text>
       </View>
     ))}
   </View>

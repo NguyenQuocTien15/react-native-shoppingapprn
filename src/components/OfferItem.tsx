@@ -47,13 +47,13 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
         text={`${item.percent}% Off`}
       />
       <TextComponent  text={item.title} color={colors.black} size={16} />
-      {/* <TextComponent
+       <TextComponent
         text={`With code: ${item.code}`}
         size={16}
         styles={{paddingVertical: 12}}
       />
       <Row justifyContent="flex-start">
-        {/* Nút Liên kết sản phẩm với khuyến mãi */}
+       
         <Button
           size="small"
           title="Get Now"
@@ -63,7 +63,7 @@ const OfferItem = ({ item,onPress}: OfferItemProps) => {
           onPress={() =>  navigation.navigate('ProductsByOfferListScreen', { offerId: item.id  })
         }
         />
-      {/* </Row> */}
+      </Row>
     </>
   );
 

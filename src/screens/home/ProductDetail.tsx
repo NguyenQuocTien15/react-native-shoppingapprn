@@ -56,7 +56,6 @@ const ProductDetail = ({navigation, route}: any) => {
     setCount(1);
     setSizeSelected('');
   }, [subProductSelected]);
-const hideDialog = () => setVisible(false);
   const getUserId = () => {
     const currentUser = auth().currentUser;
 
@@ -150,18 +149,16 @@ const hideDialog = () => setVisible(false);
         }
       });
 
-      
-      setVisible(true); 
+      setVisible(true);
       setTimeout(() => {
-        setVisible(false); 
-        navigation.navigate('CartScreen'); 
+        setVisible(false);
+        //navigation.navigate('CartScreen');
       }, 2000);
-     
     } catch (error) {
       console.error('Error adding product to cart: ', error);
     }
   };
-const handleChatting = () => {}
+  const handleChatting = () => {};
   const renderChatButton = () => {
     return (
       subProductSelected && (
@@ -187,9 +184,7 @@ const handleChatting = () => {}
           color={colors.black}
           title={'Add to cart'}
         />
-        
       )
-      
     );
   };
 
@@ -341,6 +336,9 @@ const handleChatting = () => {}
                     } in stok`}
                     font={fontFamilies.RobotoMedium}
                   />
+                  <TextComponent
+                    text={`${subProductSelected.quantity}`}
+                    font={fontFamilies.RobotoMedium}></TextComponent>
                 </View>
               </Row>
               <Space height={20} />
@@ -436,6 +434,28 @@ const handleChatting = () => {}
                 size={12}
                 color={colors.gray700}
               />
+              <TouchableOpacity onPress={()=> navigation.navigate('RatingScreen')}>
+                <Row styles={{justifyContent: 'space-between', marginTop: 15, alignItems: 'center'}}>
+                  <Text
+                    style={{fontWeight: 'bold', color: 'black', fontSize: 18}}>
+                    Đánh giá của khách hàng
+                  </Text>
+                  <Row>
+                    <Text
+                      style={{
+                       
+                        fontSize: 18,
+                      }}>
+                      Xem thêm
+                    </Text>
+                    <MaterialIcons
+                      name="navigate-next"
+                      size={28}
+                      color="gray"
+                    />
+                  </Row>
+                </Row>
+              </TouchableOpacity>
             </Section>
           )}
         </View>
@@ -475,7 +495,7 @@ const handleChatting = () => {}
               />
               <Text
                 style={{
-                  textAlign:'center',
+                  textAlign: 'center',
                   marginTop: 10,
                   marginBottom: 10,
                   fontSize: 30,

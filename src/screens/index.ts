@@ -10,7 +10,6 @@ import RatingScreen from "./home/RatingScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
 import ProductsByOfferListScreen from "./home/ProductsByOfferListScreen";
 import ChatScreen from "./home/ChatScreen";
-import FilterScreen from "./home/FilterScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 import ProductsScreen from "./home/ProductsCategoryScreen";
 
