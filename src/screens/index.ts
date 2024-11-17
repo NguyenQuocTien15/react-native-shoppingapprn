@@ -12,6 +12,7 @@ import ProductsByOfferListScreen from "./home/ProductsByOfferListScreen";
 import ChatScreen from "./home/ChatScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 import ProductsScreen from "./home/ProductsCategoryScreen";
+import FilterScreen from "./home/FilterScreen";
 
 export {
   HomeScreen,
