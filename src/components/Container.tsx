@@ -8,7 +8,7 @@ import { colors } from '../constants/colors';
 
 type Props = {
     children: ReactNode;
-    title?: string,
+    bigTitle?: string,
     back?: boolean;
     left?: ReactNode;
     right?:ReactNode;
@@ -18,12 +18,12 @@ type Props = {
 };
 
 const Container = (props: Props) => {
-    const {children, title, back,left,right,isScroll,bottomComponent} = props;
+    const {children, bigTitle, back,left,right,isScroll,bottomComponent} = props;
     const navigation = useNavigation();
 
     return (
       <SafeAreaView style={[globalStyles.container]}>
-        {(back || left || title || right) && (
+        {(back || left || bigTitle || right) && (
           <Row
             styles={{
               marginTop: 5,
@@ -55,7 +55,7 @@ const Container = (props: Props) => {
             )}
             {left && !back && <TextComponent text='Left' />}
             <View style={{ paddingHorizontal: 5, paddingVertical: 5,marginTop: 5,padding:1, flex: 1 }}>
-              {title && <TextComponent text={title} type="bigTitle"   styles={{marginTop:20,marginLeft:10}}/>}
+              {bigTitle && <TextComponent text={bigTitle} type="bigTitle" styles={{marginTop:20,marginLeft:10}}/>}
             </View>
             {right && right}
           </Row>

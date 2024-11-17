@@ -80,7 +80,7 @@ const ProductItem = (props: Props) => {
       <>
         <TextComponent
           text={`$${product.price}`} // Giá gốc
-          styles={{ textDecorationLine: 'line-through', color: colors.dark }}
+          styles={{ textDecorationLine: 'line-through', color: colors.black }}
         />
         <TextComponent
           text={`$${offerPrice}`} // Giá khuyến mãi

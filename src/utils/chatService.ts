@@ -6,6 +6,7 @@ import {db} from "../firebase/firebaseConfig"
 
 // Hàm tìm cuộc trò chuyện giữa admin và user
 export async function getChatWithUser(userId: string): Promise<string | null> {
+  //@ts-ignore
   const chatsRef = collection(db, "chats");
   const q = query(chatsRef, where("user_ID", "==", userId));
 

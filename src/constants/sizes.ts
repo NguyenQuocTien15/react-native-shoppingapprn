@@ -5,7 +5,7 @@ export const sizes = {
   height: Dimensions.get('window').height,
   bigTitle: 38,
   title: 30,
-  text: 20,
+  text: 14,
   description: 12,
   icon: 18,
 };

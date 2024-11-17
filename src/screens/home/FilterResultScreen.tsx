@@ -88,7 +88,7 @@ console.log(filterValues)
   };
   
   
-  return <Container  back title='Results' isScroll={false}>
+  return <Container  back bigTitle='Results' isScroll={false}>
     {
       isLoading ? (
       <Section styles={[globalStyles.center,{flex:1,}]}>

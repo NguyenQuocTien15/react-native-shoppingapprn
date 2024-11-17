@@ -90,7 +90,7 @@ const ChatScreen = () => {
   );
 
   return (
-    <Container back title='Chat' isScroll={false}> 
+    <Container back bigTitle='Chat' isScroll={false}> 
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={messages}
