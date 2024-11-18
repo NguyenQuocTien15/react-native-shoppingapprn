@@ -113,5 +113,5 @@ console.log(filterValues)
   </Container>
 }
 
-export default ResultScreen
+export default FilterResultScreen
 
