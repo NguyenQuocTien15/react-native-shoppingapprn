@@ -41,7 +41,7 @@ const CategoriesList = () => {
     <View style={{ flex: 1 }}>
       <Tabbar
         title="Categories"
-        tabbarStylesProps={{ paddingHorizontal: 16 }}
+        tabbarStylesProps={{ paddingHorizontal: 0 }}
         titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 20 }}
         renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
         onSeeMore={() => {}}
@@ -56,7 +56,7 @@ const CategoriesList = () => {
             <View
               key={item.id}
               style={{
-                marginLeft: 16,
+                paddingLeft: 10,
                 marginRight: index === categories.length - 1 ? 16 : 0,
               }}
             >

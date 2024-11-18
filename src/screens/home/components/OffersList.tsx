@@ -16,27 +16,6 @@ const OffersList = (props: Props) => {
 
   const time = new Date().getTime();
 
-  // const fetchProductsByOfferId = async (offerId: string) => {
-  //   try {
-  //     const snap = await firestore()
-  //       .collection("products")
-  //       .where('offer', '==', offerId)
-  //       .get();
-
-  //     const items: ProductModel[] = [];
-  //     snap.forEach(doc => {
-  //       items.push({
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       } as ProductModel);
-  //     });
-
-  //     setProducts(items);
-  //   } catch (error) {
-  //     console.error('Error fetching products for offer:', error);
-  //   }
-  // };
-
   useEffect(() => {
     firestore()
       .collection(collectionNames.offers) 
@@ -62,7 +41,7 @@ const OffersList = (props: Props) => {
   return (
     <>
       <FlatList
-        style={{paddingLeft: 16}}
+        style={{paddingLeft: 0}}
         data={offers}
         showsHorizontalScrollIndicator={false}
         horizontal
