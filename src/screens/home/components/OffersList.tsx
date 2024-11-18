@@ -20,7 +20,7 @@ const OffersList = (props: Props) => {
     firestore()
       .collection(collectionNames.offers) 
       .where('startAt', '<=', time)
-     // .where('endAt', '>=', time)
+      .where('endAt', '>=', time)
       .onSnapshot(snap => {
         if (snap.empty) {
           console.log('Offer active not found');

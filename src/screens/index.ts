@@ -7,14 +7,12 @@ import CartScreen from "./cart/CartScreen";
 import HomeScreen from "./home/HomeScreen";
 import ProductDetail from "./home/ProductDetail";
 import RatingScreen from "./home/RatingScreen";
-import ResultScreen from './home/FilterResultScreen'
-import FilterScreen from "./home/FilterScreen";
-//import NotificationsScreen from "./notifications/NotificationsScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
-
 import ProductsByOfferListScreen from "./home/ProductsByOfferListScreen";
-import OffersList from "./home/components/OffersList";
 import ChatScreen from "./home/ChatScreen";
+import SearchResultsScreen from "./home/SearchResultsScreen";
+import ProductsScreen from "./home/ProductsCategoryScreen";
+import FilterScreen from "./home/FilterScreen";
 
 export {
   HomeScreen,
@@ -29,5 +27,9 @@ export {
   ProductDetail,
   RatingScreen,
   FilterScreen,
-  ResultScreen
+  SearchResultsScreen,
+  ChatScreen,
+  ProductsScreen,
+  ProductsByOfferListScreen
+  
 };

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Container from '../../../components/Container';
 import { globalStyles } from '../../../styles/globalStyles';
 import SearchResultsScreen from '../SearchResultsScreen';
+import { color } from 'react-native-elements/dist/helpers';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
 

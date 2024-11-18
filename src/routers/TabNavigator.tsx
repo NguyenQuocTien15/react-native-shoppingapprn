@@ -37,9 +37,10 @@ const TabNavigator = () => {
           justifyContent: 'center',
           alignItems: 'center',
         },
-        tabBarIcon: ({focused, size, color}) => {
-          color = focused ? colors.white : colors.dark;
-          size = focused ? 14 : 20;
+        tabBarIcon: ({focused, size, color,}) => {
+          color = focused ? colors.white : colors.black;
+          size = focused ? 20 : 24;
+          
           let icon = <Entypo name="home" size={size} color={color} />;
           switch (route.name) {
             case 'Cart':
@@ -66,20 +67,20 @@ const TabNavigator = () => {
               break;
           }
           return (
-            <Row styles={focused ? {backgroundColor: colors.gray} : undefined}>
+            <Row styles={focused ? {backgroundColor: colors.black,borderRadius:100} : undefined}>
               <View style={focused ? styles.iconContainer : undefined}>
                 {icon}
               </View>
-              {focused && (
-                <TextComponent
-                  styles={{
-                    paddingHorizontal: 6,
-                    fontSize: 11,
-                    fontFamily: fontFamilies.poppinsMedium,
-                  }}
-                  text={route.name}
-                />
-              )}
+              {/* {focused && (
+                // <TextComponent
+                //   styles={{
+                //     paddingHorizontal: 6,
+                //     fontSize: 11,
+                //     fontFamily: fontFamilies.poppinsMedium,
+                //   }}
+                //   // text={route.name}
+                // />
+              )} */}
             </Row>
           );
         },
@@ -142,9 +143,11 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 30,
     height: 30,
-    backgroundColor: colors.dark,
+    backgroundColor: colors.black,
     justifyContent: 'center',
     alignItems: 'center',
+    margin:1,
+    padding:3,
     borderRadius: 100,
   },
 });

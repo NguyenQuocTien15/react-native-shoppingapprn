@@ -63,6 +63,7 @@ const HomeScreen = ({navigation}: any) => {
     />
   );
 };
+//@ts-ignore
 
 const styles = StyleSheet.create({
   container: {

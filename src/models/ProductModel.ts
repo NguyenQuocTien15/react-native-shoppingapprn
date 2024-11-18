@@ -82,15 +82,17 @@ export interface ProductModel {
   id: string;
   type: string;
   description: string;
-  price: string;
+  price: number;
   title: string;
   imageUrl: string;
   files: string[];
   categories: string[];
   createdAt: number;
   updatedAt: number;
-  rate: string;
-  selled: number;
+  averageRating: number;
+  offer?:OfferModel;
+  sold: number;
+
 }
 
 export interface SubProduct {
@@ -103,7 +105,7 @@ export interface SubProduct {
   size: string[];
   quantity: number;
   offer?:OfferModel;
-  // Phương thức tính giá sau khi giảm
-  getDiscountedPrice?: () => number;
+  sold: number;
+  
 }
 

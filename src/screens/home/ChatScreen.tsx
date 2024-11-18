@@ -1,85 +1,101 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { chatsRef } from '../../firebase/firebaseConfig';
 import firestore from '@react-native-firebase/firestore';
-import { firebase } from '@react-native-firebase/auth';
-interface ChatModel {
-  id: string;
-  messages: MessageModel[];
-}
+import auth from '@react-native-firebase/auth';
+import { Container } from '../../components';
+import { Row, Section } from '@bsdaoquang/rncomponent';
+import Avatar from '../../components/Avatar';
 
-interface MessageModel {
-  id: string;
-  text: string;
-  senderId: string;
-  timestamp: firebase.firestore.Timestamp | null;
-}
-
-const ChatScreen = ({ role }: { role: 'admin' | 'client' }) => {
+const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageModel[]>([
     {
       id: 'default',
-      text: 'Hello. How can I help you?',
-      senderId: 'admin',
-      timestamp: null,
+      message: 'Hello. How can I help you?',
+      sender_ID: 'admin',
+      createdAt: null,
     },
   ]);
   const [newMessage, setNewMessage] = useState<string>('');
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const chatId = "rxc5ZaeOc3bwbEJy0wgI";  // Example chat ID
-  const userId = role === 'admin' ? 'adminId' : 'clientId';  // Example sender ID
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      setUserId(currentUser.uid);
+
+      const fetchChatId = async () => {
+        const chatsRef = firestore().collection('chats');
+        const chatsSnapshot = await chatsRef
+          .where("user_ID", "==", currentUser.uid)
+          .limit(1)
+          .get();
+
+        if (!chatsSnapshot.empty) {
+          setChatId(chatsSnapshot.docs[0].id);
+        } else {
+          const newChatDoc = await chatsRef.add({ user_ID: currentUser.uid });
+          setChatId(newChatDoc.id);
+        }
+      };
+
+      fetchChatId();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (chatId) {
+      const unsubscribe = firestore()
+        .collection('chats')
+        .doc(chatId)
+        .collection("messages")
+        .orderBy("createdAt")
+        .onSnapshot((snapshot) => {
+          const newMsgs = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate(),
+          })) as MessageModel[];
+
+          setMessages(newMsgs);
+        });
+
+      return () => unsubscribe();
+    }
+  }, [chatId]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim().length === 0) return;
+    if (newMessage.trim().length === 0 || !chatId || !userId) return;
 
-    await chatsRef
+    await firestore()
+      .collection('chats')
       .doc(chatId)
       .collection("messages")
       .add({
-        text: newMessage,
-        senderId: userId,
-        timestamp: firestore.FieldValue.serverTimestamp(),
+        message: newMessage,
+        sender_ID: userId,
+        createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
-    setNewMessage(''); // Clear input after sending
+    setNewMessage("");
   };
-
-  useEffect(() => {
-    const unsubscribe = chatsRef
-      .doc(chatId)
-      .collection("messages")
-      .orderBy("timestamp")
-      .onSnapshot((snapshot) => {
-        const msgs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as MessageModel[];
-
-        // Update state only if there are new messages
-        if (JSON.stringify(msgs) !== JSON.stringify(messages)) {
-          setMessages(msgs);
-        }
-      });
-
-    return () => unsubscribe();
-  }, [messages]);
-
+ 
   const renderItem = ({ item }: { item: MessageModel }) => (
-    <View style={[styles.message, item.senderId === userId ? styles.userMessage : styles.botMessage]}>
-      <Text style={styles.messageText}>{item.text}</Text>
+    <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
+      <Text style={styles.messageText}>{item.message}</Text>
+      {item.createdAt &&  (
+        <Text style={styles.timestamp}>{item.createdAt.toLocaleTimeString([],{hour: '2-digit',minute:'2-digit'})}</Text>
+      )}
     </View>
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <Container back bigTitle='Chat' isScroll={false}> 
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        inverted
         style={styles.chatList}
       />
       <View style={styles.inputContainer}>
@@ -94,11 +110,14 @@ const ChatScreen = ({ role }: { role: 'admin' | 'client' }) => {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+    </Container>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
+    marginTop: 25,
     flex: 1,
     justifyContent: 'space-between',
   },
@@ -116,12 +135,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#DCF8C6',
     alignSelf: 'flex-end',
   },
-  botMessage: {
+  adminMessage: {
     backgroundColor: '#E5E5E5',
     alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
+    color: "black",
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "gray",
+    marginTop: 5,
+    alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -138,6 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     fontSize: 16,
+    color: "black",
   },
   sendButton: {
     justifyContent: 'center',
@@ -145,7 +172,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#0084ff',
+    backgroundColor: 'black',
     borderRadius: 20,
   },
   sendButtonText: {

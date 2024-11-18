@@ -1,14 +1,12 @@
-import {View, Text, FlatList} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Button, Tabbar} from '@bsdaoquang/rncomponent';
-import {TextComponent} from '../../../components';
-import {fontFamilies} from '../../../constants/fontFamilies';
-import {colors} from '../../../constants/colors';
-import {CategoryModel} from '../../../models/CategoryModel';
+import { View, Text, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, Tabbar } from '@bsdaoquang/rncomponent';
+import { TextComponent } from '../../../components';
+import { fontFamilies } from '../../../constants/fontFamilies';
+import { colors } from '../../../constants/colors';
+import { CategoryModel } from '../../../models/CategoryModel';
 import { categoriesRef } from '../../../firebase/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-//import {categoriesRef} from '../../../firebase/firebaseConfig';
-
 
 const CategoriesList = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -33,8 +31,9 @@ const CategoriesList = () => {
   }, []);
 
   const handleCategoryPress = (categoryId: string, categoryTitle: string) => {
-    // @ts-ignore
-    navigation.navigate('ProductScreen', { categoryId , categoryTitle});
+    // Navigate to ProductsCategoryScreen with categoryId and categoryTitle
+    //@ts-ignore
+    navigation.navigate('ProductsCategoryScreen', { categoryId, categoryTitle });
   };
 
   return (
@@ -43,37 +42,31 @@ const CategoriesList = () => {
         title="Categories"
         tabbarStylesProps={{ paddingHorizontal: 0 }}
         titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 20 }}
-        renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
         onSeeMore={() => {}}
       />
 
-      {categories.length > 0 && (
+      {categories.length > 0 ? (
         <FlatList
           showsHorizontalScrollIndicator={false}
           horizontal
           data={categories}
-          renderItem={({ item, index }) => (
-            <View
-              key={item.id}
-              style={{
-                paddingLeft: 10,
-                marginRight: index === categories.length - 1 ? 16 : 0,
+          renderItem={({ item }) => (
+            <Button
+              title={item.title}
+              onPress={() => handleCategoryPress(item.id, item.title)}
+              color={colors.black}
+              styles={{
+                paddingVertical: 4,
+                paddingHorizontal: 20,
+                marginRight: 8, // Add some margin to space out the buttons
               }}
-            >
-              <Button
-                title={item.title}
-                onPress={() => handleCategoryPress(item.id,item.title)}
-                color={colors.dark}
-                styles={{
-                  paddingVertical: 4,
-                  paddingHorizontal: 20,
-                }}
-                inline
-              />
-            </View>
+              inline
+            />
           )}
           keyExtractor={item => item.id}
         />
+      ) : (
+        <Text>No categories found.</Text> // Show if no categories are available
       )}
     </View>
   );
