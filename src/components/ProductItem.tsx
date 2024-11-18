@@ -30,7 +30,6 @@ type Props = {
 
 const ProductItem = (props: Props) => {
   const {product, styles, index} = props;
-  const WIDTH = (sizes.width - 48) / 2;
   const navigation: any = useNavigation();
 
   // Calculate the offer price if applicable
@@ -46,25 +45,25 @@ const ProductItem = (props: Props) => {
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('ProductDetail', {id: product.id, product: product})}
+      onPress={() =>
+        navigation.navigate('ProductDetail', {id: product.id, product: product})
+      }
       style={[
         {
-          width: (sizes.width - 48) / 2,
+          width: (sizes.width - 50) / 2,
           marginLeft: index ? (index % 2 !== 0 ? 16 : 0) : 0,
           marginBottom: 16,
+          justifyContent: 'center',
         },
         styles,
       ]}>
       <Image
-        source={{uri: imageUrl}}  // Sử dụng imageUrl đã kiểm tra
+        source={{uri: imageUrl}} // Sử dụng imageUrl đã kiểm tra
         style={{
-          flex: 1,
-          width: WIDTH,
-          height: WIDTH - 20,
-          maxWidth: 220,
-          maxHeight: 200,
-          borderRadius: 12,
-          resizeMode: 'cover',
+          width: 180, // Đảm bảo chiều rộng của ảnh bằng chiều rộng cột
+          height: 200, // Đặt chiều cao bằng chiều rộng để giữ tỷ lệ vuông
+          borderRadius: 12, // Bo góc cho hình ảnh
+          resizeMode: 'cover', // Đảm bảo hình ảnh hiển thị đầy đủ cột
         }}
       />
       <View style={[globalStyles.center]}>
@@ -81,7 +80,7 @@ const ProductItem = (props: Props) => {
           numberOfLine={1}
         />
         <TextComponent
-          text={`$${product.price.toLocaleString()}`}
+          text={`$${product.price}`}
           size={20}
           font={fontFamilies.poppinsSemiBold}
         />
