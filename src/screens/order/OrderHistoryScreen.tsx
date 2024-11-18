@@ -7,8 +7,10 @@ import {StyleSheet} from 'react-native';
 import {FlatList} from 'react-native';
 import {ActivityIndicator} from 'react-native';
 import {TouchableOpacity} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const OrderHistoryScreen = () => {
+  const navigation =useNavigation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ const OrderHistoryScreen = () => {
     '3': 'Đã đóng gói', // Packed
     '4': 'Chờ vận chuyển', // Awaiting Shipment
     '5': 'Đang vận chuyển', // In Transit
-    '6': 'Đã giao hàng', // Delivered
+    '6': 'Đơn hàng đã giao hàng', // Delivered
     '7': 'Giao thất bại', // Failed Delivery
     '8': 'Trả kho', // Returned to Warehouse
   };
@@ -52,7 +54,12 @@ const OrderHistoryScreen = () => {
 
     return (
       <View style={styles.itemListProduct}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
           <View
             style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
             <Image
@@ -62,7 +69,9 @@ const OrderHistoryScreen = () => {
             <Text style={styles.customText}>Fashion Store</Text>
           </View>
           <View style={{alignItems: 'center', marginTop: 5}}>
-            <Text style={styles.customText}>{orderStatusName}</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 15, color: 'black'}}>
+              {orderStatusName}
+            </Text>
           </View>
         </View>
 
@@ -99,6 +108,19 @@ const OrderHistoryScreen = () => {
                 </View>
               </View>
             </View>
+            {item.orderStatusId == '6' ? (
+              <View style={{alignItems: 'flex-end'}}>
+                <TouchableOpacity
+                  style={styles.touch}
+                  onPress={() => navigation.navigate('OrderReviews')}>
+                  <Text style={[styles.textTouch, {color: 'white'}]}>
+                    Viết đánh giá
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              ''
+            )}
           </View>
         ))}
 
@@ -130,26 +152,6 @@ const OrderHistoryScreen = () => {
                 },
               ]}>
               Trả hàng
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.touch,
-              {
-                backgroundColor: '#ff7891',
-                width: '30%',
-              },
-            ]}
-            onPress={() => Alert.alert('Review')}>
-            <Text
-              style={[
-                styles.textTouch,
-                {
-                  color: 'white',
-                },
-              ]}>
-              Đánh giá
             </Text>
           </TouchableOpacity>
         </View> */}
@@ -193,15 +195,12 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   touch: {
-    borderRadius: 5,
-    borderColor: '#ff7891',
-    borderWidth: 2,
+    backgroundColor: '#ff7896',
   },
   textTouch: {
     fontSize: 20,
     paddingRight: 5,
     paddingLeft: 5,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   itemListProduct: {

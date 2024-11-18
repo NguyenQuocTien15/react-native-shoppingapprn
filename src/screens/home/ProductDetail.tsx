@@ -27,8 +27,15 @@ import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
 import auth from '@react-native-firebase/auth';
 import { Image } from 'react-native';
+type RouteParams = {
+  ProductDetail: {
+    id: string;
+    product: ProductModel;
+  };
+};
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
+  console.log(route.params);
 
   const [productDetail, setProductDetail] = useState<ProductModel>();
   const [subProducts, setSubProducts] = useState<SubProduct[]>([]);
@@ -43,12 +50,12 @@ const ProductDetail = ({navigation, route}: any) => {
     getProductDetail();
     getSubProducts();
   }, [id]);
-
+  
+  
   useEffect(() => {
     setCount(1);
     setSizeSelected('');
   }, [subProductSelected]);
-const hideDialog = () => setVisible(false);
   const getUserId = () => {
     const currentUser = auth().currentUser;
 
@@ -112,6 +119,7 @@ const hideDialog = () => setVisible(false);
     }
     const cartRef = firestore()
       .collection('carts')
+      //@ts-ignore
       .doc(userId)
       
     try {
@@ -128,6 +136,7 @@ const hideDialog = () => setVisible(false);
             },
           });
         } else {
+          //@ts-ignore
           const currentProducts = cartDoc.data().products || {};
           const currentQuantity = currentProducts[productId]?.quantity || 0;
 
@@ -140,18 +149,16 @@ const hideDialog = () => setVisible(false);
         }
       });
 
-      
-      setVisible(true); 
+      setVisible(true);
       setTimeout(() => {
-        setVisible(false); 
-        //navigation.navigate('CartScreen'); 
+        setVisible(false);
+        //navigation.navigate('CartScreen');
       }, 2000);
-     
     } catch (error) {
       console.error('Error adding product to cart: ', error);
     }
   };
-const handleChatting = () => {}
+  const handleChatting = () => {};
   const renderChatButton = () => {
     return (
       subProductSelected && (
@@ -177,9 +184,7 @@ const handleChatting = () => {}
           color={colors.black}
           title={'Add to cart'}
         />
-        
       )
-      
     );
   };
 
@@ -331,6 +336,9 @@ const handleChatting = () => {}
                     } in stok`}
                     font={fontFamilies.RobotoMedium}
                   />
+                  <TextComponent
+                    text={`${subProductSelected.quantity}`}
+                    font={fontFamilies.RobotoMedium}></TextComponent>
                 </View>
               </Row>
               <Space height={20} />
@@ -426,6 +434,28 @@ const handleChatting = () => {}
                 size={12}
                 color={colors.gray700}
               />
+              <TouchableOpacity onPress={()=> navigation.navigate('RatingScreen')}>
+                <Row styles={{justifyContent: 'space-between', marginTop: 15, alignItems: 'center'}}>
+                  <Text
+                    style={{fontWeight: 'bold', color: 'black', fontSize: 18}}>
+                    Đánh giá của khách hàng
+                  </Text>
+                  <Row>
+                    <Text
+                      style={{
+                       
+                        fontSize: 18,
+                      }}>
+                      Xem thêm
+                    </Text>
+                    <MaterialIcons
+                      name="navigate-next"
+                      size={28}
+                      color="gray"
+                    />
+                  </Row>
+                </Row>
+              </TouchableOpacity>
             </Section>
           )}
         </View>
@@ -465,7 +495,7 @@ const handleChatting = () => {}
               />
               <Text
                 style={{
-                  textAlign:'center',
+                  textAlign: 'center',
                   marginTop: 10,
                   marginBottom: 10,
                   fontSize: 30,

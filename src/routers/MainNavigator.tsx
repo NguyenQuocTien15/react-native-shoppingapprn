@@ -4,6 +4,9 @@ import React from 'react';
 import { CartScreen, ChatScreen, FilterScreen, RatingScreen, SearchResultsScreen } from '../screens';
 import ProductDetail from '../screens/home/ProductDetail';
 import TabNavigator from './TabNavigator';
+import FilterResultScreen from '../screens/home/FilterResultScreen';
+import ProductsCategoryScreen from '../screens/home/ProductsCategoryScreen';
+import ProductsByOfferListScreen from '../screens/home/ProductsByOfferListScreen';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -16,11 +19,16 @@ const MainNavigator = () => {
     {/* <Stack.Screen name='Payment' component={AddPayment}/>
     */}
     <Stack.Screen name='FilterScreen' component={FilterScreen}/>
+    <Stack.Screen name='FilterResultScreen' component={FilterResultScreen}/>
     <Stack.Screen name='SearchResultsScreen' component={SearchResultsScreen}/>
+    {/* @ts-ignore */}
     <Stack.Screen name='ChatScreen' component={ChatScreen}/>
+    <Stack.Screen name='ProductsCategoryScreen' component={ProductsCategoryScreen}/>
+    <Stack.Screen name='ProductsByOfferListScreen' component={ProductsByOfferListScreen}/>
     {/* <Stack.Screen name='ResultScreen' component={ResultScreen}/> */}
     </Stack.Navigator>
   )
+  
 }
 
 export default MainNavigator

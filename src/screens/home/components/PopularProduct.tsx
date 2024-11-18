@@ -52,14 +52,15 @@ const PopularProduct = (props: Props) => {
     return () => unsubscribe();
   }, []);
 
-// const handleUpdateProduct = () => {
-//   products.forEach (async item => {
-// await firestore()
-// .collection('products')
-// .doc(item.id)
-// .update({selled: Math.floor(Math.random()*100)})
-//   });
-// };
+const handleUpdateProduct = () => {
+  products.forEach (async item => {
+    //@ts-ignore
+await firestore()
+.collection('products')
+.doc(item.id)
+.update({selled: Math.floor(Math.random()*100)})
+  });
+};
   return (
     <View style={{flex: 1}}>
       <Tabbar

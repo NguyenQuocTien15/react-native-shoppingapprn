@@ -8,7 +8,7 @@ import { colors } from '../constants/colors';
 
 type Props = {
     children: ReactNode;
-    title?: string,
+    bigTitle?: string,
     back?: boolean;
     left?: ReactNode;
     right?:ReactNode;
@@ -16,21 +16,23 @@ type Props = {
 };
 
 const Container = (props: Props) => {
-    const {children, title, back,left,right,isScroll} = props;
+    const {children, title, back,left,right,isScroll,bottomComponent} = props;
   return (
     <SafeAreaView style={[globalStyles.container]}>
       {
         (back || left || title || right) && 
         <Row
           styles={{
-            backgroundColor:'coral',
+            //backgroundColor:'white',
+            marginTop:16,
+            padding:1,
             paddingHorizontal: 16,
             paddingVertical:12,
           }}>
             {back && <TextComponent text='Back'/>}
             {left && !back && <TextComponent text='Left'/>}
             <View style={{paddingHorizontal: 16,flex:1}}>
-              {title && (<TextComponent text='{title}'  type="bigTitle"/>)}
+              {title && (<TextComponent text= {title}  type="bigTitle"/>)}
             </View>
             {right && right}
           </Row>
@@ -40,6 +42,7 @@ const Container = (props: Props) => {
           {children}
         </ScrollView>) : (<View style={globalStyles.container}>{children}</View>)
         }
+               {bottomComponent && bottomComponent}
     </SafeAreaView>
   );
 }
