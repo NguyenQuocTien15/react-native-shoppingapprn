@@ -78,6 +78,7 @@ export class Product {
 
 
 export interface ProductModel {
+  variations: any;
   id: string;
   type: string;
   description: string;
