@@ -80,7 +80,7 @@ const HomeScreen = ({navigation}: any) => {
               styles={styles.searchButton}
               icon={<Setting4 variant="TwoTone" size={24} color="white" />}
               color="black"
-              onPress={() => console.log('Settings Pressed')}
+              onPress={() => navigation.navigate('FilterScreen')}
             />
           </Row>
         </Section>
