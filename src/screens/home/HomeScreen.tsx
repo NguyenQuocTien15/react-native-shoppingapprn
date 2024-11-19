@@ -37,14 +37,15 @@ const HomeScreen = ({navigation}: any) => {
           <Button
           size='small'
             inline
-            icon={<Entypo name="message" size={28} color="white" />}
-            color="black"
+            icon={<Entypo name="message" size={28} color="black" />}
+            color="white"
+            borderColor='black'
             onPress={() => navigation.navigate('ChatScreen')}
           />
           <View
           style={{
             borderColor:'red',
-            backgroundColor:'red',
+           
             borderRadius:6,
             borderWidth:6,
             width:6,
@@ -100,6 +101,7 @@ const HomeScreen = ({navigation}: any) => {
         <Space height={16} />
         <ProductList />
       </ScrollView>
+     
     </Container>
   );
 };
