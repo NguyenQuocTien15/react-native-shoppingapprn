@@ -13,15 +13,40 @@ import SearchProduct from './components/SearchProduct';
 import { Setting4 } from 'iconsax-react-native';
 
 const HomeScreen = ({navigation}: any) => {
-  const ListHeader = () => (
-    <View>
-      <Avatar />
-      <Space height={16} />
-      <TextComponent type="title" text="Welcome," size={24} />
-      <TextComponent text="Our fashion app" size={18} color={colors.gray2} />
+  useEffect(() => {
+    messaging().onMessage(mess => {
+      console.log(mess);
+    });
+  }, []);
 
-      <Section>
-        <Row>
+  useStatusBar('dark-content');
+
+  return (
+    <Container isScroll={false}>
+      <Section styles={{padding: 10, marginTop:10}}>
+        <Row justifyContent="space-between">
+        <Avatar />
+          <Button
+            inline
+            icon={<Entypo name="message" size={19} color="white" />}
+            color="black"
+            onPress={() => {navigation.navigate('ChatScreen')}}
+          />
+        
+        </Row>
+      </Section>
+      <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+        <>
+          <Section>
+            <TextComponent type="title" text="Welcome," size={24} />
+            <TextComponent
+              text="Our fashion app"
+              size={18}
+              color={colors.gray2}
+            />
+          </Section>
+          <Section>
+            <Row>
           <View style={{flex: 1}}>
             {/* @ts-ignore */}
             <SearchProduct
