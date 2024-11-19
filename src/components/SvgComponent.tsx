@@ -15,7 +15,7 @@ const SvgComponent = (props: Props) => {
   const icon = (
     <SvgFromXml
       xml={svgFile
-        .replace(/color/g, color ? color : colors.dark)
+        .replace(/color/g, color ? color : colors.black)
         .replace(/imageWidth/g, width ? `"${width}"` : '24')
         .replace(/imageHeight/g, height ? `"${height}"` : '24')}
     />
