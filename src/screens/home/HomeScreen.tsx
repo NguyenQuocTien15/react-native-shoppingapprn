@@ -29,12 +29,33 @@ const HomeScreen = ({navigation}: any) => {
       <Section styles={{padding: 10, marginTop:10}}>
         <Row justifyContent="space-between">
         <Avatar />
-          <Button
+       
+        <View>
+        <Button
+        size='small'
             inline
-            icon={<Entypo name="message" size={19} color="white" />}
+            icon={<Entypo name="message" size={25} color="white" />}
             color="black"
             onPress={() => {navigation.navigate('ChatScreen')}}
           />
+           <View
+        style={{
+          backgroundColor: 'red',
+          width:10,
+          height:10,
+          borderRadius:6,
+          borderWidth:6,
+          borderColor:'red',
+          position:'absolute',
+          top:2,
+          right:2
+
+        }}
+        >
+
+        </View>
+        </View>
+          
         
         </Row>
       </Section>
