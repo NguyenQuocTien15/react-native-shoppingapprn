@@ -26,10 +26,8 @@ const Container = (props: Props) => {
         {(back || left || bigTitle || right) && (
           <Row
             styles={{
-              marginTop: 5,
               padding: 1,
               paddingHorizontal: 5,
-              paddingVertical: 5,
             }}>
             {back && (
               <TouchableOpacity
@@ -38,10 +36,9 @@ const Container = (props: Props) => {
                   {
                     backgroundColor: colors.black,
                     borderRadius: 100,
-                    padding: 0,
                     width: 34,
                     height: 34,
-                    marginTop: 26,
+                    marginTop: 6,
                   },
                 ]}
                 onPress={() => navigation.goBack()}>
@@ -54,8 +51,8 @@ const Container = (props: Props) => {
               </TouchableOpacity>
             )}
             {left && !back && <TextComponent text='Left' />}
-            <View style={{ paddingHorizontal: 5, paddingVertical: 5,marginTop: 5,padding:1, flex: 1 }}>
-              {bigTitle && <TextComponent text={bigTitle} type="bigTitle" styles={{marginTop:20,marginLeft:10}}/>}
+            <View style={{ paddingHorizontal: 5,padding:1, flex: 1 }}>
+              {bigTitle && <TextComponent text={bigTitle} type="bigTitle" styles={{marginTop:5,marginLeft:10,fontSize:20}}/>}
             </View>
             {right && right}
           </Row>
