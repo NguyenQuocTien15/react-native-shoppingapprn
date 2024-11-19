@@ -6,6 +6,10 @@ import {collectionNames} from '../../../constants/collectionNames';
 import {OfferModel} from '../../../models/OfferModel';
 import { ProductModel } from '../../../models/ProductModel';
 import { useNavigation } from '@react-navigation/native';
+import { Tabbar } from '@bsdaoquang/rncomponent';
+import { TextComponent } from '../../../components';
+import { fontFamilies } from '../../../constants/fontFamilies';
+import { colors } from '../../../constants/colors';
 
 type Props = {};
 
@@ -40,6 +44,13 @@ const OffersList = (props: Props) => {
 
   return (
     <>
+     <Tabbar
+        title="Offers"
+        tabbarStylesProps={{paddingHorizontal: 0}}
+        titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
+        renderSeemore={<TextComponent text=" " color={colors.gray2} />}
+        onSeeMore={() => {}}
+      />
       <FlatList
         style={{paddingLeft: 0}}
         data={offers}

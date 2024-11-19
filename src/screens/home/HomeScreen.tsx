@@ -13,6 +13,7 @@ import SearchProduct from './components/SearchProduct';
 import Entypo from 'react-native-vector-icons/Entypo';
 import messaging from '@react-native-firebase/messaging';
 import Container from '../../components/Container'; // Assuming you have a Container component
+import { Image } from 'react-native';
 
 const HomeScreen = ({navigation}: any) => {
   useEffect(() => {
@@ -28,6 +29,10 @@ const HomeScreen = ({navigation}: any) => {
       <Section styles={styles.header}>
         <Row justifyContent="space-between">
           <Avatar />
+          <Image
+          source={require('../../assets/images/GoShopLoGo.png')}
+         style={{width:150,height:40}}
+          />
           <View style={{ position: 'relative' }}>
           <Button
           size='small'
@@ -50,6 +55,7 @@ const HomeScreen = ({navigation}: any) => {
              pointerEvents: 'none'
           }}/>
           </View>
+         
         </Row>
       </Section>
 
@@ -84,8 +90,8 @@ const HomeScreen = ({navigation}: any) => {
             />
           </Row>
         </Section>
-
         {/* Offers, Arrivals, and Categories */}
+        <Space height={1} />
         <OffersList />
         <Space height={16} />
         <ArrivalsProduct />

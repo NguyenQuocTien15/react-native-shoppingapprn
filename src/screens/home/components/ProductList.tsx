@@ -40,7 +40,7 @@ const ProductList = () => {
         title="Product"
         tabbarStylesProps={{paddingHorizontal: 0}}
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
-        renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
+        renderSeemore={<TextComponent text=" " color={colors.gray2} />}
         onSeeMore={() => {}}
       />
 
