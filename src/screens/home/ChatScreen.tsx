@@ -103,7 +103,7 @@ const ChatScreen = () => {
   };
   const renderItem = ({ item }: { item: MessageModel }) => (
     <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
-      <Text style={styles.messageText}>{item.message}</Text>
+      <Text style={item.sender_ID === userId ? styles.messageText : styles.adminMessageText}>{item.message}</Text>
       {item.createdAt &&  (
         <Text style={styles.timestamp}>{item.createdAt.toLocaleTimeString([],{hour: '2-digit',minute:'2-digit'})}</Text>
       )}
@@ -166,16 +166,29 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
   },
   userMessage: {
-    backgroundColor: '#DCF8C6',
+    backgroundColor: '#000', // Đặt màu nền của tin nhắn user là màu đen
     alignSelf: 'flex-end',
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '70%',
   },
   adminMessage: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: '#fff', // Đặt màu nền của tin nhắn admin là màu trắng
     alignSelf: 'flex-start',
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '70%',
+    
+    borderWidth: 1,  // Viền của tin nhắn admin
+    borderColor: '#000',  // Màu viền là màu đen
   },
   messageText: {
     fontSize: 16,
-    color: "black",
+    color: "#fff", // Màu chữ mặc định là trắng (dành cho userMessage)
+  },
+  adminMessageText: {
+    fontSize: 16,
+    color: "#000", // Màu chữ cho admin là màu đen
   },
   timestamp: {
     fontSize: 12,
