@@ -2836,7 +2836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@notifee/react-native@npm:latest":
+"@notifee/react-native@npm:^9.1.2":
   version: 9.1.2
   resolution: "@notifee/react-native@npm:9.1.2"
   peerDependencies:
@@ -11357,7 +11357,7 @@ __metadata:
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
     "@bsdaoquang/rncomponent": ^0.1.16
-    "@notifee/react-native": latest
+    "@notifee/react-native": ^9.1.2
     "@react-native-async-storage/async-storage": ^1.24.0
     "@react-native-firebase/app": ^20.3.0
     "@react-native-firebase/auth": ^20.3.0
