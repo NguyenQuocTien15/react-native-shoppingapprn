@@ -438,6 +438,7 @@ const ProductDetail = ({navigation, route}: any) => {
                       <Text
                         style={{
                           fontSize: 18,
+                          color: 'black',
                         }}>
                         Xem thêm
                       </Text>
