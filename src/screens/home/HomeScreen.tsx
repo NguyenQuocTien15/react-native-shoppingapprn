@@ -15,40 +15,13 @@ import Entypo from 'react-native-vector-icons/Entypo';
 
 const HomeScreen = ({navigation}: any) => {
   const ListHeader = () => (
-    <View>
-      <Section styles={styles.header}>
-        <Row justifyContent="space-between">
+    <View style={{padding:15}}>
+      
+        <Row justifyContent="flex-end">
           <Avatar />
-          <Image
-            source={require('../../assets/images/GoShopLoGo.png')}
-            style={{width: 150, height: 40}}
-          />
-          <View style={{position: 'relative'}}>
-            <Button
-              size="small"
-              inline
-              icon={<Entypo name="message" size={28} color="black" />}
-              color="white"
-              borderColor="black"
-              onPress={() => navigation.navigate('ChatScreen')}
-            />
-            <View
-              style={{
-                borderColor: 'red',
-
-                borderRadius: 6,
-                borderWidth: 6,
-                width: 6,
-                height: 6,
-                top: -1,
-                right: -1,
-                position: 'absolute',
-                pointerEvents: 'none',
-              }}
-            />
-          </View>
+          
         </Row>
-      </Section>
+     
       <Space height={16} />
       <TextComponent type="title" text="Welcome," size={24} />
       <TextComponent text="Our fashion app" size={18} color={colors.gray2} />
