@@ -119,6 +119,7 @@ const CartScreen = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
+    setDialogVisible(false);
   }, [userId]);
 
   const updateCart = async (userId, productId, quantity) => {
@@ -198,11 +199,15 @@ const CartScreen = () => {
   };
 
   const toggleSelectProduct = item => {
+    // Create a unique key for the selected item based on productId, color, and size
+    const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
+
     setSelectedProducts(prevSelected => {
-      const isSelected = prevSelected.includes(item.productId);
+      // Check if the item is already selected
+      const isSelected = prevSelected.includes(productKey);
       const updatedSelected = isSelected
-        ? prevSelected.filter(id => id !== item.productId)
-        : [...prevSelected, item.productId];
+        ? prevSelected.filter(key => key !== productKey) // Remove if already selected
+        : [...prevSelected, productKey]; // Add if not selected
 
       // Check if all items are selected
       if (updatedSelected.length === cartItems.length) {
@@ -217,10 +222,14 @@ const CartScreen = () => {
 
   const handleChooseAll = () => {
     if (isSelectAll) {
-      setSelectedProducts([]);
+      setSelectedProducts([]); // Deselect all
       setIsSelectAll(false);
     } else {
-      setSelectedProducts(cartItems.map(item => item.productId)); // Use productId here
+      // Select all items by including unique product keys
+      const allSelectedKeys = cartItems.map(
+        item => `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+      );
+      setSelectedProducts(allSelectedKeys);
       setIsSelectAll(true);
     }
   };
@@ -243,9 +252,11 @@ const CartScreen = () => {
   const handleRemoveFromCart = async (
     userId: string | null | undefined,
     productId: string | number,
+    colorSelected: string,
+    sizeSelected: string,
   ) => {
     if (!userId) {
-      console.error('User ID is required');
+      Alert.alert('User not logged in');
       return;
     }
 
@@ -255,40 +266,70 @@ const CartScreen = () => {
       await firebase.firestore().runTransaction(async transaction => {
         const cartDoc = await transaction.get(cartRef);
 
-        if (cartDoc.exists) {
-          const currentProducts = cartDoc.data()?.products || {};
+        if (!cartDoc.exists) {
+          Alert.alert('Cart not found');
+          return;
+        }
 
-          if (currentProducts[productId]) {
-            delete currentProducts[productId];
+        const currentProducts = cartDoc.data()?.products || {};
+        const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
+        const currentProduct = currentProducts[productKey];
 
-            transaction.update(cartRef, {
-              products: currentProducts,
-            });
-            setDialogVisible(false);
-            console.log('Product removed from cart successfully!');
-          } else {
-            console.warn('Product not found in cart:', productId);
-          }
+        if (!currentProduct) {
+          Alert.alert('Product not found in cart');
+          return;
+        }
+
+        // Remove the product from the cart
+        const updatedProducts = {...currentProducts};
+        delete updatedProducts[productKey];
+
+        // If there are no products left in the cart, delete the cart document
+        if (Object.keys(updatedProducts).length === 0) {
+          transaction.delete(cartRef);
         } else {
-          console.warn('Cart does not exist.');
+          transaction.update(cartRef, {
+            products: updatedProducts,
+          });
+          setDialogVisible(false);
         }
       });
+
     } catch (error) {
       console.error('Error removing product from cart: ', error);
+      Alert.alert('Error removing product from cart');
     }
   };
 
   const handleCheckOut = () => {
+    // Filter selected items based on the selected product IDs
     const selectedItems = cartItems.filter(item =>
-      selectedProducts.includes(item.productId),
+      selectedProducts.includes(
+        `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+      ),
     );
 
     if (selectedItems.length > 0) {
-      navigation.navigate('CheckOut', {selectedItems});
+      
+      const itemsToSend = selectedItems.map(item => ({
+        productId: item.productId,
+        title: item.title,
+        imageUrl: item.imageUrl,
+        size: item.sizeName,
+        quantity: item.quantity,
+        color: item.colorName,
+        colorSelected: item.colorSelected,
+        sizeSelected: item.sizeSelected,
+        price: item.price,
+      }));
+
+      // Navigate to checkout with the selected items
+      navigation.navigate('CheckOut', {selectedItems: itemsToSend});
     } else {
       Alert.alert('Please select at least one product to checkout.');
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -298,16 +339,18 @@ const CartScreen = () => {
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
             data={cartItems}
-            keyExtractor={item => item.productId}
+            keyExtractor={item =>
+              `${item.productId}-${item.colorSelected}-${item.sizeSelected}`
+            }
             renderItem={({item, index}) => (
               <View key={item.productId} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
                   <Col flex={0.15}>
                     <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
-                        {selectedProducts.includes(item.productId) && (
-                          <View style={styles.selectedRb} />
-                        )}
+                        {selectedProducts.includes(
+                          `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+                        ) && <View style={styles.selectedRb} />}
                       </View>
                     </TouchableOpacity>
                   </Col>
@@ -391,7 +434,12 @@ const CartScreen = () => {
                   <Dialog.Button
                     label="Delete"
                     onPress={() =>
-                      handleRemoveFromCart(userID, selectedItem?.productId)
+                      handleRemoveFromCart(
+                        userID,
+                        selectedItem?.productId,
+                        selectedItem?.colorSelected,
+                        selectedItem?.sizeSelected,
+                      )
                     }
                   />
                 </Dialog.Container>
