@@ -52,8 +52,7 @@ const ProductItem = (props: Props) => {
           justifyContent: 'center',
         },
         styles,
-      ]}
-    >
+      ]}>
       <Image
         source={{uri: imageUrl}} // Sử dụng imageUrl đã kiểm tra
         style={{
@@ -71,25 +70,35 @@ const ProductItem = (props: Props) => {
           numberOfLine={1}
           font={fontFamilies.poppinsBold}
         />
-        <TextComponent text={product.type} color={colors.gray2} numberOfLine={1} />
-        
+        <TextComponent
+          text={product.type}
+          color={colors.gray2}
+          numberOfLine={1}
+        />
+
         <>
-    {product.offer?.percent ? (
-      <>
-        <TextComponent
-          text={`$${product.price}`} // Giá gốc
-          styles={{ textDecorationLine: 'line-through', color: colors.black }}
-        />
-        <TextComponent
-          text={`$${offerPrice}`} // Giá khuyến mãi
-          styles={{ color: colors.gray2 }}
-        />
-      </>
-    ) : (
-      <TextComponent text={`$${product.price}`} />
-    )}
-  </>
-        
+          {product.offer?.percent ? (
+            <>
+              <TextComponent
+                text={`$${product.price}`} // Giá gốc
+                styles={{
+                  textDecorationLine: 'line-through',
+                  color: colors.black,
+                }}
+              />
+              <TextComponent
+                text={`$${offerPrice}`} // Giá khuyến mãi
+                styles={{color: colors.gray2}}
+              />
+            </>
+          ) : (
+            <TextComponent
+              color={colors.red}
+              font={fontFamilies.poppinsBold}
+              text={`$${product.price}`}
+            />
+          )}
+        </>
       </View>
     </TouchableOpacity>
   );
