@@ -14,9 +14,9 @@ import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
-import auth from '@react-native-firebase/auth';
+import auth, {getAuth} from '@react-native-firebase/auth';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
+import {firebase} from '@react-native-firebase/firestore';
 const CartScreen = () => {
   const navigation = useNavigation();
 
@@ -24,93 +24,102 @@ const CartScreen = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [userId, setUserId] = useState(null);
+
   const [cartItems, setCartItems] = useState([]);
-
-  const sizeNameSelected = 
-    {
-      1: 'S',
-      2: 'M',
-      3: 'L',
-      4: 'XL',
-      5: 'XXL',
+  const userId = getAuth().currentUser?.uid;
+  const sizeNameSelected = {
+    1: 'S',
+    2: 'M',
+    3: 'L',
+    4: 'XL',
+    5: 'XXL',
+  };
+  const fetchCartProducts = (
+    userId: string | null | undefined,
+    setCartItems: React.Dispatch<React.SetStateAction<any[]>>,
+  ) => {
+    if (!userId) {
+      console.error('User ID is null or undefined.');
+      setCartItems([]);
+      return;
     }
-  ;
-  useEffect(() => {
-    const currentUser = auth().currentUser;
-    if (currentUser) {
-      setUserId(currentUser.uid);
 
-      const cartRef = firebase
-        .firestore()
-        .collection('carts')
-        .doc(currentUser.uid);
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
+    const productsRef = firebase.firestore().collection('products');
+    const colorRef = firebase.firestore().collection('colors');
 
-      const unsubscribe = cartRef.onSnapshot(async doc => {
-        if (doc.exists) {
-          const products = doc.data().products;
+    return cartRef.onSnapshot(
+      async cartDoc => {
+        if (cartDoc.exists) {
+          const cartData = cartDoc.data();
+          const cartProducts = cartData?.products || {};
 
-          const productDetails = await Promise.all(
-            Object.keys(products).map(async productId => {
-              const productDoc = await firebase
-                .firestore()
-                .collection('products')
-                .doc(productId)
-                .get();
+          const productKeys = Object.keys(cartProducts);
+          const productList: any[] = [];
 
-              const productData = productDoc.data();
-              if (!productData) {
-                console.warn(`Product with ID ${productId} is missing data`);
-                return null; // Skip this product if data is missing
+          for (const key of productKeys) {
+            const {colorSelected, sizeSelected, quantity} = cartProducts[key];
+
+            // Extract productId from the key (assuming the format: productId-color-size)
+            const [productId] = key.split('-');
+
+            try {
+              const productDoc = await productsRef.doc(productId).get();
+              const colorDoc = await colorRef.doc(colorSelected).get();
+
+              if (productDoc.exists && colorDoc.exists) {
+                const productData = productDoc.data();
+                const colorData = colorDoc.data();
+                const sizeName = sizeNameSelected[sizeSelected]; // Assuming `sizeNameSelected` is a mapping object
+
+                productList.push({
+                  productKey: key,
+                  productId,
+                  colorSelected,
+                  colorName: colorData?.colorName,
+                  sizeSelected,
+                  sizeName,
+                  quantity,
+                  ...productData, // Spread product details (e.g., name, imageUrl, price)
+                });
+              } else {
+                if (!productDoc.exists) {
+                  console.warn(`Product with ID ${productId} not found.`);
+                }
+                if (!colorDoc.exists) {
+                  console.warn(`Color with ID ${colorSelected} not found.`);
+                }
               }
+            } catch (error) {
+              console.error(
+                `Error fetching product details for ${productId}: `,
+                error,
+              );
+            }
+          }
 
-              const colorDoc = await firebase
-                .firestore()
-                .collection('colors')
-                .doc(products[productId].colorSelected)
-                .get();
-              const colorData = colorDoc.data();
-              const sizeName = sizeNameSelected[products[productId].sizeSelected];
-              return {
-                productId,
-                imageUrl: productData.imageUrl || '', // Default to an empty string if imageUrl is missing
-                quantity: products[productId].quantity,
-                colorSelected: colorData?.colorName,
-                sizeSelected: sizeName,
-                title: productData.title,
-                description: productData.description,
-                price: productData.price,
-                addedAt: new Date(products[productId].addedAt || Date.now()),
-              };
-            }),
-          ).then(results => results.filter(item => item !== null)); // Filter out null results
-
-          const sortedProductDetails = productDetails.sort(
-            (a, b) => b.addedAt - a.addedAt,
-          );
-
-          setCartItems(sortedProductDetails);
+          setCartItems(productList);
         } else {
-          console.log('Giỏ hàng trống');
+          console.log('Cart is empty.');
+          setCartItems([]);
         }
-      });
+      },
+      error => {
+        console.error('Error listening to cart changes: ', error);
+      },
+    );
+  };
 
-      return () => unsubscribe(); // Hủy theo dõi khi component bị unmount
-    } else {
-      console.log('Không có người dùng đăng nhập');
-    }
-  }, []);
   useEffect(() => {
-    const fetchCartItems = async () => {
-      const cartRef = firebase.firestore().collection('carts').doc('userId');
-      const doc = await cartRef.get();
-      if (doc.exists) {
-        setCartItems(doc.data().products);
-      }
-    };
+    if (!userId) return;
 
-    fetchCartItems();
-  }, []);
+    const unsubscribe = fetchCartProducts(userId, setCartItems);
+
+    // Cleanup the listener on component unmount
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [userId]);
 
   const updateCart = async (userId, productId, quantity) => {
     const cartRef = firebase.firestore().collection('carts').doc(userId);
@@ -322,11 +331,10 @@ const CartScreen = () => {
                     />
 
                     <TextComponent
-                      text={`${item.colorSelected} - ${item.sizeSelected}`}
+                      text={`${item.colorName} - ${item.sizeName}`}
                       size={17}
                     />
 
-                    <TextComponent text={item.size} />
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
