@@ -6,6 +6,7 @@ import TabNavigator from './TabNavigator';
 import FilterResultScreen from '../screens/home/FilterResultScreen';
 import ProductsCategoryScreen from '../screens/home/ProductsCategoryScreen';
 import ProductsByOfferListScreen from '../screens/home/ProductsByOfferListScreen';
+import OrderReview from './Order/OrderReviewNavigator';
 
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -25,6 +26,7 @@ const MainNavigator = () => {
     <Stack.Screen name='ProductsCategoryScreen' component={ProductsCategoryScreen}/>
     <Stack.Screen name='ProductsByOfferListScreen' component={ProductsByOfferListScreen}/>
     {/* <Stack.Screen name='ResultScreen' component={ResultScreen}/> */}
+    <Stack.Screen name='OrderReviews' component={OrderReview}></Stack.Screen>
     </Stack.Navigator>
   )
   
