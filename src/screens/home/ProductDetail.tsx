@@ -345,7 +345,7 @@ const handleAddToCart = async (
                   borderTopStartRadius: 30,
                   borderTopEndRadius: 30,
                 }}>
-                <Row justifyContent="space-between" alignItems='flex-start'>
+                <Row justifyContent="space-between" alignItems="flex-start">
                   <Col>
                     <TextComponent
                       text={productDetail?.title}
@@ -360,7 +360,7 @@ const handleAddToCart = async (
                       backgroundColor: colors.gray300,
                       padding: 6,
                       borderRadius: 100,
-                      flex:0.28
+                      flex: 0.28,
                     }}>
                     <TouchableOpacity
                       style={{paddingLeft: 12}}
@@ -487,8 +487,13 @@ const handleAddToCart = async (
                   size={12}
                   color={colors.gray700}
                 />
+               
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('RatingScreen')}>
+                  onPress={() =>
+                    navigation.navigate('RatingScreen', {
+                      productId: id,
+                    })
+                  }>
                   <Row
                     styles={{
                       justifyContent: 'space-between',
@@ -554,16 +559,17 @@ const handleAddToCart = async (
             />
           </Col>
           <Space width={4}></Space>
-          
-            <Button
-              icon={
-                <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
-              }
-              inline
-              onPress={() => handleAddToCart(userId,id,colorSelected, sizeSelected, count)}
-              color={colors.black}
-              title={'Add to cart'}></Button>
-          
+
+          <Button
+            icon={
+              <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
+            }
+            inline
+            onPress={() =>
+              handleAddToCart(userId, id, colorSelected, sizeSelected, count)
+            }
+            color={colors.black}
+            title={'Add to cart'}></Button>
 
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
