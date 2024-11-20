@@ -134,63 +134,132 @@ const ProductDetail = ({navigation, route}: any) => {
       );
     }
   };
-  const handleAddToCart = async (
-    userId: string | null | undefined,
-    productId: string | number,
-    colorSelected: string,
-    sizeSelected: string,
-    quantity: number,
-  ) => {
-    if (!sizeSelected) {
-      Alert.alert('Bạn chưa chọn size');
-      return;
-    }
-    if (!colorSelected) {
-      Alert.alert('Bạn chưa chọn màu');
-      return;
-    }
-    const cartRef = firestore().collection('carts').doc(userId);
+  // const handleAddToCart = async (
+  //   userId: string | null | undefined,
+  //   productId: string | number,
+  //   colorSelected: string,
+  //   sizeSelected: string,
+  //   quantity: number,
+  // ) => {
+  //   if (!sizeSelected) {
+  //     Alert.alert('Bạn chưa chọn size');
+  //     return;
+  //   }
+  //   if (!colorSelected) {
+  //     Alert.alert('Bạn chưa chọn màu');
+  //     return;
+  //   }
+  //   const cartRef = firestore().collection('carts').doc(userId);
 
-    try {
-      await firestore().runTransaction(async transaction => {
-        const cartDoc = await transaction.get(cartRef);
+  //   try {
+  //     await firestore().runTransaction(async transaction => {
+  //       const cartDoc = await transaction.get(cartRef);
 
-        if (!cartDoc.exists) {
-          transaction.set(cartRef, {
-            products: {
-              [productId]: {
-                colorSelected,
-                sizeSelected,
-                quantity: quantity,
-                addedAt: new Date().toISOString(),
-              },
-            },
-          });
-        } else {
-          const currentProducts = cartDoc.data().products || {};
-          const currentQuantity = currentProducts[productId]?.quantity || 0;
+  //       if (!cartDoc.exists) {
+  //         transaction.set(cartRef, {
+  //           products: {
+  //             [productId]: {
+  //               colorSelected,
+  //               sizeSelected,
+  //               quantity: quantity,
+  //               addedAt: new Date().toISOString(),
+  //             },
+  //           },
+  //         });
+  //       } else {
+  //         const currentProducts = cartDoc.data().products || {};
+  //         const currentQuantity = currentProducts[productId]?.quantity || 0;
 
-          transaction.update(cartRef, {
-            [`products.${productId}`]: {
+  //         transaction.update(cartRef, {
+  //           [`products.${productId}`]: {
+  //             colorSelected,
+  //             sizeSelected,
+  //             quantity: currentQuantity + quantity,
+  //             addedAt: new Date().toISOString(),
+  //           },
+  //         });
+  //       }
+  //     });
+
+  //     setVisible(true);
+  //     setTimeout(() => {
+  //       setVisible(false);
+  //       //navigation.navigate('CartScreen');
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error('Error adding product to cart: ', error);
+  //   }
+  // };
+
+const handleAddToCart = async (
+  userId: string | null | undefined,
+  productId: string | number,
+  colorSelected: string,
+  sizeSelected: string,
+  quantity: number,
+) => {
+  if (!sizeSelected) {
+    Alert.alert('Bạn chưa chọn size');
+    return;
+  }
+  if (!colorSelected) {
+    Alert.alert('Bạn chưa chọn màu');
+    return;
+  }
+
+  const cartRef = firestore().collection('carts').doc(userId);
+
+  try {
+    await firestore().runTransaction(async transaction => {
+      const cartDoc = await transaction.get(cartRef);
+
+      if (!cartDoc.exists) {
+        // If cart doesn't exist, create it with the new product
+        transaction.set(cartRef, {
+          products: {
+            [`${productId}-${colorSelected}-${sizeSelected}`]: {
               colorSelected,
               sizeSelected,
-              quantity: currentQuantity + quantity,
+              quantity,
+              addedAt: new Date().toISOString(),
+            },
+          },
+        });
+      } else {
+        const currentProducts = cartDoc.data().products || {};
+
+        // Check if the product with the selected color and size already exists
+        const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
+        const currentProduct = currentProducts[productKey];
+
+        if (currentProduct) {
+          // If the product exists, update the quantity
+          transaction.update(cartRef, {
+            [`products.${productKey}.quantity`]: currentProduct.quantity + quantity,
+          });
+        } else {
+          // If the product doesn't exist (same color, different size), add it as a new item
+          transaction.update(cartRef, {
+            [`products.${productKey}`]: {
+              colorSelected,
+              sizeSelected,
+              quantity,
               addedAt: new Date().toISOString(),
             },
           });
         }
-      });
+      }
+    });
 
-      setVisible(true);
-      setTimeout(() => {
-        setVisible(false);
-        //navigation.navigate('CartScreen');
-      }, 2000);
-    } catch (error) {
-      console.error('Error adding product to cart: ', error);
-    }
-  };
-
+    setVisible(true);
+    setTimeout(() => {
+      setVisible(false);
+      //navigation.navigate('CartScreen');
+    }, 2000);
+  } catch (error) {
+    console.error('Error adding product to cart: ', error);
+  }
+};
 
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
