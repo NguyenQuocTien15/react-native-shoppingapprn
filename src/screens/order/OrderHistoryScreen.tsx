@@ -6,10 +6,10 @@ import {StyleSheet} from 'react-native';
 import {FlatList} from 'react-native';
 import {ActivityIndicator} from 'react-native';
 import {TouchableOpacity} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const OrderHistoryScreen = () => {
-  const navigation =useNavigation();
+  const navigation = useNavigation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,9 +91,9 @@ const OrderHistoryScreen = () => {
                   {orderItem.title}
                 </Text>
                 <Text style={{color: 'black', fontSize: 18}}>
-                  Quantity: {orderItem.quantity}
+                  {orderItem.color} - {orderItem.size} - SL:{' '}
+                  {orderItem.quantity}
                 </Text>
-
                 <View
                   style={{
                     flex: 1,
@@ -111,7 +111,15 @@ const OrderHistoryScreen = () => {
               <View style={{alignItems: 'flex-end'}}>
                 <TouchableOpacity
                   style={styles.touch}
-                  onPress={() => navigation.navigate('OrderReviews')}>
+                  onPress={() =>
+                    navigation.navigate('OrderReviewsScreen', {
+                      productId: orderItem.productId,
+                      title: orderItem.title,
+                      imageUrl: orderItem.imageUrl,
+                      size: orderItem.size,
+                      color: orderItem.color,
+                    })
+                  }>
                   <Text style={[styles.textTouch, {color: 'white'}]}>
                     Viết đánh giá
                   </Text>
