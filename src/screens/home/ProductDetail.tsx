@@ -29,7 +29,7 @@ import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
 import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
-import auth, {firebase} from '@react-native-firebase/auth';
+import auth, {firebase, getAuth} from '@react-native-firebase/auth';
 import {Image} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -45,8 +45,8 @@ const ProductDetail = ({navigation, route}: any) => {
   const [sizeSelected, setSizeSelected] = useState('');
   const [visible, setVisible] = useState(false);
 
-  const [quantityAvailable, setQuantityAvailable] = useState(0);
   const [sizes, setSizes] = useState<any[]>([]);
+  const userId = getAuth().currentUser?.uid
   useEffect(() => {
     if (productDetail?.variations?.length > 0) {
       const firstColor = productDetail.variations[0].color;
@@ -132,17 +132,65 @@ const ProductDetail = ({navigation, route}: any) => {
       const sizeVariation = colorVariation.sizes.find(
         (s: any) => s.size === sizeSelected,
       );
-
-      if (sizeVariation) {
-        // Cập nhật số lượng của kích cỡ
-        setQuantityAvailable(sizeVariation.quantity);
-        console.log(
-          'Available Quantity for selected size:',
-          sizeVariation.quantity,
-        );
-      }
     }
   };
+  const handleAddToCart = async (
+    userId: string | null | undefined,
+    productId: string | number,
+    colorSelected: string,
+    sizeSelected: string,
+    quantity: number,
+  ) => {
+    if (!sizeSelected) {
+      Alert.alert('Bạn chưa chọn size');
+      return;
+    }
+    if (!colorSelected) {
+      Alert.alert('Bạn chưa chọn màu');
+      return;
+    }
+    const cartRef = firestore().collection('carts').doc(userId);
+
+    try {
+      await firestore().runTransaction(async transaction => {
+        const cartDoc = await transaction.get(cartRef);
+
+        if (!cartDoc.exists) {
+          transaction.set(cartRef, {
+            products: {
+              [productId]: {
+                colorSelected,
+                sizeSelected,
+                quantity: quantity,
+                addedAt: new Date().toISOString(),
+              },
+            },
+          });
+        } else {
+          const currentProducts = cartDoc.data().products || {};
+          const currentQuantity = currentProducts[productId]?.quantity || 0;
+
+          transaction.update(cartRef, {
+            [`products.${productId}`]: {
+              colorSelected,
+              sizeSelected,
+              quantity: currentQuantity + quantity,
+              addedAt: new Date().toISOString(),
+            },
+          });
+        }
+      });
+
+      setVisible(true);
+      setTimeout(() => {
+        setVisible(false);
+        //navigation.navigate('CartScreen');
+      }, 2000);
+    } catch (error) {
+      console.error('Error adding product to cart: ', error);
+    }
+  };
+
 
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -436,16 +484,16 @@ const ProductDetail = ({navigation, route}: any) => {
             />
           </Col>
           <Space width={4}></Space>
-          <Col>
+          
             <Button
               icon={
                 <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
               }
               inline
-              onPress={() => console.log('1')}
+              onPress={() => handleAddToCart(userId,id,colorSelected, sizeSelected, count)}
               color={colors.black}
               title={'Add to cart'}></Button>
-          </Col>
+          
 
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
