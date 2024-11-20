@@ -1,33 +1,37 @@
-import {View, Text, TouchableOpacity} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { View, Text, TouchableOpacity, Modal, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {StyleSheet} from 'react-native';
-import {db, dbFirestore, reviewsRef} from '../../firebase/firebaseConfig';
-import {Alert} from 'react-native';
-import {ActivityIndicator} from 'react-native';
-import {FlatList} from 'react-native';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  where,
-} from '@react-native-firebase/firestore';
-import {getAuth} from '@react-native-firebase/auth';
-import { AirbnbRating } from 'react-native-elements';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { db } from '../../firebase/firebaseConfig';
 import { Rating } from 'react-native-ratings';
+import { collection, doc, getDoc, onSnapshot } from '@react-native-firebase/firestore';
 
-const AllReviews = ({item}) => {
+const AllReviews = () => {
   const route = useRoute();
-
   const navigation = useNavigation();
-  const {productId} = route.params; // Get productId from route params
+  const { productId } = route.params; // Get productId from route params
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
+  const filterOptions = [
+    'Đánh giá thấp đến cao', // Low to High Rating
+    'Đánh giá gần nhất', // Most Recent
+    'Đánh giá cao đến thấp', 'Hủy'
+  ];
+
+  const toggleDialog = () => {
+    setIsVisible(!isVisible);
+  };
+
+  const handleFilterSelect = (filter: string) => {
+    setSelectedFilter(filter);
+    setIsVisible(false); // Close dialog after selection
+  };
+
+  // Fetching reviews data
   useEffect(() => {
     // Reference to the reviews collection for the specific product
     const reviewsRef = collection(db, 'reviews', productId, 'reviews');
@@ -68,7 +72,6 @@ const AllReviews = ({item}) => {
     return () => unsubscribe();
   }, [productId]);
 
-
   const fetchUserName = async (userId: string) => {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
@@ -80,73 +83,120 @@ const AllReviews = ({item}) => {
     }
     return 'Unknown'; // Nếu không tìm thấy, trả về "Unknown"
   };
-  const RenderReviewItem = ({item}) => (
-    <View style={styles.reviewContainer}>
-      <Text style={styles.userText}>{item.userName}</Text>
-      <View style={{alignItems: 'flex-start'}}><Rating
-        startingValue={item.rating}
-        readonly
-        ratingCount={5}
-        ratingBackgroundColor="coral"
-        imageSize={18}
-      /></View>
-      
-      <Text style={styles.commentText}>{item.comment}</Text>
-    </View>
-  );
+
+   const RenderReviewItem = ({item}) => (
+     <View style={styles.reviewContainer}>
+       <Text style={styles.userText}>{item.userName}</Text>
+       <View style={{alignItems: 'flex-start'}}>
+         <Rating
+           startingValue={item.rating}
+           readonly
+           ratingCount={5}
+           ratingBackgroundColor="coral"
+           imageSize={18}
+         />
+       </View>
+
+       <Text style={styles.commentText}>{item.comment}</Text>
+     </View>
+   );
+
+  // Function to apply the selected filter
+  const applyFilter = (filter) => {
+    let filteredReviews = [...reviews];
+    if (filter === 'Đánh giá thấp đến cao') {
+      filteredReviews = filteredReviews.sort((a, b) => a.rating - b.rating); // Low to High Rating
+    } else if (filter === 'Đánh giá cao đến thấp') {
+      filteredReviews = filteredReviews.sort((a, b) => b.rating - a.rating); // High to Low Rating
+    } else if (filter === 'Đánh giá gần nhất') {
+      filteredReviews = filteredReviews.sort((a, b) => new Date(b.date) - new Date(a.date)); // Most Recent
+    }else if (filter === 'Đánh giá gần nhất') {
+      setIsVisible(false)
+    }
+    setReviews(filteredReviews); // Update the reviews list
+  };
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          marginTop: 10,
-          marginBottom: 10,
-          alignItems: 'center',
-        }}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="black" />
+          <Ionicons name="chevron-back" size={30} color="black" />
         </TouchableOpacity>
 
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 25,
-            fontWeight: 'bold',
-            textAlign: 'center',
-            color: 'black',
-          }}>
-          Tất cả đánh giá
-        </Text>
+        <Text style={styles.title}>Tất cả đánh giá</Text>
+
+        <TouchableOpacity onPress={toggleDialog}>
+          <Ionicons name="filter-circle" size={30} color="black" />
+        </TouchableOpacity>
       </View>
+
+      {isVisible && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isVisible}
+          onRequestClose={toggleDialog}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.dialogContainer}>
+              <FlatList
+                data={filterOptions}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.filterOption}
+                    onPress={() => {
+                      handleFilterSelect(item);
+                      applyFilter(item); // Apply the filter when selected
+                    }}
+                  >
+                    <Text>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {selectedFilter && (
+        <Text style={styles.selectedFilterText}>
+          Bạn chọn: {selectedFilter}
+        </Text>
+      )}
+
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : reviews.length > 0 ? (
         <FlatList
-          data={reviews} // Ensure reviewsData is an array of objects with userId
-          renderItem={({item}) => <RenderReviewItem item={item} />}
+          data={reviews}
+          renderItem={({ item }) => <RenderReviewItem item={item} />}
           keyExtractor={item => item.id || Math.random().toString()}
         />
       ) : (
-        <Text style={styles.noReviewsText}>
-          No reviews yet for this product.
-        </Text>
+        <Text style={styles.noReviewsText}>Chưa có đánh giá cho sản phẩm này.</Text>
       )}
     </View>
   );
 };
 
-export default AllReviews;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 12,
+  },
+  header: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
-    marginBottom: 10,
+    textAlign: 'center',
+    color: 'black',
   },
   reviewContainer: {
     marginBottom: 10,
@@ -156,18 +206,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  ratingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  commentText: {
-    fontSize: 14,
-    marginVertical: 5,
-  },
   userText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
+  },
+  commentText: {
+    fontSize: 14,
+    marginVertical: 5,
   },
   noReviewsText: {
     fontSize: 16,
@@ -175,4 +221,34 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#888',
   },
+  modalOverlay: {
+    flex: 1,
+    paddingTop: 60,
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  dialogContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  filterOption: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  selectedFilterText: {
+    marginTop: 20,
+    marginBottom: 20,
+    fontSize: 16,
+    color: 'gray',
+  },
 });
+
+export default AllReviews;
