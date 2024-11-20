@@ -54,13 +54,21 @@ const CartScreen = () => {
                 return null; // Skip this product if data is missing
               }
 
+              const colorDoc = await firebase.firestore().collection('colors').doc(products[productId].colorSelected).get()
+              const colorData = colorDoc.data();
+              
+              const colorName =   colorData?.colorName;
+              console.log(colorName);
+              
+              
               return {
                 productId,
                 imageUrl: productData.imageUrl || '', // Default to an empty string if imageUrl is missing
                 quantity: products[productId].quantity,
+                colorSelected: colorName,
+                sizeSelected: products[productId].sizeSelected,
                 title: productData.title,
                 description: productData.description,
-                sizes: productData.size,
                 price: productData.price,
                 addedAt: new Date(products[productId].addedAt || Date.now()),
               };
@@ -315,17 +323,25 @@ const CartScreen = () => {
                       ellipsizeMode="tail"
                       text={item.description}
                     />
-                    <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.sizes}
-                    />
+                    <Row justifyContent='flex-start'>
+                      <TextComponent
+                        numberOfLine={1}
+                        ellipsizeMode="tail"
+                        text={`Color: ${item.colorSelected || 'Unknown'}`}
+                      />
+                      <TextComponent
+                        numberOfLine={1}
+                        ellipsizeMode="tail"
+                        text={`,Size: ${item.sizeSelected || 'Unknown'}`}
+                      />
+                    </Row>
+
                     <TextComponent text={item.size} />
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
                           type="title"
-                          text={`$${item.price * item.quantity}`}
+                          text={`$${item.price}`}
                           size={20}
                         />
                       </Col>
@@ -414,7 +430,7 @@ const CartScreen = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <Text style={{color:'black', padding:10}}>Giỏ hàng trống</Text>
+        <Text style={{color: 'black', padding: 10}}>Giỏ hàng trống</Text>
       )}
     </View>
   );
@@ -427,8 +443,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textCart: {
-    marginTop: 35,
-    paddingBottom: 10,
+    marginTop: 10,
     marginBottom: 10,
     fontWeight: 'bold',
     fontSize: 25,
