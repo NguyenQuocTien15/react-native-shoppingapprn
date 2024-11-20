@@ -27,14 +27,24 @@ const CartScreen = () => {
   const [userId, setUserId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
 
+  const sizeNameSelected = 
+    {
+      1: 'S',
+      2: 'M',
+      3: 'L',
+      4: 'XL',
+      5: 'XXL',
+    }
+  ;
   useEffect(() => {
     const currentUser = auth().currentUser;
     if (currentUser) {
       setUserId(currentUser.uid);
 
-      const cartRef = firebase.firestore()
+      const cartRef = firebase
+        .firestore()
         .collection('carts')
-        .doc(currentUser.uid)
+        .doc(currentUser.uid);
 
       const unsubscribe = cartRef.onSnapshot(async doc => {
         if (doc.exists) {
@@ -54,19 +64,19 @@ const CartScreen = () => {
                 return null; // Skip this product if data is missing
               }
 
-              const colorDoc = await firebase.firestore().collection('colors').doc(products[productId].colorSelected).get()
+              const colorDoc = await firebase
+                .firestore()
+                .collection('colors')
+                .doc(products[productId].colorSelected)
+                .get();
               const colorData = colorDoc.data();
-              
-              const colorName =   colorData?.colorName;
-              console.log(colorName);
-              
-              
+              const sizeName = sizeNameSelected[products[productId].sizeSelected];
               return {
                 productId,
                 imageUrl: productData.imageUrl || '', // Default to an empty string if imageUrl is missing
                 quantity: products[productId].quantity,
-                colorSelected: colorName,
-                sizeSelected: products[productId].sizeSelected,
+                colorSelected: colorData?.colorName,
+                sizeSelected: sizeName,
                 title: productData.title,
                 description: productData.description,
                 price: productData.price,
@@ -103,11 +113,7 @@ const CartScreen = () => {
   }, []);
 
   const updateCart = async (userId, productId, quantity) => {
-    const cartRef = firebase
-      .firestore()
-      .collection('carts')
-      .doc(userId)
-      
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
 
     try {
       await firebase.firestore().runTransaction(async transaction => {
@@ -179,6 +185,7 @@ const CartScreen = () => {
   const userID = getUserId();
   const handleCancel = () => {
     setDialogVisible(false);
+    setSelectedItem(null);
   };
 
   const toggleSelectProduct = item => {
@@ -233,11 +240,7 @@ const CartScreen = () => {
       return;
     }
 
-    const cartRef = firebase
-      .firestore()
-      .collection('carts')
-      .doc(userId)
-      
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
 
     try {
       await firebase.firestore().runTransaction(async transaction => {
@@ -278,7 +281,6 @@ const CartScreen = () => {
     }
   };
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.textCart}>Carts({cartItems.length})</Text>
@@ -318,23 +320,11 @@ const CartScreen = () => {
                       text={item.title}
                       size={20}
                     />
+
                     <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.description}
+                      text={`${item.colorSelected} - ${item.sizeSelected}`}
+                      size={17}
                     />
-                    <Row justifyContent='flex-start'>
-                      <TextComponent
-                        numberOfLine={1}
-                        ellipsizeMode="tail"
-                        text={`Color: ${item.colorSelected || 'Unknown'}`}
-                      />
-                      <TextComponent
-                        numberOfLine={1}
-                        ellipsizeMode="tail"
-                        text={`,Size: ${item.sizeSelected || 'Unknown'}`}
-                      />
-                    </Row>
 
                     <TextComponent text={item.size} />
                     <Row flex={1} alignItems="flex-end">
@@ -379,7 +369,11 @@ const CartScreen = () => {
                   <Text style={styles.backTextWhite}>Delete</Text>
                 </TouchableOpacity>
                 <Dialog.Container visible={dialogVisible}>
-                  <Dialog.Title>Delete {selectedItem?.title}?</Dialog.Title>
+                  <Dialog.Title>
+                    {selectedItem
+                      ? `Delete ${selectedItem.title}?`
+                      : 'Deleting Item'}
+                  </Dialog.Title>
 
                   <Dialog.Description>
                     Are you sure you want to remove this {selectedItem?.title}
