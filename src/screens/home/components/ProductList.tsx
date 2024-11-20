@@ -30,12 +30,12 @@ const ProductList = () => {
 
   const renderItem = ({item}: {item: ProductModel}) => (
     <View style={styles.item}>
-      <ProductItem product={item} />
+      <ProductItem product={item} navigateTo={'ProductDetail'} />
     </View>
   );
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, padding:10}}>
       <Tabbar
         title="Product"
         tabbarStylesProps={{paddingHorizontal: 0}}
