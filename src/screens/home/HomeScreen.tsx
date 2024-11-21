@@ -1,4 +1,3 @@
-
 import {Button, Input, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import messaging from '@react-native-firebase/messaging';
 import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
@@ -7,81 +6,88 @@ import {ScrollView, Text, View} from 'react-native';
 import {Container, TextComponent} from '../../components';
 import Avatar from '../../components/Avatar';
 import {colors} from '../../constants/colors';
-import ArrivalsProduct from './components/ArrivalsProduct';
+import Avatar from '../../components/Avatar';
 import CategoriesList from './components/CategoriesList';
+import ArrivalsProduct from './components/ArrivalsProduct';
 import OffersList from './components/OffersList';
-import PopularProduct from './components/PopularProduct';
+import ProductList from './components/ProductList';
+import {Button, Row, Section, Space} from '@bsdaoquang/rncomponent';
+import {ProductModel} from '../../models/ProductModel';
 import SearchProduct from './components/SearchProduct';
-import {useStatusBar} from '../../utils/useStatusBar';
-import FilterScreen from './FilterScreen';
+import {Setting4} from 'iconsax-react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 const HomeScreen = ({navigation}: any) => {
-  useEffect(() => {
-    messaging().onMessage(mess => {
-      console.log(mess);
-    });
-  }, []);
+  const ListHeader = () => (
+    <View style={{padding:15}}>
+      
+        <Row justifyContent="flex-end">
+          <Avatar />
+          
+        </Row>
+     
+      <Space height={16} />
+      <TextComponent type="title" text="Welcome," size={24} />
+      <TextComponent text="Our fashion app" size={18} color={colors.gray2} />
 
-  useStatusBar('dark-content');
+      <Section>
+        <Row>
+          <View style={{flex: 1}}>
+            {/* @ts-ignore */}
+            <SearchProduct
+              onSearchResults={results => {
+                handleSearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
+                navigation.navigate('SearchResultsScreen', {results}); // Điều hướng sang màn hình SearchResultsScreen
+              }}
+              navigation={undefined}
+            />
+          </View>
 
-  return (
-    <Container isScroll={false}>
-      <Section styles={{padding: 10, marginTop:10}}>
-        <Row justifyContent="space-between">
-        <Avatar />
+          <Space width={12} />
           <Button
-            inline
-            icon={<Entypo name="message" size={19} color="white" />}
+            styles={{width: 48, height: 48}}
+            icon={<Setting4 variant="TwoTone" size={24} color="white" />}
             color="black"
-            onPress={() => {navigation.navigate('ChatScreen')}}
+            onPress={() => {}}
           />
-        
         </Row>
       </Section>
-      <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
-        <>
-          <Section>
-            <TextComponent type="title" text="Welcome," size={24} />
-            <TextComponent
-              text="Our fashion app"
-              size={18}
-              color={colors.gray2}
-            />
-          </Section>
-          <Section>
-            <Row>
-            <View style={{ flex: 1 }}>
-            {/* @ts-ignore */}
-              <SearchProduct onSearchResults={(results) => {
-                  SearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
-                  navigation.navigate('SearchResultsScreen', { results }); // Điều hướng sang màn hình SearchResultsScreen
-                } } navigation={undefined}  />
-            </View>
-   
-              <Space width={12} />
-              <Button
-                styles={{width: 48, height: 48}}
-                icon={<Setting4 variant="TwoTone" size={24} color="white" />}
-                color="black"
-                onPress={() => {navigation.navigate('FilterScreen')}}
-              />
-            </Row>
-          </Section>
-        </>
-        <OffersList />
-        <Space height={20} />
-        <CategoriesList />
-        <Space height={20} />
-        <ArrivalsProduct />
-        <Space height={20} />
-        <PopularProduct />
-      </ScrollView>
-    </Container>
+
+      <OffersList />
+      <Space height={16} />
+      <ArrivalsProduct />
+      <Space height={16} />
+      <CategoriesList />
+      <Space height={16} />
+    </View>
+  );
+
+  return (
+    <FlatList
+      ListHeaderComponent={<ListHeader />}
+      data={[]} // Empty data since we only want the header and child components
+      renderItem={null} // No items to render; header is the focus
+      ListFooterComponent={<ProductList />} // Render ProductList in the footer
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 //@ts-ignore
 
+const styles = StyleSheet.create({
+  header: {
+    padding: 10,
+    marginTop: 10,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  searchButton: {
+    width: 48,
+    height: 48,
+  },
+});
 const SearchResults: React.FC<{products: ProductModel[]}> = ({products}) => (
   <View>
     {products.map(product => (

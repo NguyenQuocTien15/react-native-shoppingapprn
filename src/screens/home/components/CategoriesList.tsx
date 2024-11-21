@@ -40,11 +40,10 @@ const CategoriesList = () => {
     <View style={{ flex: 1 }}>
       <Tabbar
         title="Categories"
-        tabbarStylesProps={{ paddingHorizontal: 16 }}
+        showSeeMore={false}
+        tabbarStylesProps={{ paddingHorizontal: 0 }}
         titleStyleProps={{ fontFamily: fontFamilies.poppinsBold, fontSize: 20 }}
-        onSeeMore={() => {}}
       />
-
       {categories.length > 0 ? (
         <FlatList
           showsHorizontalScrollIndicator={false}

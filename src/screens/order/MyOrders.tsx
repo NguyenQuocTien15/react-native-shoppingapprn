@@ -10,7 +10,6 @@ const MyOrders = () => {
           fontSize: 25,
           fontWeight: 'bold',
           textAlign: 'center',
-          paddingTop:35,
           backgroundColor:'white',
           color:'black'
         }}>

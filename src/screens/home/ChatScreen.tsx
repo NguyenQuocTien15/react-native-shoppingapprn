@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { Container } from '../../components';
 import { Row, Section } from '@bsdaoquang/rncomponent';
 import Avatar from '../../components/Avatar';
+import Entypo from 'react-native-vector-icons/Entypo';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageModel[]>([
@@ -18,6 +20,8 @@ const ChatScreen = () => {
   const [newMessage, setNewMessage] = useState<string>('');
   const [chatId, setChatId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const flatListRef = useRef<FlatList>(null); // Tạo tham chiếu đến FlatList
+  const [isScrolling, setIsScrolling] = useState<boolean>(false); 
 
   useEffect(() => {
     const currentUser = auth().currentUser;
@@ -78,11 +82,28 @@ const ChatScreen = () => {
       });
 
     setNewMessage("");
+      // Cuộn đến cuối khi tin nhắn mới được thêm
+      flatListRef.current?.scrollToEnd({ animated: true });
+     // Cuộn đến cuối khi tin nhắn mới được thêm và người dùng không đang cuộn lên
+    if (!isScrolling) {
+      // Sau khi tin nhắn mới được thêm, gọi scrollToEnd để cuộn xuống cuối
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100); // Đợi một chút sau khi tin nhắn được thêm vào
+    }
   };
- 
+
+  const handleScroll = (event: any) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const contentOffsetY = event.nativeEvent.contentOffset.y;
+    const layoutHeight = event.nativeEvent.layoutMeasurement.height;
+
+    // Nếu người dùng cuộn gần đến cuối, tự động cuộn xuống sau khi gửi tin nhắn mới
+    setIsScrolling(contentOffsetY + layoutHeight < contentHeight - 20); // Điều chỉnh giá trị 20 nếu cần
+  };
   const renderItem = ({ item }: { item: MessageModel }) => (
     <View style={[styles.message, item.sender_ID === userId ? styles.userMessage : styles.adminMessage]}>
-      <Text style={styles.messageText}>{item.message}</Text>
+      <Text style={item.sender_ID === userId ? styles.messageText : styles.adminMessageText}>{item.message}</Text>
       {item.createdAt &&  (
         <Text style={styles.timestamp}>{item.createdAt.toLocaleTimeString([],{hour: '2-digit',minute:'2-digit'})}</Text>
       )}
@@ -91,26 +112,39 @@ const ChatScreen = () => {
 
   return (
     <Container back bigTitle='Chat' isScroll={false}> 
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <FlatList
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={styles.chatList}
-      />
+    <View style={{ flex: 1 }}>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        resetScrollToCoords={{ x: 0, y: 0 }}
+        enableOnAndroid
+      >
+        <FlatList
+        ref={flatListRef} 
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          style={styles.chatList}
+          onScroll={handleScroll} 
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        />
+      </KeyboardAwareScrollView>
+      
+      {/* Phần input và nút gửi */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           value={newMessage}
           onChangeText={setNewMessage}
           placeholder="Type a message..."
+          placeholderTextColor='black'
         />
         <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Entypo name="paper-plane" size={29} color="white" />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
     </Container>
+    
   );
 };
 
@@ -132,16 +166,29 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
   },
   userMessage: {
-    backgroundColor: '#DCF8C6',
+    backgroundColor: '#000', // Đặt màu nền của tin nhắn user là màu đen
     alignSelf: 'flex-end',
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '70%',
   },
   adminMessage: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: '#fff', // Đặt màu nền của tin nhắn admin là màu trắng
     alignSelf: 'flex-start',
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '70%',
+    
+    borderWidth: 1,  // Viền của tin nhắn admin
+    borderColor: '#000',  // Màu viền là màu đen
   },
   messageText: {
     fontSize: 16,
-    color: "black",
+    color: "#fff", // Màu chữ mặc định là trắng (dành cho userMessage)
+  },
+  adminMessageText: {
+    fontSize: 16,
+    color: "#000", // Màu chữ cho admin là màu đen
   },
   timestamp: {
     fontSize: 12,
@@ -155,11 +202,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'black',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -177,7 +225,7 @@ const styles = StyleSheet.create({
   },
   sendButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
   },
 });
 

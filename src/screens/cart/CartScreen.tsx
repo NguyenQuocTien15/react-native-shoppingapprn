@@ -14,9 +14,9 @@ import {useNavigation} from '@react-navigation/native';
 import {Minus, Add} from 'iconsax-react-native';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Dialog from 'react-native-dialog';
-import auth from '@react-native-firebase/auth';
+import auth, {getAuth} from '@react-native-firebase/auth';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {deleteDoc, doc, firebase} from '@react-native-firebase/firestore';
+import {firebase} from '@react-native-firebase/firestore';
 const CartScreen = () => {
   const navigation = useNavigation();
 
@@ -24,82 +24,106 @@ const CartScreen = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [userId, setUserId] = useState(null);
+
   const [cartItems, setCartItems] = useState([]);
-
-  useEffect(() => {
-    const currentUser = auth().currentUser;
-    if (currentUser) {
-      setUserId(currentUser.uid);
-
-      const cartRef = firebase.firestore()
-        .collection('carts')
-        .doc(currentUser.uid)
-
-      const unsubscribe = cartRef.onSnapshot(async doc => {
-        if (doc.exists) {
-          const products = doc.data().products;
-
-          const productDetails = await Promise.all(
-            Object.keys(products).map(async productId => {
-              const productDoc = await firebase
-                .firestore()
-                .collection('products')
-                .doc(productId)
-                .get();
-
-              const productData = productDoc.data();
-              if (!productData) {
-                console.warn(`Product with ID ${productId} is missing data`);
-                return null; // Skip this product if data is missing
-              }
-
-              return {
-                productId,
-                imageUrl: productData.imageUrl || '', // Default to an empty string if imageUrl is missing
-                quantity: products[productId].quantity,
-                title: productData.title,
-                description: productData.description,
-                sizes: productData.size,
-                price: productData.price,
-                addedAt: new Date(products[productId].addedAt || Date.now()),
-              };
-            }),
-          ).then(results => results.filter(item => item !== null)); // Filter out null results
-
-          const sortedProductDetails = productDetails.sort(
-            (a, b) => b.addedAt - a.addedAt,
-          );
-
-          setCartItems(sortedProductDetails);
-        } else {
-          console.log('Giỏ hàng trống');
-        }
-      });
-
-      return () => unsubscribe(); // Hủy theo dõi khi component bị unmount
-    } else {
-      console.log('Không có người dùng đăng nhập');
+  const userId = getAuth().currentUser?.uid;
+  const sizeNameSelected = {
+    1: 'S',
+    2: 'M',
+    3: 'L',
+    4: 'XL',
+    5: 'XXL',
+  };
+  const fetchCartProducts = (
+    userId: string | null | undefined,
+    setCartItems: React.Dispatch<React.SetStateAction<any[]>>,
+  ) => {
+    if (!userId) {
+      console.error('User ID is null or undefined.');
+      setCartItems([]);
+      return;
     }
-  }, []);
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      const cartRef = firebase.firestore().collection('carts').doc('userId');
-      const doc = await cartRef.get();
-      if (doc.exists) {
-        setCartItems(doc.data().products);
-      }
-    };
 
-    fetchCartItems();
-  }, []);
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
+    const productsRef = firebase.firestore().collection('products');
+    const colorRef = firebase.firestore().collection('colors');
+
+    return cartRef.onSnapshot(
+      async cartDoc => {
+        if (cartDoc.exists) {
+          const cartData = cartDoc.data();
+          const cartProducts = cartData?.products || {};
+
+          const productKeys = Object.keys(cartProducts);
+          const productList: any[] = [];
+
+          for (const key of productKeys) {
+            const {colorSelected, sizeSelected, quantity} = cartProducts[key];
+
+            // Extract productId from the key (assuming the format: productId-color-size)
+            const [productId] = key.split('-');
+
+            try {
+              const productDoc = await productsRef.doc(productId).get();
+              const colorDoc = await colorRef.doc(colorSelected).get();
+
+              if (productDoc.exists && colorDoc.exists) {
+                const productData = productDoc.data();
+                const colorData = colorDoc.data();
+                const sizeName = sizeNameSelected[sizeSelected]; // Assuming `sizeNameSelected` is a mapping object
+
+                productList.push({
+                  productKey: key,
+                  productId,
+                  colorSelected,
+                  colorName: colorData?.colorName,
+                  sizeSelected,
+                  sizeName,
+                  quantity,
+                  ...productData, // Spread product details (e.g., name, imageUrl, price)
+                });
+              } else {
+                if (!productDoc.exists) {
+                  console.warn(`Product with ID ${productId} not found.`);
+                }
+                if (!colorDoc.exists) {
+                  console.warn(`Color with ID ${colorSelected} not found.`);
+                }
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching product details for ${productId}: `,
+                error,
+              );
+            }
+          }
+
+          setCartItems(productList);
+        } else {
+          console.log('Cart is empty.');
+          setCartItems([]);
+        }
+      },
+      error => {
+        console.error('Error listening to cart changes: ', error);
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = fetchCartProducts(userId, setCartItems);
+
+    // Cleanup the listener on component unmount
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+    setDialogVisible(false);
+  }, [userId]);
 
   const updateCart = async (userId, productId, quantity) => {
-    const cartRef = firebase
-      .firestore()
-      .collection('carts')
-      .doc(userId)
-      
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
 
     try {
       await firebase.firestore().runTransaction(async transaction => {
@@ -171,14 +195,19 @@ const CartScreen = () => {
   const userID = getUserId();
   const handleCancel = () => {
     setDialogVisible(false);
+    setSelectedItem(null);
   };
 
   const toggleSelectProduct = item => {
+    // Create a unique key for the selected item based on productId, color, and size
+    const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
+
     setSelectedProducts(prevSelected => {
-      const isSelected = prevSelected.includes(item.productId);
+      // Check if the item is already selected
+      const isSelected = prevSelected.includes(productKey);
       const updatedSelected = isSelected
-        ? prevSelected.filter(id => id !== item.productId)
-        : [...prevSelected, item.productId];
+        ? prevSelected.filter(key => key !== productKey) // Remove if already selected
+        : [...prevSelected, productKey]; // Add if not selected
 
       // Check if all items are selected
       if (updatedSelected.length === cartItems.length) {
@@ -193,10 +222,14 @@ const CartScreen = () => {
 
   const handleChooseAll = () => {
     if (isSelectAll) {
-      setSelectedProducts([]);
+      setSelectedProducts([]); // Deselect all
       setIsSelectAll(false);
     } else {
-      setSelectedProducts(cartItems.map(item => item.productId)); // Use productId here
+      // Select all items by including unique product keys
+      const allSelectedKeys = cartItems.map(
+        item => `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+      );
+      setSelectedProducts(allSelectedKeys);
       setIsSelectAll(true);
     }
   };
@@ -219,52 +252,79 @@ const CartScreen = () => {
   const handleRemoveFromCart = async (
     userId: string | null | undefined,
     productId: string | number,
+    colorSelected: string,
+    sizeSelected: string,
   ) => {
     if (!userId) {
-      console.error('User ID is required');
+      Alert.alert('User not logged in');
       return;
     }
 
-    const cartRef = firebase
-      .firestore()
-      .collection('carts')
-      .doc(userId)
-      
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
 
     try {
       await firebase.firestore().runTransaction(async transaction => {
         const cartDoc = await transaction.get(cartRef);
 
-        if (cartDoc.exists) {
-          const currentProducts = cartDoc.data()?.products || {};
+        if (!cartDoc.exists) {
+          Alert.alert('Cart not found');
+          return;
+        }
 
-          if (currentProducts[productId]) {
-            delete currentProducts[productId];
+        const currentProducts = cartDoc.data()?.products || {};
+        const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
+        const currentProduct = currentProducts[productKey];
 
-            transaction.update(cartRef, {
-              products: currentProducts,
-            });
-            setDialogVisible(false);
-            console.log('Product removed from cart successfully!');
-          } else {
-            console.warn('Product not found in cart:', productId);
-          }
+        if (!currentProduct) {
+          Alert.alert('Product not found in cart');
+          return;
+        }
+
+        // Remove the product from the cart
+        const updatedProducts = {...currentProducts};
+        delete updatedProducts[productKey];
+
+        // If there are no products left in the cart, delete the cart document
+        if (Object.keys(updatedProducts).length === 0) {
+          transaction.delete(cartRef);
         } else {
-          console.warn('Cart does not exist.');
+          transaction.update(cartRef, {
+            products: updatedProducts,
+          });
+          setDialogVisible(false);
         }
       });
+
     } catch (error) {
       console.error('Error removing product from cart: ', error);
+      Alert.alert('Error removing product from cart');
     }
   };
 
   const handleCheckOut = () => {
+    // Filter selected items based on the selected product IDs
     const selectedItems = cartItems.filter(item =>
-      selectedProducts.includes(item.productId),
+      selectedProducts.includes(
+        `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+      ),
     );
 
     if (selectedItems.length > 0) {
-      navigation.navigate('CheckOut', {selectedItems});
+      
+      const itemsToSend = selectedItems.map(item => ({
+        productId: item.productId,
+        title: item.title,
+        imageUrl: item.imageUrl,
+        size: item.sizeName,
+        quantity: item.quantity,
+        color: item.colorName,
+        colorSelected: item.colorSelected,
+        sizeSelected: item.sizeSelected,
+        price: item.price,
+      }));
+
+      // Navigate to checkout with the selected items
+      navigation.navigate('CheckOut', {selectedItems: itemsToSend});
     } else {
       Alert.alert('Please select at least one product to checkout.');
     }
@@ -279,16 +339,18 @@ const CartScreen = () => {
           <SwipeListView
             style={{marginHorizontal: 10, marginBottom: 10}}
             data={cartItems}
-            keyExtractor={item => item.productId}
+            keyExtractor={item =>
+              `${item.productId}-${item.colorSelected}-${item.sizeSelected}`
+            }
             renderItem={({item, index}) => (
               <View key={item.productId} style={styles.itemListProduct}>
                 <Row alignItems="center" styles={{margin: 10}}>
                   <Col flex={0.15}>
                     <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
-                        {selectedProducts.includes(item.productId) && (
-                          <View style={styles.selectedRb} />
-                        )}
+                        {selectedProducts.includes(
+                          `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+                        ) && <View style={styles.selectedRb} />}
                       </View>
                     </TouchableOpacity>
                   </Col>
@@ -310,22 +372,17 @@ const CartScreen = () => {
                       text={item.title}
                       size={20}
                     />
+
                     <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.description}
+                      text={`${item.colorName} - ${item.sizeName}`}
+                      size={17}
                     />
-                    <TextComponent
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.sizes}
-                    />
-                    <TextComponent text={item.size} />
+
                     <Row flex={1} alignItems="flex-end">
                       <Col>
                         <TextComponent
                           type="title"
-                          text={`$${item.price * item.quantity}`}
+                          text={`$${item.price}`}
                           size={20}
                         />
                       </Col>
@@ -363,7 +420,11 @@ const CartScreen = () => {
                   <Text style={styles.backTextWhite}>Delete</Text>
                 </TouchableOpacity>
                 <Dialog.Container visible={dialogVisible}>
-                  <Dialog.Title>Delete {selectedItem?.title}?</Dialog.Title>
+                  <Dialog.Title>
+                    {selectedItem
+                      ? `Delete ${selectedItem.title}?`
+                      : 'Deleting Item'}
+                  </Dialog.Title>
 
                   <Dialog.Description>
                     Are you sure you want to remove this {selectedItem?.title}
@@ -373,7 +434,12 @@ const CartScreen = () => {
                   <Dialog.Button
                     label="Delete"
                     onPress={() =>
-                      handleRemoveFromCart(userID, selectedItem?.productId)
+                      handleRemoveFromCart(
+                        userID,
+                        selectedItem?.productId,
+                        selectedItem?.colorSelected,
+                        selectedItem?.sizeSelected,
+                      )
                     }
                   />
                 </Dialog.Container>
@@ -414,7 +480,7 @@ const CartScreen = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <Text style={{color:'black', padding:10}}>Giỏ hàng trống</Text>
+        <Text style={{color: 'black', padding: 10}}>Giỏ hàng trống</Text>
       )}
     </View>
   );
@@ -427,8 +493,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textCart: {
-    marginTop: 35,
-    paddingBottom: 10,
+    marginTop: 10,
     marginBottom: 10,
     fontWeight: 'bold',
     fontSize: 25,

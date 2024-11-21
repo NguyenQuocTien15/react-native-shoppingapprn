@@ -4,35 +4,113 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Image,
+  Alert,
 } from 'react-native';
 import React, {useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {AirbnbRating, Rating} from 'react-native-ratings';
 import {TextInput} from 'react-native';
+import {Col, Row, Space} from '@bsdaoquang/rncomponent';
+import {TextComponent} from '../../components';
+import {getAuth} from '@react-native-firebase/auth';
+import {
+  collection,
+  doc,
+  getFirestore,
+  serverTimestamp,
+  setDoc,
+} from '@react-native-firebase/firestore';
 
-const ReviewsProduct = () => {
-  const navigation = useNavigation();
+const ReviewsProduct = ({navigation}) => {
+  const route = useRoute();
+  const {productId, title, imageUrl, size, color} = route.params;
+
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  const handleRating = newRating => {
-    setRating(newRating);
-    // Save rating to Firestore or update product data
-  };
-  const handleRatingCompleted = rating => {
-    setRating(rating);
-    // Lưu rating vào Firestore hoặc xử lý dữ liệu đánh giá
-    console.log("User's Rating: ", rating);
-  };
   const placeholderComment =
-    'Bạn nghĩ như thế nào về kiểu dáng, độ vừa vặn,'+'\n'+'kích thước, màu sắc?';
+    'Bạn nghĩ như thế nào về kiểu dáng, độ vừa vặn,' +
+    '\n' +
+    'kích thước, màu sắc?';
+
+  const userId = getAuth().currentUser?.uid;
+
+  // const handleReviewProduct = async () => {
+  //   if (rating === 0 && comment.trim() === '') {
+  //     Alert.alert('Vui lòng chọn đánh giá và viết bình luận');
+  //     return;
+  //   }
+  //   try {
+  //     if (!userId) {
+  //       Alert.alert('Bạn cần đăng nhập để đánh giá và viết bình luận');
+  //     }
+  //     const productId = route.params.productId;
+  //     const reviewRef = doc(
+  //       collection(getFirestore(), 'reviews', productId, 'productReviews'),
+  //     );
+  //     await setDoc(reviewRef, {
+  //       productId: productId,
+  //       userId: userId,
+  //       rating: rating,
+  //       color:color,
+  //       size:size,
+  //       comment: comment,
+  //       created_at: serverTimestamp(),
+  //     });
+
+  //     Alert.alert('Cảm ơn bạn đã đánh giá sản phẩm!');
+  //     // Optionally, navigate back or reset fields
+  //     navigation.goBack();
+  //   } catch (error) {
+  //     console.error('Error submitting review:', error);
+  //     Alert.alert('Có lỗi xảy ra, vui lòng thử lại!');
+  //   }
+  // };
+ 
+ const handleReviewProduct = async () => {
+   if (rating === 0 || comment.trim() === '') {
+     Alert.alert('Vui lòng chọn đánh giá và viết bình luận');
+     return;
+   }
+   try {
+     if (!userId) {
+       Alert.alert('Bạn cần đăng nhập để đánh giá và viết bình luận');
+       return;
+     }
+
+     // Get the productId from route params
+     const productId = route.params.productId;
+
+     // Create a reference to the Firestore document path: reviews -> productId -> reviewId
+     const reviewRef = doc(
+       collection(getFirestore(), 'reviews', productId, 'reviews'),
+     );
+
+     // Save the review data in Firestore under the specific product
+     await setDoc(reviewRef, {
+       productId: productId, // Save productId
+       userId: userId,
+       rating: rating,
+       comment: comment,
+       created_at: serverTimestamp(),
+     });
+
+     Alert.alert('Cảm ơn bạn đã đánh giá sản phẩm!');
+     // Optionally, navigate back or reset fields
+     navigation.goBack();
+   } catch (error) {
+     console.error('Error submitting review:', error);
+     Alert.alert('Có lỗi xảy ra, vui lòng thử lại!');
+   }
+ };
+
   return (
     <View style={styles.container}>
       <View
         style={{
           flexDirection: 'row',
-          paddingTop: 35,
           alignItems: 'center',
         }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -51,16 +129,40 @@ const ReviewsProduct = () => {
         </Text>
       </View>
       <View
-        style={{backgroundColor: 'black', height: 200, marginTop: 20}}></View>
+        style={{backgroundColor: '#adb5bd', borderRadius: 12, marginTop: 10}}>
+        <Row alignItems="flex-start" styles={{margin: 10}}>
+          <Image
+            source={{uri: imageUrl}}
+            style={{
+              width: 110,
+              height: 110,
+              borderRadius: 12,
+              resizeMode: 'cover',
+            }}
+          />
+          <Space width={12} />
+          <Col>
+            <TextComponent
+              type="title"
+              numberOfLine={1}
+              ellipsizeMode="tail"
+              text={title}
+              size={20}
+            />
+
+            <TextComponent text={`${color} - ${size}`} size={17} />
+          </Col>
+        </Row>
+      </View>
 
       <ScrollView style={{flex: 1}}>
-          <AirbnbRating
-            count={5}
-            reviews={['Terrible', 'Bad', 'Okay', 'Good', 'Great']}
-            defaultRating={3}
-            size={40}
-            onFinishRating={rating => console.log('Rating is: ' + rating)}
-          />
+        <AirbnbRating
+          count={5}
+          reviews={['Terrible', 'Bad', 'Okay', 'Good', 'Great']}
+          defaultRating={0}
+          size={40}
+          onFinishRating={selectedRating => setRating(selectedRating)}
+        />
         <Text style={[styles.label, {textAlign: 'center'}]}>
           Đánh giá sản phẩm này
         </Text>
@@ -72,7 +174,9 @@ const ReviewsProduct = () => {
           onChangeText={text => setComment(text)}
         />
       </ScrollView>
-      <TouchableOpacity style={styles.touchCheckOut}>
+      <TouchableOpacity
+        style={styles.touchCheckOut}
+        onPress={handleReviewProduct}>
         <Text style={styles.textCheckOut}>Gửi</Text>
       </TouchableOpacity>
     </View>

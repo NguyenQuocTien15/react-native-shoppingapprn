@@ -25,6 +25,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { BrandModel } from '../../models/BrandModel';
+import RnRangeSlider from 'rn-range-slider'
 
 const FilterScreen = ({navigation}: any) => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -229,7 +230,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
           title="Price"
         />
         <Space height={12} />
-        {/* <RnRangeSlider
+        <RnRangeSlider
           min={0}
           step={1}
           max={maxPrice}
@@ -275,7 +276,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
           )}
           onSliderTouchEnd={(low, high) => setFilterValues({ ...filterValues, price: { low, high } })}
           onValueChanged={(low, high) => {}}
-        /> */}
+        />
       </Section>
 
       {/* <Section>

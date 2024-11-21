@@ -7,7 +7,7 @@ const OrderReview = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen
-        name="OrderReviews"
+        name="OrderReviewsScreen"
         component={OrderReviewsScreen}></Stack.Screen>
     </Stack.Navigator>
   );

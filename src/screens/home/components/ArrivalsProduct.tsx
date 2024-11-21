@@ -37,9 +37,9 @@ const ArrivalsProduct = (props: Props) => {
     <View style={{flex: 1}}>
       <Tabbar
         title="New Arrivals"
-        tabbarStylesProps={{paddingHorizontal: 16}}
+        tabbarStylesProps={{paddingHorizontal: 0}}
         titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
-        renderSeemore={<TextComponent text="View all" color={colors.gray2} />}
+        renderSeemore={<TextComponent text=" " color={colors.gray2} />}
         onSeeMore={() => {}}
       />
 
@@ -52,9 +52,10 @@ const ArrivalsProduct = (props: Props) => {
             <View
               key={item.id}
               style={{
-                marginLeft: 16,
+                marginLeft: 15,
                 marginRight: index === products.length - 1 ? 16 : 0,
               }}>
+                
               <ProductItem product={item} />
             </View>
           )}

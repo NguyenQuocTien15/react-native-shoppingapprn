@@ -6,6 +6,10 @@ import {collectionNames} from '../../../constants/collectionNames';
 import {OfferModel} from '../../../models/OfferModel';
 import { ProductModel } from '../../../models/ProductModel';
 import { useNavigation } from '@react-navigation/native';
+import { Tabbar } from '@bsdaoquang/rncomponent';
+import { TextComponent } from '../../../components';
+import { fontFamilies } from '../../../constants/fontFamilies';
+import { colors } from '../../../constants/colors';
 
 type Props = {};
 
@@ -15,27 +19,6 @@ const OffersList = (props: Props) => {
   const navigation = useNavigation();
 
   const time = new Date().getTime();
-
-  // const fetchProductsByOfferId = async (offerId: string) => {
-  //   try {
-  //     const snap = await firestore()
-  //       .collection("products")
-  //       .where('offer', '==', offerId)
-  //       .get();
-
-  //     const items: ProductModel[] = [];
-  //     snap.forEach(doc => {
-  //       items.push({
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       } as ProductModel);
-  //     });
-
-  //     setProducts(items);
-  //   } catch (error) {
-  //     console.error('Error fetching products for offer:', error);
-  //   }
-  // };
 
   useEffect(() => {
     firestore()
@@ -61,8 +44,15 @@ const OffersList = (props: Props) => {
 
   return (
     <>
+     <Tabbar
+        title="Offers"
+        tabbarStylesProps={{paddingHorizontal: 0}}
+        titleStyleProps={{fontFamily: fontFamilies.poppinsBold, fontSize: 20}}
+        renderSeemore={<TextComponent text=" " color={colors.gray2} />}
+        onSeeMore={() => {}}
+      />
       <FlatList
-        style={{paddingLeft: 16}}
+        style={{paddingLeft: 0}}
         data={offers}
         showsHorizontalScrollIndicator={false}
         horizontal

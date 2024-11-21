@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
+import { View, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Container from '../../../components/Container';
 import { globalStyles } from '../../../styles/globalStyles';
 import SearchResultsScreen from '../SearchResultsScreen';
 import { color } from 'react-native-elements/dist/helpers';
+
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const SearchProduct = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +28,9 @@ const SearchProduct = () => {
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
-        <Button color="black" title="Search" onPress={handleSearch} />
+        <TouchableOpacity onPress={handleSearch}>
+          <AntDesign name="search1" size={24} color="black" />
+        </TouchableOpacity>
       </View>
     </Container>
   );
