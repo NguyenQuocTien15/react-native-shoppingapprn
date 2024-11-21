@@ -44,28 +44,42 @@ const Container = (props: Props) => {
                 ]}
                 onPress={() => navigation.goBack()}>
                 <MaterialIcons
-                  style={{ marginLeft: 8 }}
+                  style={{marginLeft: 8}}
                   name="arrow-back-ios"
                   size={22}
                   color={colors.white}
                 />
               </TouchableOpacity>
             )}
-            {left && !back && <TextComponent text='Left' />}
-            <View style={{ paddingHorizontal: 5, paddingVertical: 5,marginTop: 5,padding:1, flex: 1 }}>
-              {bigTitle && <TextComponent text={bigTitle} type="bigTitle" styles={{marginTop:20,marginLeft:10}}/>}
+            {left && !back && <TextComponent text="Left" />}
+            <View
+              style={{
+                paddingHorizontal: 5,
+                paddingVertical: 5,
+                marginTop: 5,
+                padding: 1,
+                flex: 1,
+              }}>
+              {bigTitle && (
+                <TextComponent
+                  text={bigTitle}
+                  type="bigTitle"
+                  styles={{marginTop: 20, marginLeft: 10}}
+                />
+              )}
             </View>
             {right && right}
           </Row>
-        }
-        {!isScroll && isScroll !== false ? 
-        (<ScrollView style={globalStyles.container}>
-          {children}
-        </ScrollView>) : (<View style={globalStyles.container}>{children}</View>)
-        }
-               {bottomComponent && bottomComponent}
-    </SafeAreaView>
-  );
+        )}
+
+        {!isScroll && isScroll !== false ? (
+          <ScrollView style={globalStyles.container}>{children}</ScrollView>
+        ) : (
+          <View style={globalStyles.container}>{children}</View>
+        )}
+        {bottomComponent && bottomComponent}
+      </SafeAreaView>
+    );
 }
 
 export default Container;
