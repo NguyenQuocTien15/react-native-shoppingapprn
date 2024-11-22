@@ -34,7 +34,7 @@ const CartScreen = () => {
     4: 'XL',
     5: 'XXL',
   };
-  
+
   const fetchCartProducts = (
     userId: string | null | undefined,
     setCartItems: React.Dispatch<React.SetStateAction<any[]>>,
@@ -121,7 +121,6 @@ const CartScreen = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-    
   }, [userId]);
 
   const updateCart = async (
@@ -207,12 +206,11 @@ const CartScreen = () => {
     updateCart(userId, productKey, item, -1); // Decrement quantity by 1
   };
 
-
   const showDialog = (item: React.SetStateAction<null>) => {
     setSelectedItem(item);
     setDialogVisible(true);
   };
-  
+
   const handleCancel = () => {
     setDialogVisible(false);
     setSelectedItem(null);
@@ -314,7 +312,6 @@ const CartScreen = () => {
           setDialogVisible(false);
         }
       });
-
     } catch (error) {
       console.error('Error removing product from cart: ', error);
       Alert.alert('Error removing product from cart');
@@ -330,7 +327,6 @@ const CartScreen = () => {
     );
 
     if (selectedItems.length > 0) {
-      
       const itemsToSend = selectedItems.map(item => ({
         productId: item.productId,
         title: item.title,
@@ -350,7 +346,6 @@ const CartScreen = () => {
     }
   };
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.textCart}>Carts({cartItems.length})</Text>
@@ -364,70 +359,141 @@ const CartScreen = () => {
             }
             renderItem={({item, index}) => (
               <View key={item.productId} style={styles.itemListProduct}>
-                <Row alignItems="center" styles={{margin: 10}}>
-                  <Col flex={0.15}>
-                    <TouchableOpacity onPress={() => toggleSelectProduct(item)}>
+                {item.quantity > 0 ? (
+                  <Row alignItems="center" styles={{margin: 10}}>
+                    <TouchableOpacity
+                      style={{flex: 0.15}}
+                      onPress={() => toggleSelectProduct(item)}>
                       <View style={styles.radioCircle}>
                         {selectedProducts.includes(
                           `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
                         ) && <View style={styles.selectedRb} />}
                       </View>
                     </TouchableOpacity>
-                  </Col>
-                  <Image
-                    source={{uri: item.imageUrl}}
-                    style={{
-                      width: 110,
-                      height: 110,
-                      borderRadius: 12,
-                      resizeMode: 'cover',
-                    }}
-                  />
-                  <Space width={12} />
-                  <Col>
-                    <TextComponent
-                      type="title"
-                      numberOfLine={1}
-                      ellipsizeMode="tail"
-                      text={item.title}
-                      size={20}
-                    />
 
-                    <TextComponent
-                      text={`${item.colorName} - ${item.sizeName}`}
-                      size={17}
+                    <Image
+                      source={{uri: item.imageUrl}}
+                      style={{
+                        width: 110,
+                        height: 110,
+                        borderRadius: 12,
+                        resizeMode: 'cover',
+                      }}
                     />
+                    <Space width={12} />
+                    <Col>
+                      <TextComponent
+                        type="title"
+                        numberOfLine={1}
+                        ellipsizeMode="tail"
+                        text={item.title}
+                        size={20}
+                      />
 
-                    <Row flex={1} alignItems="flex-end">
+                      <TextComponent
+                        text={`${item.colorName} - ${item.sizeName}`}
+                        size={17}
+                      />
+
+                      <Row flex={1} alignItems="flex-end">
+                        <Col>
+                          <TextComponent
+                            type="title"
+                            text={`$${item.price}`}
+                            size={20}
+                          />
+                        </Col>
+                        <Row
+                          styles={{
+                            backgroundColor: '#e0e0e0',
+                            paddingVertical: 4,
+                            borderRadius: 100,
+                            paddingHorizontal: 12,
+                          }}>
+                          <TouchableOpacity
+                            onPress={() => handleDecrease(userId, item)}>
+                            <Minus size={20} color="black" />
+                          </TouchableOpacity>
+                          <Space width={6} />
+                          <TextComponent text={`${item.quantity}`} />
+                          <Space width={6} />
+                          <TouchableOpacity
+                            onPress={() => handleIncrease(userId, item)}>
+                            <Add size={20} color="black" />
+                          </TouchableOpacity>
+                        </Row>
+                      </Row>
+                    </Col>
+                  </Row>
+                ) : (
+                  <View>
+                    <Row alignItems="center" styles={{margin: 10}}>
+                      <Image
+                        source={{uri: item.imageUrl}}
+                        style={{
+                          width: 110,
+                          height: 110,
+                          borderRadius: 12,
+                          resizeMode: 'cover',
+                        }}
+                      />
+                      <Space width={12} />
                       <Col>
                         <TextComponent
                           type="title"
-                          text={`$${item.price}`}
+                          numberOfLine={1}
+                          ellipsizeMode="tail"
+                          text={item.title}
                           size={20}
                         />
+
+                        <TextComponent
+                          text={`${item.colorName} - ${item.sizeName}`}
+                          size={17}
+                        />
+
+                        <Row flex={1} alignItems="flex-end">
+                          <Col>
+                            <TextComponent
+                              type="title"
+                              text={`$${item.price}`}
+                              size={20}
+                            />
+                          </Col>
+                          <Row
+                            styles={{
+                              backgroundColor: '#e0e0e0',
+                              paddingVertical: 4,
+                              borderRadius: 100,
+                              paddingHorizontal: 12,
+                            }}>
+                            <TouchableOpacity
+                              disabled={item.quantity === 0}
+                              onPress={() => handleDecrease(userId, item)}>
+                              <Minus size={20} color="black" />
+                            </TouchableOpacity>
+                            <Space width={6} />
+                            <TextComponent text={`${item.quantity}`} />
+                            <Space width={6} />
+                            <TouchableOpacity
+                              disabled={item.quantity === 0}
+                              onPress={() => handleIncrease(userId, item)}>
+                              <Add size={20} color="black" />
+                            </TouchableOpacity>
+                          </Row>
+                        </Row>
+                        <TextComponent
+                          type="title"
+                          numberOfLine={1}
+                          color="red"
+                          ellipsizeMode="tail"
+                          text="Sản phẩm này hiện tại đã hết"
+                          size={16}
+                        />
                       </Col>
-                      <Row
-                        styles={{
-                          backgroundColor: '#e0e0e0',
-                          paddingVertical: 4,
-                          borderRadius: 100,
-                          paddingHorizontal: 12,
-                        }}>
-                        <TouchableOpacity
-                          onPress={() => handleDecrease(userId, item)}>
-                          <Minus size={20} color="black" />
-                        </TouchableOpacity>
-                        <Space width={6} />
-                        <TextComponent text={`${item.quantity}`} />
-                        <Space width={6} />
-                        <TouchableOpacity
-                          onPress={() => handleIncrease(userId, item)}>
-                          <Add size={20} color="black" />
-                        </TouchableOpacity>
-                      </Row>
                     </Row>
-                  </Col>
-                </Row>
+                  </View>
+                )}
               </View>
             )}
             // Phần render khi vuốt sang trái để xóa
