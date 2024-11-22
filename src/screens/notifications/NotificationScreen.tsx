@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ImageBackground, StyleSheet, FlatList } from 'react-native';
-import { Row } from '@bsdaoquang/rncomponent';
-import Avatar from '../../components/Avatar';
+import { FlatList, Text, View, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
-// Hàm lắng nghe thông báo từ Firestore
-const listenToNotifications = (userId, onNotification) => {
+const listenToNotifications = ({ userId, onNotification }) => {
+  if (!userId) {
+    console.error('User ID is not valid');
+    return;
+  }
+
   const unsubscribe = firestore()
     .collection('notifications')
     .where('userId', '==', userId)
@@ -15,99 +18,129 @@ const listenToNotifications = (userId, onNotification) => {
         id: doc.id,
         ...doc.data(),
       }));
-
-      onNotification(notifications); // Gọi callback để cập nhật danh sách
+      onNotification(notifications);
     });
 
-  return unsubscribe; // Trả về hàm hủy đăng ký
+  return unsubscribe;
 };
 
 const NotificationScreen = () => {
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true); // Hiển thị trạng thái tải dữ liệu
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userId = 'currentUserId'; // Thay bằng ID người dùng thực tế
+    const userId = auth().currentUser?.uid;
+    if (!userId) {
+      console.error('User ID is not available');
+      setLoading(false);
+      return;
+    }
 
-    // Lắng nghe thông báo từ Firestore
-    const unsubscribe = listenToNotifications(userId, (fetchedNotifications) => {
-      setNotifications(fetchedNotifications);
-      setLoading(false); // Tắt trạng thái tải
+    const unsubscribe = listenToNotifications({
+      userId,
+      onNotification: (fetchedNotifications) => {
+        setNotifications(fetchedNotifications);
+        setLoading(false);
+      },
     });
 
-    // Hủy đăng ký lắng nghe khi màn hình bị unmount
     return () => unsubscribe();
   }, []);
 
-  // Hàm render từng thông báo
-  const renderItem = ({ item }) => (
-    <Row style={styles.row}>
-      <Avatar />
-      <Text style={styles.notificationText}>{item.content}</Text>
-    </Row>
-  );
-
-  // Hiển thị thông báo khi đang tải dữ liệu
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Đang tải thông báo...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="black" />
+        <Text style={styles.loadingText}>Đang tải thông báo...</Text>
       </View>
     );
   }
 
-  // Kiểm tra nếu không có thông báo
   if (notifications.length === 0) {
     return (
-      <View style={styles.container}>
-        <ImageBackground
-          source={require('../../assets/images/nonotification.png')}
-          style={styles.image}
-          accessible
-          accessibilityLabel="Không có thông báo"
-        />
-        <Text style={styles.text}>Không có thông báo</Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Chưa có thông báo mới.</Text>
       </View>
     );
   }
 
-  // Hiển thị danh sách thông báo nếu có
   return (
     <FlatList
       data={notifications}
-      renderItem={renderItem}
       keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <View style={styles.notificationContainer}>
+          {/* Hình ảnh đơn hàng */}
+          {item.imageUrl && (
+            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+          )}
+          <View style={styles.textContainer}>
+            {/* Mã đơn hàng */}
+            <Text style={styles.orderId}>Mã đơn hàng: {item.orderId || 'Không có mã'}</Text>
+
+            {/* Ngày đặt */}
+            <Text style={styles.orderDate}>
+              Ngày đặt: {item.createdAt ? new Date(item.createdAt.toDate()).toLocaleString() : 'Không xác định'}
+            </Text>
+
+            {/* Trạng thái đơn hàng */}
+            <Text style={styles.orderStatus}>
+              Trạng thái: {item.orderStatus || 'Đang chuẩn bị'}
+            </Text>
+          </View>
+        </View>
+      )}
     />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
-  image: {
-    width: 200,
-    height: 200,
-    marginBottom: 20,
+  loadingText: {
+    marginTop: 10,
+    color: 'black',
   },
-  text: {
-    fontSize: 16,
-    color: '#888',
-  },
-  row: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    flexDirection: 'row',
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  notificationText: {
-    marginLeft: 10,
+  emptyText: {
+    color: 'black',
+  },
+  notificationContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  textContainer: {
+    justifyContent: 'center',
+  },
+  orderId: {
+    fontWeight: 'bold',
+    color: 'black',
+    fontSize: 16,
+  },
+  orderDate: {
+    color: 'gray',
     fontSize: 14,
-    color: '#333',
+    marginTop: 4,
+  },
+  orderStatus: {
+    color: 'green',
+    fontSize: 14,
+    marginTop: 4,
   },
 });
 

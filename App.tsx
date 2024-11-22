@@ -3,49 +3,44 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import Router from './src/routers/Router';
-import NotificationService from './src/utils/notificationService';
-import {displayNotification} from './src/utils/notificationService';
-import { Button, View, StyleSheet } from 'react-native';
+
+import PermissionNotificationService from './src/utils/permissionNotificationService';
+import ListenerNotificationService from './src/utils/listenerNotificationService';
+import MessageNotificationService from './src/utils/messageNotificationService';
+import OrderNotificationService from './src/utils/orderNotificationService';
+import { createNotificationChannels } from './src/utils/createNotificationChannels';
 
 const App = () => {
   useEffect(() => {
-    // Yêu cầu quyền và lấy token FCM
-    NotificationService.requestUserPermission();
+    // Yêu cầu quyền thông báo
+    PermissionNotificationService.requestUserPermission();
 
-    // Lắng nghe thông báo khi ứng dụng đang mở
-    const unsubscribeForeground = NotificationService.onMessageListener();
+    // Tạo kênh thông báo
+    createNotificationChannels();
 
-    // Xử lý thông báo khi ứng dụng ở chế độ nền
-    NotificationService.setBackgroundMessageHandler();
+    // Khởi tạo listener cho từng loại thông báo
+    ListenerNotificationService.setupForegroundListener();
+    ListenerNotificationService.setupBackgroundHandler();
+     // Đăng ký listener và lưu các hàm unsubscribe
+     const messageUnsubscribe = MessageNotificationService.setupMessageNotificationListener();
+     const orderUnsubscribe = OrderNotificationService.setupOrderNotificationListener();
+ 
 
+    // Cleanup listener khi component bị hủy
     return () => {
-      // Dọn dẹp listener khi component bị hủy
-      unsubscribeForeground();
+      // Thêm logic cleanup ở đây
+      if (messageUnsubscribe) messageUnsubscribe();
+      if (orderUnsubscribe) orderUnsubscribe();
     };
   }, []);
-
-  const handleNotification = () => {
-    displayNotification('Tiêu đề thông báo', 'Nội dung của thông báo');
-  };
 
   return (
     <NavigationContainer>
       <Provider store={store}>
-        {/* <View style={styles.container}>
-          <Button title="Hiển thị thông báo" onPress={handleNotification} />
-        </View> */}
         <Router />
       </Provider>
     </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default App;

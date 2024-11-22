@@ -15,12 +15,37 @@ import Dialog from 'react-native-dialog';
 import {orderRef} from '../../firebase/firebaseConfig';
 import {firebase} from '@react-native-firebase/firestore';
 import {PaymentMethodModel} from '../../models/OrderModel';
-import auth, { getAuth } from '@react-native-firebase/auth';
+import auth, {getAuth} from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-const CheckOutScreen = ({route}) => {
+import firestore from '@react-native-firebase/firestore';
+import NotificationService from '../../utils/notificationService';
+import OrderNotificationService from '../../utils/orderNotificationService';
+import MessageNotificationService from '../../utils/messageNotificationService';
+import notifee from '@notifee/react-native';
+import HomeScreen from '../home/HomeScreen';
+const sendNotification = async (title, body) => {
+  // Đảm bảo kênh thông báo tồn tại trước khi gửi thông báo
+  const channelId = await notifee.createChannel({
+    id: 'message_channel',
+    name: 'Message Channel',
+    sound: 'default',
+  });
+
+  // Hiển thị thông báo
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {
+      channelId,
+      smallIcon: 'ic_launcher', // Đảm bảo rằng bạn đã thêm ic_launcher vào tài nguyên Android
+    },
+  });
+};
+
+const CheckOutScreen = ({route}: any) => {
   const navigation = useNavigation();
- const {selectedItems} = route.params;
+  const {selectedItems} = route.params;
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     string | null
   >(null);
@@ -30,7 +55,6 @@ const CheckOutScreen = ({route}) => {
 
   const [user, setUser] = useState('');
   const timerRef = useRef(null); // Create a ref to store the timer ID
-  
 
   const getUserId = () => {
     const currentUser = auth().currentUser;
@@ -75,83 +99,161 @@ const CheckOutScreen = ({route}) => {
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
+
+  //lay status id
+  function getOrderStatusById(orderStatusId: string): string {
+    switch (orderStatusId) {
+      case '0':
+        return 'Hủy đơn';
+      case '1':
+        return 'Đang xử lý đơn hàng mới';
+      case '2':
+        return 'Đang chuẩn bị';
+      case '2':
+        return 'Đã đóng gói';
+      case '4':
+        return 'Chờ vận chuyển';
+      case '5':
+        return 'Đang vận chuyển';
+      case '6':
+        return 'Đã giao hàng';
+      case '7':
+        return 'Giao thất bại';
+      case '8':
+        return 'Trả kho';
+      case '9':
+        return 'Trả tiền';
+      case '10':
+        return 'Đã nhận lại hàng';
+      case '11':
+        return 'Hoàn thành';
+      default:
+        return 'Trạng thái không xác định';
+    }
+  }
   useEffect(() => {
     // Cleanup the timer if the component unmounts
     return () => {
       clearTimeout(timerRef.current); // Clear the timer
     };
   }, []);
+
+  // Mua và xóa sản phẩm khỏi giỏ hàng
   const showDialogAndAddOrders = async () => {
     try {
+      // Kiểm tra phương thức thanh toán
       if (!selectedPaymentMethod) {
-        console.error('Payment method is not selected.');
+        console.error('Chưa chọn phương thức thanh toán.');
         return;
       }
 
+      // Kiểm tra sản phẩm trong giỏ hàng
       if (!items || items.length === 0) {
-        console.error('No items found.');
-        return;
-      }
-      if (!user.phoneNumber) {
-        Alert.alert(
-          'Thông báo',
-          'Vui lòng nhập số điện thoại',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
-            },
-          ],
-          {cancelable: false},
-        );
-        return;
-      }
-      if (!user.fullAddress) {
-        Alert.alert(
-          'Thông báo',
-          'Vui lòng nhập địa chỉ',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
-            },
-          ],
-          {cancelable: false},
-        );
+        console.error('Không có sản phẩm trong giỏ hàng.');
         return;
       }
 
-      if (totalPrice <= 0) {
-        console.error('Total price must be greater than 0.');
+      // Kiểm tra thông tin người dùng
+      if (!user.phoneNumber) {
+        Alert.alert('Thông báo', 'Vui lòng nhập số điện thoại', [
+          {text: 'OK', onPress: () => navigation.navigate('Address')},
+        ]);
         return;
       }
-      const sanitizedItems = items.map(item => ({
-        ...item,
-      }));
+
+      if (!user.fullAddress) {
+        Alert.alert('Thông báo', 'Vui lòng nhập địa chỉ', [
+          {text: 'OK', onPress: () => navigation.navigate('Address')},
+        ]);
+        return;
+      }
+
+      // Kiểm tra giá trị tổng đơn hàng
+      if (totalPrice <= 0) {
+        console.error('Tổng giá trị đơn hàng phải lớn hơn 0.');
+        return;
+      }
+
+      // Chuyển đổi giỏ hàng sang dạng cần thiết
+      const sanitizedItems = items.map(item => ({...item}));
+
+      // Tạo dữ liệu đơn hàng
       const orderData = {
-        userId: getUserId(),
+        userId: auth().currentUser?.uid, // UID người dùng
         address: user.fullAddress,
         items: sanitizedItems,
         totalPrice: totalPrice,
         shipperId: null,
         paymentMethodId: selectedPaymentMethod,
-        orderStatusId: '1',
+        orderStatusId: '1', // Trạng thái đơn hàng ban đầu là "Đã đặt"
         timestamp: getCurrentDateTime(),
       };
 
       // Thêm đơn hàng vào Firestore
-      await orderRef.add(orderData);
+      const docRef = await firestore().collection('orders').add(orderData);
+      const orderId = docRef.id; // Lấy ID của đơn hàng vừa thêm
+
+      // Lấy trạng thái đơn hàng từ orderStatusId
+      const orderStatus = getOrderStatusById(orderData.orderStatusId);
+
+      // Lưu thông báo vào Firestore
+      await NotificationService.saveNotificationToFirestore(
+        orderId,
+        orderStatus,
+      );
+
+      // Gửi thông báo đến người dùng
+      if (auth().currentUser?.uid && orderId) {
+        try {
+          //@ts-ignore
+          const userId = auth().currentUser.uid;
+
+          // Gửi thông báo
+          await MessageNotificationService.setupMessageNotificationListener(
+            //@ts-ignore
+            userId,
+            {
+              title: 'Đơn hàng mới',
+              body: `Đơn hàng của bạn (#${orderId}) đã được đặt thành công.`,
+            },
+            {orderId, status: orderStatus},
+          );
+
+          // Thực hiện gỡ bỏ listener sau một khoảng thời gian nếu cần thiết
+          setTimeout(() => {
+            MessageNotificationService.removeMessageNotificationListener();
+            console.log(`Đã gỡ bỏ listener cho đơn hàng ${orderId}`);
+          }, 1000); // Gỡ bỏ listener sau 5 giây
+
+          // Gửi thông báo ngay lập tức
+          await sendNotification(
+            'Đơn hàng mới',
+            `Đơn hàng của bạn (#${orderId}) đã được đặt thành công.`,
+          );
+
+          console.log(
+            `Thông báo đơn hàng ${orderId} đã được gửi thành công cho người dùng ${userId}`,
+          );
+        } catch (error) {
+          console.error('Lỗi khi gửi thông báo cho người dùng:', error);
+        }
+      } else {
+        console.error('Không có UID người dùng hoặc ID đơn hàng không hợp lệ.');
+      }
+
+      // Sau khi đặt hàng thành công, xóa các sản phẩm trong giỏ hàng
       await removeItemsFromCart(items);
-      
-      setVisible(true);
-      setTimeout(() => {
-        setVisible(false); 
-        navigation.replace('CartScreen'); 
-      }, 2000);
+
+      // Hiển thị thông báo đặt hàng thành công
+      Alert.alert('Thông báo', 'Đặt hàng thành công!', [
+        {text: 'OK', onPress: () => navigation.navigate('HomeScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
+      ]);
     } catch (error) {
-      console.error('Error saving order: ', error);
+      console.error('Lỗi khi xử lý đơn hàng:', error);
     }
   };
+
+  // Xóa các sản phẩm trong giỏ hàng
   const removeItemsFromCart = async (items: any[]) => {
     const userId = getAuth().currentUser?.uid;
     const cartRef = firebase.firestore().collection('carts').doc(userId);
@@ -166,23 +268,22 @@ const CheckOutScreen = ({route}) => {
 
         items.forEach(item => {
           const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
-         
+
           delete updatedProducts[productKey];
         });
 
-        // Update the cart in Firestore
+        // Cập nhật lại giỏ hàng trong Firestore
         await cartRef.update({products: updatedProducts});
-        console.log('Cart items removed successfully.');
+        console.log('Đã xóa sản phẩm khỏi giỏ hàng thành công.');
 
-        // Optionally, you could refetch the updated cart data here to update the UI
+        // Optionally, bạn có thể refetch lại dữ liệu giỏ hàng để cập nhật giao diện
       } else {
-        console.error('Cart not found.');
+        console.error('Không tìm thấy giỏ hàng.');
       }
     } catch (error) {
-      console.error('Error removing items from cart: ', error);
+      console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng: ', error);
     }
   };
-
   const calculateTotalPrice = () => {
     const total = items.reduce(
       (sum: number, item: {price: number; quantity: number}) =>

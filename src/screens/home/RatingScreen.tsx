@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'space-between',
+    
   },
   title: {
     fontSize: 25,
@@ -205,6 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
+    
   },
   userText: {
     fontSize: 16,
@@ -214,40 +216,50 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 14,
     marginVertical: 5,
+    color:"black"
   },
   noReviewsText: {
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
     color: '#888',
+    
   },
   modalOverlay: {
+    
     flex: 1,
     paddingTop: 60,
     alignItems: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color:"black"
+
   },
   dialogContainer: {
     width: 300,
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
+    
   },
   dialogTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:"black"
   },
   filterOption: {
+  
     padding: 10,
+    backgroundColor:'#8888',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: 'black',
+    color:'black'
   },
   selectedFilterText: {
     marginTop: 20,
     marginBottom: 20,
     fontSize: 16,
-    color: 'gray',
+    color: 'black',
   },
 });
 

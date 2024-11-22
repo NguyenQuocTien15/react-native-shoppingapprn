@@ -148,6 +148,7 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
     </Section>
   ) : (
     <Container
+    //@ts-ignore
       bottomComponent={
         <Section>
           <Button

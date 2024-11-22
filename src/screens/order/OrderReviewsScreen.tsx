@@ -22,9 +22,10 @@ import {
   serverTimestamp,
   setDoc,
 } from '@react-native-firebase/firestore';
-
+//@ts-ignore
 const ReviewsProduct = ({navigation}) => {
   const route = useRoute();
+  //@ts-ignore
   const {productId, title, imageUrl, size, color} = route.params;
 
   const [rating, setRating] = useState(0);
@@ -81,6 +82,8 @@ const ReviewsProduct = ({navigation}) => {
      }
 
      // Get the productId from route params
+     //@ts-ignore
+
      const productId = route.params.productId;
 
      // Create a reference to the Firestore document path: reviews -> productId -> reviewId
@@ -145,6 +148,7 @@ const ReviewsProduct = ({navigation}) => {
             <TextComponent
               type="title"
               numberOfLine={1}
+              //@ts-ignore
               ellipsizeMode="tail"
               text={title}
               size={20}
