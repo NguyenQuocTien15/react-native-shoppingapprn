@@ -9,17 +9,19 @@ import { collection, doc, getDoc, onSnapshot } from '@react-native-firebase/fire
 const AllReviews = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { productId } = route.params; // Get productId from route params
+  const {productId} = route.params; // Get productId from route params
 
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-
+  const [averageRating, setAverageRating] = useState(0); // State lưu trung bình số sao
+  const [totalReviews, setTotalReviews] = useState(0); // State lưu tổng số lượt đánh giá
   const filterOptions = [
     'Đánh giá thấp đến cao', // Low to High Rating
     'Đánh giá gần nhất', // Most Recent
-    'Đánh giá cao đến thấp', 'Hủy'
+    'Đánh giá cao đến thấp',
+    'Hủy',
   ];
 
   const toggleDialog = () => {
@@ -31,12 +33,9 @@ const AllReviews = () => {
     setIsVisible(false); // Close dialog after selection
   };
 
-  // Fetching reviews data
   useEffect(() => {
-    // Reference to the reviews collection for the specific product
-    const reviewsRef = collection(db, 'reviews', productId, 'reviews');
+    const reviewsRef = collection(db, 'reviews', productId, 'productReviews');
 
-    // Real-time listener for reviews
     const unsubscribe = onSnapshot(
       reviewsRef,
       async snapshot => {
@@ -51,12 +50,23 @@ const AllReviews = () => {
             reviewsData.map(async review => {
               const userName = review.userId
                 ? await fetchUserName(review.userId)
-                : 'Unknown'; // Nếu không có userId, gắn "Unknown"
+                : 'Unknown';
               return {...review, userName}; // Thêm userName vào dữ liệu review
             }),
           );
 
           setReviews(reviewsWithUserNames); // Cập nhật danh sách đánh giá
+
+          // Tính tổng số sao và số lượt đánh giá
+          const totalStars = reviewsWithUserNames.reduce(
+            (sum, review) => sum + (review.rating || 0),
+            0,
+          );
+          const totalReviews = reviewsWithUserNames.length;
+
+          setTotalReviews(totalReviews);
+          setAverageRating(totalReviews > 0 ? totalStars / totalReviews : 0);
+
           setLoading(false); // Dừng trạng thái loading
         } catch (error) {
           console.error('Error fetching reviews:', error);
@@ -84,34 +94,36 @@ const AllReviews = () => {
     return 'Unknown'; // Nếu không tìm thấy, trả về "Unknown"
   };
 
-   const RenderReviewItem = ({item}) => (
-     <View style={styles.reviewContainer}>
-       <Text style={styles.userText}>{item.userName}</Text>
-       <View style={{alignItems: 'flex-start'}}>
-         <Rating
-           startingValue={item.rating}
-           readonly
-           ratingCount={5}
-           ratingBackgroundColor="coral"
-           imageSize={18}
-         />
-       </View>
+  const RenderReviewItem = ({item}) => (
+    <View style={styles.reviewContainer}>
+      <Text style={styles.userText}>{item.userName}</Text>
+      <View style={{alignItems: 'flex-start'}}>
+        <Rating
+          startingValue={item.rating}
+          readonly
+          ratingCount={5}
+          ratingBackgroundColor="coral"
+          imageSize={18}
+        />
+      </View>
 
-       <Text style={styles.commentText}>{item.comment}</Text>
-     </View>
-   );
+      <Text style={styles.commentText}>{item.comment}</Text>
+    </View>
+  );
 
   // Function to apply the selected filter
-  const applyFilter = (filter) => {
+  const applyFilter = filter => {
     let filteredReviews = [...reviews];
     if (filter === 'Đánh giá thấp đến cao') {
       filteredReviews = filteredReviews.sort((a, b) => a.rating - b.rating); // Low to High Rating
     } else if (filter === 'Đánh giá cao đến thấp') {
       filteredReviews = filteredReviews.sort((a, b) => b.rating - a.rating); // High to Low Rating
     } else if (filter === 'Đánh giá gần nhất') {
-      filteredReviews = filteredReviews.sort((a, b) => new Date(b.date) - new Date(a.date)); // Most Recent
-    }else if (filter === 'Đánh giá gần nhất') {
-      setIsVisible(false)
+      filteredReviews = filteredReviews.sort(
+        (a, b) => new Date(b.date) - new Date(a.date),
+      ); // Most Recent
+    } else if (filter === 'Đánh giá gần nhất') {
+      setIsVisible(false);
     }
     setReviews(filteredReviews); // Update the reviews list
   };
@@ -129,27 +141,42 @@ const AllReviews = () => {
           <Ionicons name="filter-circle" size={30} color="black" />
         </TouchableOpacity>
       </View>
+      <View style={styles.ratingSummaryContainer}>
+        <Rating
+          startingValue={averageRating}
+          readonly
+          ratingCount={5}
+          ratingBackgroundColor="coral"
+          imageSize={40}
+        />
+        <Text style={styles.totalReviewsText}>
+          {`Số sao sản phẩm: ${averageRating.toFixed(1)}/5`}
+        </Text>
+        <Text style={styles.totalReviewsText}>
+          {`Số lượt đánh giá: ${totalReviews}`}
+        </Text>
+      </View>
 
       {isVisible && (
         <Modal
           animationType="slide"
           transparent={true}
           visible={isVisible}
-          onRequestClose={toggleDialog}
-        >
+          onRequestClose={toggleDialog}>
           <View style={styles.modalOverlay}>
             <View style={styles.dialogContainer}>
               <FlatList
                 data={filterOptions}
-                renderItem={({ item }) => (
+                renderItem={({item}) => (
                   <TouchableOpacity
                     style={styles.filterOption}
                     onPress={() => {
                       handleFilterSelect(item);
                       applyFilter(item); // Apply the filter when selected
-                    }}
-                  >
-                    <Text>{item}</Text>
+                    }}>
+                    <Text style={{color: 'black', fontWeight: 'bold'}}>
+                      {item}
+                    </Text>
                   </TouchableOpacity>
                 )}
                 keyExtractor={(item, index) => index.toString()}
@@ -170,11 +197,13 @@ const AllReviews = () => {
       ) : reviews.length > 0 ? (
         <FlatList
           data={reviews}
-          renderItem={({ item }) => <RenderReviewItem item={item} />}
+          renderItem={({item}) => <RenderReviewItem item={item} />}
           keyExtractor={item => item.id || Math.random().toString()}
         />
       ) : (
-        <Text style={styles.noReviewsText}>Chưa có đánh giá cho sản phẩm này.</Text>
+        <Text style={styles.noReviewsText}>
+          Chưa có đánh giá cho sản phẩm này.
+        </Text>
       )}
     </View>
   );
@@ -214,6 +243,7 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 14,
     marginVertical: 5,
+    color: 'black',
   },
   noReviewsText: {
     fontSize: 16,
@@ -247,7 +277,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     fontSize: 16,
-    color: 'gray',
+    color: 'black',
+  },
+  ratingSummaryContainer: {
+    marginVertical: 10,
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    padding:20
+  },
+  totalReviewsText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 
