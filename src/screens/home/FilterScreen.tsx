@@ -384,4 +384,4 @@ const [brandsSelected, setBrandsSelected] = useState<string[]>([]);
   );
 };
 
-export default  FilterScreen;
+export default FilterScreen;

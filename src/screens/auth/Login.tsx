@@ -1,5 +1,5 @@
 import {Button, Input, Row, Section, Text} from '@bsdaoquang/rncomponent';
-import {TickCircle} from 'iconsax-react-native';
+import {Link, TickCircle} from 'iconsax-react-native';
 import React, {useState} from 'react';
 import {Image, ScrollView} from 'react-native';
 import {Container} from '../../components';
@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {localDataNames} from '../../constants/localDataNames';
 import { Auth } from '../../utils/handleAuthen';
 
+//login
 const Login = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +40,7 @@ const Login = ({navigation}: any) => {
             photoUrl: user.photoURL,
             creationTime: user.metadata.creationTime,
             lastSignInTime: user.metadata.lastSignInTime,
+            
           };
           dispatch(addAuth(data));
           await AsyncStorage.setItem(localDataNames.auth, JSON.stringify(data));
@@ -124,11 +126,13 @@ const Login = ({navigation}: any) => {
           <Button
             title="Forgot Password?"
             inline
-            onPress={() => {}}
+            onPress={() => navigation.navigate('ForgotPassword')}
+            //onPress={() => {}}
             type="link"
           />
         </Row>
-
+        
+        
         <Section>
           <Button
             title="Login"

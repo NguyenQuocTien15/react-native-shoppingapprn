@@ -29,7 +29,7 @@ import ImageSwiper from './components/ImageSwiper';
 import RatingComponent from './components/RatingComponent';
 import Dialog from 'react-native-dialog';
 import {sizes} from '../../constants/sizes';
-import auth, {firebase} from '@react-native-firebase/auth';
+import auth, {firebase, getAuth} from '@react-native-firebase/auth';
 import {Image} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -45,8 +45,8 @@ const ProductDetail = ({navigation, route}: any) => {
   const [sizeSelected, setSizeSelected] = useState('');
   const [visible, setVisible] = useState(false);
 
-  const [quantityAvailable, setQuantityAvailable] = useState(0);
   const [sizes, setSizes] = useState<any[]>([]);
+  const userId = getAuth().currentUser?.uid
   useEffect(() => {
     if (productDetail?.variations?.length > 0) {
       const firstColor = productDetail.variations[0].color;
@@ -132,17 +132,134 @@ const ProductDetail = ({navigation, route}: any) => {
       const sizeVariation = colorVariation.sizes.find(
         (s: any) => s.size === sizeSelected,
       );
-
-      if (sizeVariation) {
-        // Cập nhật số lượng của kích cỡ
-        setQuantityAvailable(sizeVariation.quantity);
-        console.log(
-          'Available Quantity for selected size:',
-          sizeVariation.quantity,
-        );
-      }
     }
   };
+  // const handleAddToCart = async (
+  //   userId: string | null | undefined,
+  //   productId: string | number,
+  //   colorSelected: string,
+  //   sizeSelected: string,
+  //   quantity: number,
+  // ) => {
+  //   if (!sizeSelected) {
+  //     Alert.alert('Bạn chưa chọn size');
+  //     return;
+  //   }
+  //   if (!colorSelected) {
+  //     Alert.alert('Bạn chưa chọn màu');
+  //     return;
+  //   }
+  //   const cartRef = firestore().collection('carts').doc(userId);
+
+  //   try {
+  //     await firestore().runTransaction(async transaction => {
+  //       const cartDoc = await transaction.get(cartRef);
+
+  //       if (!cartDoc.exists) {
+  //         transaction.set(cartRef, {
+  //           products: {
+  //             [productId]: {
+  //               colorSelected,
+  //               sizeSelected,
+  //               quantity: quantity,
+  //               addedAt: new Date().toISOString(),
+  //             },
+  //           },
+  //         });
+  //       } else {
+  //         const currentProducts = cartDoc.data().products || {};
+  //         const currentQuantity = currentProducts[productId]?.quantity || 0;
+
+  //         transaction.update(cartRef, {
+  //           [`products.${productId}`]: {
+  //             colorSelected,
+  //             sizeSelected,
+  //             quantity: currentQuantity + quantity,
+  //             addedAt: new Date().toISOString(),
+  //           },
+  //         });
+  //       }
+  //     });
+
+  //     setVisible(true);
+  //     setTimeout(() => {
+  //       setVisible(false);
+  //       //navigation.navigate('CartScreen');
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error('Error adding product to cart: ', error);
+  //   }
+  // };
+
+const handleAddToCart = async (
+  userId: string | null | undefined,
+  productId: string | number,
+  colorSelected: string,
+  sizeSelected: string,
+  quantity: number,
+) => {
+  if (!sizeSelected) {
+    Alert.alert('Bạn chưa chọn size');
+    return;
+  }
+  if (!colorSelected) {
+    Alert.alert('Bạn chưa chọn màu');
+    return;
+  }
+
+  const cartRef = firestore().collection('carts').doc(userId);
+
+  try {
+    await firestore().runTransaction(async transaction => {
+      const cartDoc = await transaction.get(cartRef);
+
+      if (!cartDoc.exists) {
+        // If cart doesn't exist, create it with the new product
+        transaction.set(cartRef, {
+          products: {
+            [`${productId}-${colorSelected}-${sizeSelected}`]: {
+              colorSelected,
+              sizeSelected,
+              quantity,
+              addedAt: new Date().toISOString(),
+            },
+          },
+        });
+      } else {
+        const currentProducts = cartDoc.data().products || {};
+
+        // Check if the product with the selected color and size already exists
+        const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
+        const currentProduct = currentProducts[productKey];
+
+        if (currentProduct) {
+          // If the product exists, update the quantity
+          transaction.update(cartRef, {
+            [`products.${productKey}.quantity`]: currentProduct.quantity + quantity,
+          });
+        } else {
+          // If the product doesn't exist (same color, different size), add it as a new item
+          transaction.update(cartRef, {
+            [`products.${productKey}`]: {
+              colorSelected,
+              sizeSelected,
+              quantity,
+              addedAt: new Date().toISOString(),
+            },
+          });
+        }
+      }
+    });
+
+    setVisible(true);
+    setTimeout(() => {
+      setVisible(false);
+      //navigation.navigate('CartScreen');
+    }, 2000);
+  } catch (error) {
+    console.error('Error adding product to cart: ', error);
+  }
+};
 
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -228,7 +345,7 @@ const ProductDetail = ({navigation, route}: any) => {
                   borderTopStartRadius: 30,
                   borderTopEndRadius: 30,
                 }}>
-                <Row justifyContent="space-between" alignItems='flex-start'>
+                <Row justifyContent="space-between" alignItems="flex-start">
                   <Col>
                     <TextComponent
                       text={productDetail?.title}
@@ -243,7 +360,7 @@ const ProductDetail = ({navigation, route}: any) => {
                       backgroundColor: colors.gray300,
                       padding: 6,
                       borderRadius: 100,
-                      flex:0.28
+                      flex: 0.28,
                     }}>
                     <TouchableOpacity
                       style={{paddingLeft: 12}}
@@ -370,8 +487,13 @@ const ProductDetail = ({navigation, route}: any) => {
                   size={12}
                   color={colors.gray700}
                 />
+               
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('RatingScreen')}>
+                  onPress={() =>
+                    navigation.navigate('RatingScreen', {
+                      productId: id,
+                    })
+                  }>
                   <Row
                     styles={{
                       justifyContent: 'space-between',
@@ -437,16 +559,17 @@ const ProductDetail = ({navigation, route}: any) => {
             />
           </Col>
           <Space width={4}></Space>
-          <Col>
-            <Button
-              icon={
-                <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
-              }
-              inline
-              onPress={() => console.log('1')}
-              color={colors.black}
-              title={'Add to cart'}></Button>
-          </Col>
+
+          <Button
+            icon={
+              <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
+            }
+            inline
+            onPress={() =>
+              handleAddToCart(userId, id, colorSelected, sizeSelected, count)
+            }
+            color={colors.black}
+            title={'Add to cart'}></Button>
 
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
@@ -478,25 +601,3 @@ const ProductDetail = ({navigation, route}: any) => {
 };
 
 export default ProductDetail;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-  },
-  iconBack: {
-    position: 'absolute',
-    top: 5, // Căn chỉnh vị trí theo ý bạn
-    left: 5,
-  },
-  iconCart: {
-    position: 'absolute',
-    top: 5, // Căn chỉnh vị trí theo ý bạn
-    right: 5,
-  },
-  image: {
-    width: '100%',
-    height: 400,
-    backgroundColor: 'blue',
-  },
-});

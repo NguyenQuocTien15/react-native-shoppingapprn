@@ -13,8 +13,6 @@ type Props = {
     left?: ReactNode;
     right?:ReactNode;
     isScroll?: boolean;
-    //nẳm ngoài scrollVIew
-    bottomComponent?: ReactNode;
 };
 
 const Container = (props: Props) => {
@@ -26,8 +24,10 @@ const Container = (props: Props) => {
         {(back || left || bigTitle || right) && (
           <Row
             styles={{
+              marginTop: 5,
               padding: 1,
               paddingHorizontal: 5,
+              paddingVertical: 5,
             }}>
             {back && (
               <TouchableOpacity
@@ -36,28 +36,43 @@ const Container = (props: Props) => {
                   {
                     backgroundColor: colors.black,
                     borderRadius: 100,
+                    padding: 0,
                     width: 34,
                     height: 34,
-                    marginTop: 6,
+                    marginTop: 26,
                   },
                 ]}
                 onPress={() => navigation.goBack()}>
                 <MaterialIcons
-                  style={{ marginLeft: 8 }}
+                  style={{marginLeft: 8}}
                   name="arrow-back-ios"
                   size={22}
                   color={colors.white}
                 />
               </TouchableOpacity>
             )}
-            {left && !back && <TextComponent text='Left' />}
-            <View style={{ paddingHorizontal: 5,padding:1, flex: 1 }}>
-              {bigTitle && <TextComponent text={bigTitle} type="bigTitle" styles={{marginTop:5,marginLeft:10,fontSize:20}}/>}
+            {left && !back && <TextComponent text="Left" />}
+            <View
+              style={{
+                paddingHorizontal: 5,
+                paddingVertical: 5,
+                marginTop: 5,
+                padding: 1,
+                flex: 1,
+              }}>
+              {bigTitle && (
+                <TextComponent
+                  text={bigTitle}
+                  type="bigTitle"
+                  styles={{marginTop: 20, marginLeft: 10}}
+                />
+              )}
             </View>
             {right && right}
           </Row>
         )}
-        {isScroll ? (
+
+        {!isScroll && isScroll !== false ? (
           <ScrollView style={globalStyles.container}>{children}</ScrollView>
         ) : (
           <View style={globalStyles.container}>{children}</View>
@@ -65,7 +80,6 @@ const Container = (props: Props) => {
         {bottomComponent && bottomComponent}
       </SafeAreaView>
     );
-  };
-
+}
 
 export default Container;

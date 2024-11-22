@@ -15,12 +15,12 @@ import Dialog from 'react-native-dialog';
 import {orderRef} from '../../firebase/firebaseConfig';
 import {firebase} from '@react-native-firebase/firestore';
 import {PaymentMethodModel} from '../../models/OrderModel';
-import auth from '@react-native-firebase/auth';
+import auth, { getAuth } from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 const CheckOutScreen = ({route}) => {
   const navigation = useNavigation();
-
+ const {selectedItems} = route.params;
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     string | null
   >(null);
@@ -125,12 +125,9 @@ const CheckOutScreen = ({route}) => {
         console.error('Total price must be greater than 0.');
         return;
       }
-
       const sanitizedItems = items.map(item => ({
         ...item,
-        sizes: item.sizes !== undefined ? item.sizes : null,
       }));
-
       const orderData = {
         userId: getUserId(),
         address: user.fullAddress,
@@ -155,39 +152,31 @@ const CheckOutScreen = ({route}) => {
       console.error('Error saving order: ', error);
     }
   };
-  const removeItemsFromCart = async (itemsToRemove: { productId: string; }[]) => {
-    try {
-      const userId = getUserId();
-      // Update the path to match your Firestore structure
-      const cartRef = firebase.firestore().collection('carts').doc(userId);
+  const removeItemsFromCart = async (items: any[]) => {
+    const userId = getAuth().currentUser?.uid;
+    const cartRef = firebase.firestore().collection('carts').doc(userId);
 
-      // Fetch the current cart data
+    try {
       const cartDoc = await cartRef.get();
       if (cartDoc.exists) {
-        const currentCart = cartDoc.data();
-        const currentProducts = currentCart.products || {};
+        const cartData = cartDoc.data();
+        const cartProducts = cartData?.products || {};
 
-        // Create a new object with the remaining items
-        const updatedProducts = Object.keys(currentProducts).reduce(
-          (acc, key) => {
-            // Only add items that are not in the itemsToRemove list
-            if (
-              !itemsToRemove.some(
-                (item: {productId: string}) => item.productId === key,
-              )
-            ) {
-              acc[key] = currentProducts[key];
-            }
-            return acc;
-          },
-          {},
-        );
+        const updatedProducts = {...cartProducts};
 
-        // Update the cart in Firestore with the remaining items
+        items.forEach(item => {
+          const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
+         
+          delete updatedProducts[productKey];
+        });
+
+        // Update the cart in Firestore
         await cartRef.update({products: updatedProducts});
-        console.log('Items removed from cart successfully.');
+        console.log('Cart items removed successfully.');
+
+        // Optionally, you could refetch the updated cart data here to update the UI
       } else {
-        console.log('Cart does not exist for this user.');
+        console.error('Cart not found.');
       }
     } catch (error) {
       console.error('Error removing items from cart: ', error);
@@ -232,23 +221,7 @@ const CheckOutScreen = ({route}) => {
   const handlePaymentMethodSelect = (paymentMethodId: string) => {
     setSelectedPaymentMethod(paymentMethodId);
   };
-  // const renderItemPaymentMethod = ({item}: {item: PaymentMethodModel}) => (
-  //   <View style={[styles.flexDirection, {alignItems: 'center'}]}>
-  //     <Text style={{color: 'black', fontSize: 20}}>
-  //       {item.paymentMethodName}
-  //     </Text>
-  //     <View>
-  //       <TouchableOpacity
-  //         onPress={() => handlePaymentMethodSelect(item.paymentMethodId)}>
-  //         <View style={[styles.radioCircle, {borderColor: 'gray'}]}>
-  //           {selectedPaymentMethod === item.paymentMethodId && (
-  //             <View style={styles.selectedRb} />
-  //           )}
-  //         </View>
-  //       </TouchableOpacity>
-  //     </View>
-  //   </View>
-  // );
+
   const renderItemPaymentMethod = ({item}) => (
     <View style={[styles.flexDirection, {alignItems: 'center'}]}>
       <Text style={{color: 'black', fontSize: 20}}>
@@ -302,78 +275,84 @@ const CheckOutScreen = ({route}) => {
 
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1}}>
-          {items.map(item => (
-            <View
-              key={item.id}
-              style={[
-                styles.itemListProduct,
-                {flexDirection: 'row', padding: 10},
-              ]}>
-              <Image
-                source={{uri: item.imageUrl}}
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 12,
-                  marginRight: 10,
-                }}></Image>
-              <View style={{flex: 1, flexDirection: 'column'}}>
-                <Text
-                  style={styles.customText}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  {item.title}
-                </Text>
-                <Text
-                  style={{color: 'black', fontSize: 18}}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  {item.description}
-                </Text>
-                <View
+          {selectedItems && selectedItems.length > 0 ? (
+            selectedItems.map(item => (
+              <View
+                key={item.id}
+                style={[
+                  styles.itemListProduct,
+                  {flexDirection: 'row', padding: 10},
+                ]}>
+                <Image
+                  source={{uri: item.imageUrl}}
                   style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-end',
-                  }}>
-                  <Text style={styles.customText}>{`$${
-                    item.price * item.quantity
-                  }`}</Text>
+                    width: 100,
+                    height: 100,
+                    borderRadius: 12,
+                    marginRight: 10,
+                  }}></Image>
+                <View style={{flex: 1, flexDirection: 'column'}}>
+                  <Text
+                    style={styles.customText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail">
+                    {item.title}
+                  </Text>
+                  <Text
+                    style={{color: 'black', fontSize: 18}}
+                    numberOfLines={1}
+                    ellipsizeMode="tail">
+                    {item.color} - {item.size}
+                  </Text>
                   <View
-                    style={[
-                      styles.flexDirection,
-                      {
-                        backgroundColor: '#e0e0e0',
-                        paddingVertical: 4,
-                        borderRadius: 100,
-                        paddingHorizontal: 12,
-                        alignItems: 'center',
-                      },
-                    ]}>
-                    <TouchableOpacity
-                      onPress={() => handleDecreaseQuantity(item.id)}>
-                      <Minus size={20} color="black"></Minus>
-                    </TouchableOpacity>
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-end',
+                    }}>
+                    <Text style={styles.customText}>{`$${
+                      item.price * item.quantity
+                    }`}</Text>
+                    <View
+                      style={[
+                        styles.flexDirection,
+                        {
+                          backgroundColor: '#e0e0e0',
+                          paddingVertical: 4,
+                          borderRadius: 100,
+                          paddingHorizontal: 12,
+                          alignItems: 'center',
+                        },
+                      ]}>
+                      <TouchableOpacity
+                        onPress={() => handleDecreaseQuantity(item.id)}>
+                        <Minus size={20} color="black"></Minus>
+                      </TouchableOpacity>
 
-                    <Text
-                      style={{
-                        marginLeft: 12,
-                        marginRight: 12,
-                        fontSize: 18,
-                        color: 'black',
-                      }}>
-                      {item.quantity}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => handleIncreaseQuantity(item.id)}>
-                      <Add size={20} color="black"></Add>
-                    </TouchableOpacity>
+                      <Text
+                        style={{
+                          marginLeft: 12,
+                          marginRight: 12,
+                          fontSize: 18,
+                          color: 'black',
+                        }}>
+                        {item.quantity}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => handleIncreaseQuantity(item.id)}>
+                        <Add size={20} color="black"></Add>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={{textAlign: 'center', marginTop: 20}}>
+              No items selected for checkout
+            </Text>
+          )}
         </ScrollView>
 
         <View style={{marginVertical: 10}}>

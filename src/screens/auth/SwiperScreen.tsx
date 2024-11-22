@@ -9,7 +9,7 @@ import { ArrowRight } from 'iconsax-react-native'
 import SwiperTwo from './components/SwiperTwo'
 import SwiperThree from './components/SwiperThree'
 import { useIsFocused } from '@react-navigation/native'
-
+//Display splash Screen
 const SwiperScreen = ({navigation,route}:any) => {
     const {authState} = route.params;
    

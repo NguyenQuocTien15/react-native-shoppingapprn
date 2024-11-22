@@ -6,6 +6,6 @@ export const colors = {
   white: '#ffffff',
   success: '#2ecc71',
   blue: 'blue',
-
+ red:'red'
 
 };

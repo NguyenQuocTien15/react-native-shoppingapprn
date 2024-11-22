@@ -1,112 +1,80 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, Text, View, ScrollView} from 'react-native';
-import {TextComponent} from '../../components';
-import {colors} from '../../constants/colors';
+import {Button, Input, Row, Section, Space} from '@bsdaoquang/rncomponent';
+import messaging from '@react-native-firebase/messaging';
+import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
+import {FlatList, ScrollView, Text, View} from 'react-native';
+import {Container, TextComponent} from '../../components';
 import Avatar from '../../components/Avatar';
+import {colors} from '../../constants/colors';
 import CategoriesList from './components/CategoriesList';
 import ArrivalsProduct from './components/ArrivalsProduct';
 import OffersList from './components/OffersList';
 import ProductList from './components/ProductList';
-import {Button, Row, Section, Space} from '@bsdaoquang/rncomponent';
-import {Setting4} from 'iconsax-react-native';
+import {ProductModel} from '../../models/ProductModel';
 import SearchProduct from './components/SearchProduct';
 import Entypo from 'react-native-vector-icons/Entypo';
-import messaging from '@react-native-firebase/messaging';
-import Container from '../../components/Container'; // Assuming you have a Container component
-import { Image } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 const HomeScreen = ({navigation}: any) => {
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(message => {
-      console.log('New message:', message);
-    });
-    return unsubscribe; // Cleanup subscription on unmount
-  }, []);
-
-  return (
-    <Container isScroll={false}>
-      {/* Header Section */}
-      <Section styles={styles.header}>
-        <Row justifyContent="space-between">
+  const ListHeader = () => (
+    <View style={{padding:15}}>
+      
+        <Row justifyContent="flex-end">
           <Avatar />
-          <Image
-          source={require('../../assets/images/GoShopLoGo.png')}
-         style={{width:150,height:40}}
-          />
-          <View style={{ position: 'relative' }}>
-          <Button
-          size='small'
-            inline
-            icon={<Entypo name="message" size={28} color="black" />}
-            color="white"
-            borderColor='black'
-            onPress={() => navigation.navigate('ChatScreen')}
-          />
-          <View
-          style={{
-            borderColor:'red',
-           
-            borderRadius:6,
-            borderWidth:6,
-            width:6,
-            height:6,
-            top:-1,
-            right:-1,
-            position:'absolute',
-             pointerEvents: 'none'
-          }}/>
+          
+        </Row>
+     
+      <Space height={16} />
+      <TextComponent type="title" text="Welcome," size={24} />
+      <TextComponent text="Our fashion app" size={18} color={colors.gray2} />
+
+      <Section>
+        <Row>
+          <View style={{flex: 1}}>
+            {/* @ts-ignore */}
+            <SearchProduct
+              onSearchResults={results => {
+                handleSearchResults(results); // Gọi hàm để xử lý kết quả tìm kiếm
+                navigation.navigate('SearchResultsScreen', {results}); // Điều hướng sang màn hình SearchResultsScreen
+              }}
+              navigation={undefined}
+            />
           </View>
-         
+
+          <Space width={12} />
+          <Button
+            styles={{width: 48, height: 48}}
+            icon={<Setting4 variant="TwoTone" size={24} color="white" />}
+            color="black"
+            onPress={() => {}}
+          />
         </Row>
       </Section>
 
-      {/* Main Content */}
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        {/* Welcome Section */}
-        <Section>
-          <TextComponent type="title" text="Welcome," size={24} />
-          <TextComponent
-            text="Our fashion app"
-            size={18}
-            color={colors.gray2}
-          />
-        </Section>
+      <OffersList />
+      <Space height={16} />
+      <ArrivalsProduct />
+      <Space height={16} />
+      <CategoriesList />
+      <Space height={16} />
+    </View>
+  );
 
-        {/* Search Section */}
-        <Section>
-          <Row>
-            <View style={{flex: 1}}>
-              <SearchProduct
-                onSearchResults={results => {
-                  navigation.navigate('SearchResultsScreen', {results});
-                }}
-              />
-            </View>
-            <Space width={12} />
-            <Button
-              styles={styles.searchButton}
-              icon={<Setting4 variant="TwoTone" size={24} color="white" />}
-              color="black"
-              onPress={() => navigation.navigate('FilterScreen')}
-            />
-          </Row>
-        </Section>
-        {/* Offers, Arrivals, and Categories */}
-        <Space height={1} />
-        <OffersList />
-        <Space height={16} />
-        <ArrivalsProduct />
-        <Space height={16} />
-        <CategoriesList />
-        <Space height={16} />
-        <ProductList />
-      </ScrollView>
-     
-    </Container>
+  return (
+    <FlatList
+      ListHeaderComponent={<ListHeader />}
+      data={[]} // Empty data since we only want the header and child components
+      renderItem={null} // No items to render; header is the focus
+      ListFooterComponent={<ProductList />} // Render ProductList in the footer
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+    />
   );
 };
+//@ts-ignore
 
 const styles = StyleSheet.create({
+  container:{},
   header: {
     padding: 10,
     marginTop: 10,
@@ -119,5 +87,15 @@ const styles = StyleSheet.create({
     height: 48,
   },
 });
+const SearchResults: React.FC<{products: ProductModel[]}> = ({products}) => (
+  <View>
+    {products.map(product => (
+      <View key={product.id} style={{padding: 10}}>
+        <Text style={{fontSize: 16, fontWeight: 'bold'}}>{product.title}</Text>
+        <Text style={{color: colors.gray2}}>{product.description}</Text>
+      </View>
+    ))}
+  </View>
+);
 
 export default HomeScreen;

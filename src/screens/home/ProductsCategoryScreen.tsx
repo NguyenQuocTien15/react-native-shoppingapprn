@@ -8,7 +8,7 @@ import { Container, ProductItem, TextComponent } from '../../components';
 import { Section } from '@bsdaoquang/rncomponent';
 import { globalStyles } from '../../styles/globalStyles';
 
-const ProductsCategoryScreen = ({ route }: any) => {
+const ProductsScreen = ({ route }: any) => {
   const { categoryId,categoryTitle } = route.params; // Get categoryId from navigation params
   console.log(route.params);
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -46,10 +46,10 @@ return <Container  back title={categoryTitle} isScroll={false} >
      data={products}
      showsVerticalScrollIndicator={false}
      columnWrapperStyle={{justifyContent:'space-between'}}
-     renderItem={({item})=><ProductItem navigateTo='ProductDetail' key={item.id} product={item}/>}/>
+     renderItem={({item})=><ProductItem key={item.id} product={item}/>}/>
     </Section>
   )}
 </Container>
 };
 
-export default ProductsCategoryScreen;
+export default ProductsScreen;
