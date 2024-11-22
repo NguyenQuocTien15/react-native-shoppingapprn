@@ -34,6 +34,7 @@ import {Image} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Rating } from 'react-native-ratings';
 
 const ProductDetail = ({navigation, route}: any) => {
   const {id} = route.params;
@@ -46,6 +47,9 @@ const ProductDetail = ({navigation, route}: any) => {
   const [visible, setVisible] = useState(false);
 
   const [sizes, setSizes] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(0);
+  const [reviewsCount, setReviewsCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
   const userId = getAuth().currentUser?.uid;
   useEffect(() => {
     if (productDetail?.variations?.length > 0) {
@@ -61,6 +65,7 @@ const ProductDetail = ({navigation, route}: any) => {
   }, [productDetail]);
 
   useEffect(() => {
+    setLoading(true)
     const unsubscribe = firestore()
       .collection('products')
       .doc(id)
@@ -81,7 +86,9 @@ const ProductDetail = ({navigation, route}: any) => {
             updateAvailableQuantity(colorSelected, productData.variations);
           }
         }
+        setLoading(false)
       });
+      setLoading(false)
 
     return () => unsubscribe();
   }, [id]);
@@ -262,6 +269,43 @@ const ProductDetail = ({navigation, route}: any) => {
     }
   };
 
+  const fetchProductReviews = async () => {
+    try {
+      const reviewsSnapshot = await firestore()
+        .collection('reviews') // Collection cha
+        .doc(id) // Document ID cho sản phẩm
+        .collection('productReviews') // Sub-collection chứa các đánh giá
+        .get();
+
+      const reviews = reviewsSnapshot.docs.map(doc => doc.data());
+
+      // Tính số lượng đánh giá
+      const count = reviews.length;
+      setReviewsCount(count);
+
+      if (count === 0) {
+        setAverageRating(0); // Không có đánh giá
+        return;
+      }
+
+      // Tính trung bình số sao
+      const totalRating = reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      );
+      const average = totalRating / count;
+
+      setAverageRating(average);
+    } catch (error) {
+      console.error('Lỗi khi lấy đánh giá:', error);
+    }
+  };
+
+  // Gọi hàm khi component được mount
+  useEffect(() => {
+    fetchProductReviews();
+  }, [id]);
+
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
       <Section
@@ -410,7 +454,23 @@ const ProductDetail = ({navigation, route}: any) => {
                   </Row>
                 </Row>
 
-                <RatingComponent id={id} />
+                <Row
+                  justifyContent="flex-start"
+                  onPress={() =>
+                    navigation.navigate('RatingScreen', {
+                      productId: id,
+                    })
+                  }>
+                  <Rating
+                    startingValue={averageRating}
+                    readonly
+                    ratingCount={5}
+                    ratingBackgroundColor="coral"
+                    imageSize={20}
+                  />
+                  <Space width={12} />
+                  <TextComponent text={`(${reviewsCount} Reviews)`} size={14} />
+                </Row>
 
                 <TextComponent
                   font={fontFamilies.RobotoBold}
@@ -454,7 +514,7 @@ const ProductDetail = ({navigation, route}: any) => {
                   size={16}
                 />
 
-                <Row wrap="wrap" justifyContent="flex-start">
+                {/* <Row wrap="wrap" justifyContent="flex-start">
                   {productDetail.variations.map((variation: any) => (
                     <TouchableOpacity
                       key={variation.color}
@@ -471,6 +531,34 @@ const ProductDetail = ({navigation, route}: any) => {
                           borderColor: colors.black,
                         }}
                       />
+                    </TouchableOpacity>
+                  ))}
+                </Row> */}
+                <Row wrap="wrap" justifyContent="flex-start">
+                  {productDetail.variations.map((variation: any) => (
+                    <TouchableOpacity
+                      key={variation.color}
+                      onPress={() => handleColorChange(variation.color)}>
+                      <View
+                        style={{
+                          width: 50,
+                          height: 50,
+                          margin: 5,
+                          backgroundColor: variation.colorCode,
+                          borderRadius: 50,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          position: 'relative',
+                        }}>
+                        {colorSelected === variation.color && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={25} // Size of the checkmark icon
+                            color={colors.white} // White color for the checkmark
+                            style={{position: 'absolute'}}
+                          />
+                        )}
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </Row>
@@ -505,14 +593,14 @@ const ProductDetail = ({navigation, route}: any) => {
                       style={{
                         fontWeight: 'bold',
                         color: 'black',
-                        fontSize: 18,
+                        fontSize: 16,
                       }}>
                       Đánh giá của khách hàng
                     </Text>
                     <Row>
                       <Text
                         style={{
-                          fontSize: 18,
+                          fontSize: 16,
                           color: 'black',
                         }}>
                         Xem thêm
