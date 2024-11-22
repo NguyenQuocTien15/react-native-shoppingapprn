@@ -374,6 +374,7 @@ const CheckOutScreen = ({route}) => {
               {`$${totalPrice.toLocaleString()}`}
             </Text>
           </View>
+          {/* nút mua */}
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
@@ -383,6 +384,7 @@ const CheckOutScreen = ({route}) => {
             disabled={!selectedPaymentMethod}>
             <Text style={styles.textCheckOut}>Mua</Text>
           </TouchableOpacity>
+          {/*  nút mua  */}
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
               <Image
