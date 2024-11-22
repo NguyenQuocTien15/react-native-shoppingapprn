@@ -16,7 +16,8 @@ const NotificationNavigator = () => {
           const isScroll = props.route.params?.data?.length > 0;
           return <NotificationScreen {...props} isScroll={isScroll} />;
         }}
-        options={{ title: 'Thông báo' }}
+        options={{ title: 'Notification' }}
+        
       />
     </Stack.Navigator>
   );
