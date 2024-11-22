@@ -34,6 +34,7 @@ const CartScreen = () => {
     4: 'XL',
     5: 'XXL',
   };
+  
   const fetchCartProducts = (
     userId: string | null | undefined,
     setCartItems: React.Dispatch<React.SetStateAction<any[]>>,
@@ -99,6 +100,7 @@ const CartScreen = () => {
           }
 
           setCartItems(productList);
+          setDialogVisible(false);
         } else {
           console.log('Cart is empty.');
           setCartItems([]);
@@ -119,80 +121,98 @@ const CartScreen = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-    setDialogVisible(false);
+    
   }, [userId]);
 
-  const updateCart = async (userId, productId, quantity) => {
+  const updateCart = async (
+    userId: string | null | undefined,
+    productKey: string,
+    productDetails: {
+      productId: string;
+      colorSelected: string;
+      sizeSelected: string;
+      price: number;
+    },
+    quantityChange: number,
+  ) => {
+    if (!userId) {
+      console.error('User ID is null or undefined.');
+      return;
+    }
+
     const cartRef = firebase.firestore().collection('carts').doc(userId);
 
     try {
       await firebase.firestore().runTransaction(async transaction => {
         const cartDoc = await transaction.get(cartRef);
+        const cartData = cartDoc.exists ? cartDoc.data() : {};
+        const currentProducts = cartData?.products || {};
 
-        if (!cartDoc.exists) {
-          console.log('Cart does not exist.');
-          return;
-        }
+        // Check if the productKey already exists
+        const existingProduct = currentProducts[productKey];
 
-        const currentProducts = cartDoc.data().products || {};
-        const currentQuantity = currentProducts[productId]?.quantity || 0;
-
-        if (currentQuantity + quantity < 0) {
-          return;
-        }
-
-        transaction.update(cartRef, {
-          [`products.${productId}`]: {quantity: currentQuantity + quantity},
-        });
-
-        setCartItems(prevItems => {
-          const updatedItems = [...prevItems];
-          const itemIndex = updatedItems.findIndex(
-            item => item.productId === productId,
-          );
-          if (itemIndex > -1) {
-            updatedItems[itemIndex].quantity += quantity;
-
-            if (updatedItems[itemIndex].quantity <= 0) {
-              updatedItems.splice(itemIndex, 1);
-            }
+        if (existingProduct) {
+          // Update the quantity or remove if zero
+          const updatedQuantity = existingProduct.quantity + quantityChange;
+          if (updatedQuantity <= 0) {
+            delete currentProducts[productKey];
+          } else {
+            currentProducts[productKey].quantity = updatedQuantity;
           }
-          return updatedItems;
-        });
+        } else if (quantityChange > 0) {
+          // Add the product if not exists and quantityChange is positive
+          currentProducts[productKey] = {
+            ...productDetails,
+            quantity: quantityChange,
+          };
+        }
+
+        // Update or delete the cart document based on its contents
+        if (Object.keys(currentProducts).length === 0) {
+          transaction.delete(cartRef);
+        } else {
+          transaction.set(cartRef, {products: currentProducts}, {merge: true});
+        }
       });
 
-      console.log('Cart updated successfully!');
+      console.log('Cart updated successfully.');
     } catch (error) {
       console.error('Error updating cart: ', error);
     }
   };
 
-  const handleDecrease = productId => {
-    const currentProduct = cartItems.find(item => item.productId === productId);
-    if (currentProduct && currentProduct.quantity > 0) {
-      updateCart(userId, productId, -1);
-    }
+  const handleIncrease = (
+    userId: string | null | undefined,
+    item: {
+      productId: string;
+      colorSelected: string;
+      sizeSelected: string;
+      price: number;
+    },
+  ) => {
+    const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
+    updateCart(userId, productKey, item, 1); // Increment quantity by 1
   };
 
-  const handleIncrease = productId => {
-    updateCart(userId, productId, 1);
+  const handleDecrease = (
+    userId: string | null | undefined,
+    item: {
+      productId: string;
+      colorSelected: string;
+      sizeSelected: string;
+      price: number;
+    },
+  ) => {
+    const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
+    updateCart(userId, productKey, item, -1); // Decrement quantity by 1
   };
+
 
   const showDialog = (item: React.SetStateAction<null>) => {
     setSelectedItem(item);
     setDialogVisible(true);
   };
-  const getUserId = () => {
-    const currentUser = auth().currentUser;
-
-    if (currentUser) {
-      return currentUser.uid;
-    } else {
-      console.log('No user is signed in.');
-      return null;
-    }
-  };
-  const userID = getUserId();
+  
   const handleCancel = () => {
     setDialogVisible(false);
     setSelectedItem(null);
@@ -394,14 +414,14 @@ const CartScreen = () => {
                           paddingHorizontal: 12,
                         }}>
                         <TouchableOpacity
-                          onPress={() => handleDecrease(item.productId)}>
+                          onPress={() => handleDecrease(userId, item)}>
                           <Minus size={20} color="black" />
                         </TouchableOpacity>
                         <Space width={6} />
                         <TextComponent text={`${item.quantity}`} />
                         <Space width={6} />
                         <TouchableOpacity
-                          onPress={() => handleIncrease(item.productId)}>
+                          onPress={() => handleIncrease(userId, item)}>
                           <Add size={20} color="black" />
                         </TouchableOpacity>
                       </Row>
@@ -435,7 +455,7 @@ const CartScreen = () => {
                     label="Delete"
                     onPress={() =>
                       handleRemoveFromCart(
-                        userID,
+                        userId,
                         selectedItem?.productId,
                         selectedItem?.colorSelected,
                         selectedItem?.sizeSelected,
