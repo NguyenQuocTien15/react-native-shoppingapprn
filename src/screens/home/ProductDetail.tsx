@@ -46,7 +46,7 @@ const ProductDetail = ({navigation, route}: any) => {
   const [visible, setVisible] = useState(false);
 
   const [sizes, setSizes] = useState<any[]>([]);
-  const userId = getAuth().currentUser?.uid
+  const userId = getAuth().currentUser?.uid;
   useEffect(() => {
     if (productDetail?.variations?.length > 0) {
       const firstColor = productDetail.variations[0].color;
@@ -191,75 +191,76 @@ const ProductDetail = ({navigation, route}: any) => {
   //   }
   // };
 
-const handleAddToCart = async (
-  userId: string | null | undefined,
-  productId: string | number,
-  colorSelected: string,
-  sizeSelected: string,
-  quantity: number,
-) => {
-  if (!sizeSelected) {
-    Alert.alert('Bạn chưa chọn size');
-    return;
-  }
-  if (!colorSelected) {
-    Alert.alert('Bạn chưa chọn màu');
-    return;
-  }
+  const handleAddToCart = async (
+    userId: string | null | undefined,
+    productId: string | number,
+    colorSelected: string,
+    sizeSelected: string,
+    quantity: number,
+  ) => {
+    if (!sizeSelected) {
+      Alert.alert('Bạn chưa chọn size');
+      return;
+    }
+    if (!colorSelected) {
+      Alert.alert('Bạn chưa chọn màu');
+      return;
+    }
 
-  const cartRef = firestore().collection('carts').doc(userId);
+    const cartRef = firestore().collection('carts').doc(userId);
 
-  try {
-    await firestore().runTransaction(async transaction => {
-      const cartDoc = await transaction.get(cartRef);
+    try {
+      await firestore().runTransaction(async transaction => {
+        const cartDoc = await transaction.get(cartRef);
 
-      if (!cartDoc.exists) {
-        // If cart doesn't exist, create it with the new product
-        transaction.set(cartRef, {
-          products: {
-            [`${productId}-${colorSelected}-${sizeSelected}`]: {
-              colorSelected,
-              sizeSelected,
-              quantity,
-              addedAt: new Date().toISOString(),
+        if (!cartDoc.exists) {
+          // If cart doesn't exist, create it with the new product
+          transaction.set(cartRef, {
+            products: {
+              [`${productId}-${colorSelected}-${sizeSelected}`]: {
+                colorSelected,
+                sizeSelected,
+                quantity,
+                addedAt: new Date().toISOString(),
+              },
             },
-          },
-        });
-      } else {
-        const currentProducts = cartDoc.data().products || {};
-
-        // Check if the product with the selected color and size already exists
-        const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
-        const currentProduct = currentProducts[productKey];
-
-        if (currentProduct) {
-          // If the product exists, update the quantity
-          transaction.update(cartRef, {
-            [`products.${productKey}.quantity`]: currentProduct.quantity + quantity,
           });
         } else {
-          // If the product doesn't exist (same color, different size), add it as a new item
-          transaction.update(cartRef, {
-            [`products.${productKey}`]: {
-              colorSelected,
-              sizeSelected,
-              quantity,
-              addedAt: new Date().toISOString(),
-            },
-          });
-        }
-      }
-    });
+          const currentProducts = cartDoc.data().products || {};
 
-    setVisible(true);
-    setTimeout(() => {
-      setVisible(false);
-      //navigation.navigate('CartScreen');
-    }, 2000);
-  } catch (error) {
-    console.error('Error adding product to cart: ', error);
-  }
-};
+          // Check if the product with the selected color and size already exists
+          const productKey = `${productId}-${colorSelected}-${sizeSelected}`;
+          const currentProduct = currentProducts[productKey];
+
+          if (currentProduct) {
+            // If the product exists, update the quantity
+            transaction.update(cartRef, {
+              [`products.${productKey}.quantity`]:
+                currentProduct.quantity + quantity,
+            });
+          } else {
+            // If the product doesn't exist (same color, different size), add it as a new item
+            transaction.update(cartRef, {
+              [`products.${productKey}`]: {
+                colorSelected,
+                sizeSelected,
+                quantity,
+                addedAt: new Date().toISOString(),
+              },
+            });
+          }
+        }
+      });
+
+      setVisible(true);
+      setTimeout(() => {
+        setVisible(false);
+        //navigation.navigate('CartScreen');
+      }, 2000);
+    } catch (error) {
+      console.error('Error adding product to cart: ', error);
+    }
+  };
 
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -487,7 +488,7 @@ const handleAddToCart = async (
                   size={12}
                   color={colors.gray700}
                 />
-               
+
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate('RatingScreen', {
@@ -529,20 +530,21 @@ const handleAddToCart = async (
           </>
         )}
       </ScrollView>
-      <Section styles={{backgroundColor: 'white', paddingTop: 12}}>
+      <Section styles={{backgroundColor: 'white', paddingTop: 10}}>
         <Row>
           <Col>
             {productDetail && count && (
               <Col>
                 <TextComponent
                   text="Total price:"
-                  size={12}
-                  color={colors.gray}
+                  size={14}
+                  color={colors.black}
                 />
                 <TextComponent
                   text={`$${count * parseFloat(productDetail.price)}`}
                   size={24}
                   font={fontFamilies.poppinsBold}
+                  color={colors.danger}
                 />
               </Col>
             )}
@@ -558,44 +560,61 @@ const handleAddToCart = async (
               title={'Chat'}
             />
           </Col>
-          <Space width={4}></Space>
-
-          <Button
-            icon={
-              <FontAwesome6 name="bag-shopping" size={18} color={'white'} />
-            }
-            inline
-            onPress={() =>
-              handleAddToCart(userId, id, colorSelected, sizeSelected, count)
-            }
-            color={colors.black}
-            title={'Add to cart'}></Button>
-
-          <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
-            <View style={{alignItems: 'center'}}>
-              <Image
-                source={require('../../assets/images/cartSuccess.png')}
-                style={{
-                  width: 50,
-                  height: 50,
-                  marginTop: 20,
-                  marginBottom: 20,
-                }}
+          <Space width={5}></Space>
+          {productDetail &&
+            productDetail.variations &&
+            (productDetail.variations
+              .find((v: {color: string}) => v.color === colorSelected)
+              ?.sizes.find(
+                (size: {sizeId: string}) => size.sizeId === sizeSelected,
+              )?.quantity > 0 ? (
+              <Button
+                styles={{marginTop: 15}}
+                title="Add to Cart"
+                color="black"
+                onPress={() =>
+                  handleAddToCart(
+                    userId,
+                    id,
+                    colorSelected,
+                    sizeSelected,
+                    count,
+                  )
+                }
               />
-              <Text
-                style={{
-                  textAlign: 'center',
-                  marginTop: 10,
-                  marginBottom: 10,
-                  fontSize: 30,
-                  color: 'black',
-                }}>
-                Thêm vào giỏ hàng thành công
-              </Text>
-            </View>
-          </Dialog.Container>
+            ) : (
+              <Button
+                title="Out of Stock"
+                color={colors.gray}
+                styles={{marginTop: 15}}
+                disabled
+              />
+            ))}
         </Row>
       </Section>
+      <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
+        <View style={{alignItems: 'center'}}>
+          <Image
+            source={require('../../assets/images/cartSuccess.png')}
+            style={{
+              width: 50,
+              height: 50,
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          />
+          <Text
+            style={{
+              textAlign: 'center',
+              marginTop: 10,
+              marginBottom: 10,
+              fontSize: 30,
+              color: 'black',
+            }}>
+            Thêm vào giỏ hàng thành công
+          </Text>
+        </View>
+      </Dialog.Container>
     </View>
   );
 };
