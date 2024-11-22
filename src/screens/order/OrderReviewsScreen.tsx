@@ -36,6 +36,14 @@ const ReviewsProduct = ({navigation}) => {
     'kích thước, màu sắc?';
 
   const userId = getAuth().currentUser?.uid;
+  const Star = ({rating}) => {
+    return <Text>{rating}</Text>;
+  };
+
+  Star.defaultProps = {
+    rating: 3, // Default value for rating
+  };
+
 
   // const handleReviewProduct = async () => {
   //   if (rating === 0 && comment.trim() === '') {
@@ -85,7 +93,7 @@ const ReviewsProduct = ({navigation}) => {
 
      // Create a reference to the Firestore document path: reviews -> productId -> reviewId
      const reviewRef = doc(
-       collection(getFirestore(), 'reviews', productId, 'reviews'),
+       collection(getFirestore(), 'reviews', productId, 'productReviews'),
      );
 
      // Save the review data in Firestore under the specific product
