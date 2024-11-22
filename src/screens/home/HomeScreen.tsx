@@ -2,20 +2,18 @@ import {Button, Input, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import messaging from '@react-native-firebase/messaging';
 import {HambergerMenu, SearchNormal1, Setting4} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
-import {ScrollView, Text, View} from 'react-native';
+import {FlatList, ScrollView, Text, View} from 'react-native';
 import {Container, TextComponent} from '../../components';
 import Avatar from '../../components/Avatar';
 import {colors} from '../../constants/colors';
-import Avatar from '../../components/Avatar';
 import CategoriesList from './components/CategoriesList';
 import ArrivalsProduct from './components/ArrivalsProduct';
 import OffersList from './components/OffersList';
 import ProductList from './components/ProductList';
-import {Button, Row, Section, Space} from '@bsdaoquang/rncomponent';
 import {ProductModel} from '../../models/ProductModel';
 import SearchProduct from './components/SearchProduct';
-import {Setting4} from 'iconsax-react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { StyleSheet } from 'react-native';
 
 const HomeScreen = ({navigation}: any) => {
   const ListHeader = () => (
@@ -76,6 +74,7 @@ const HomeScreen = ({navigation}: any) => {
 //@ts-ignore
 
 const styles = StyleSheet.create({
+  container:{},
   header: {
     padding: 10,
     marginTop: 10,
