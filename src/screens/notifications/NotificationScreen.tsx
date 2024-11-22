@@ -2,25 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ImageBackground, StyleSheet, FlatList } from 'react-native';
 import { Row } from '@bsdaoquang/rncomponent';
 import Avatar from '../../components/Avatar';
+import firestore from '@react-native-firebase/firestore';
+
+// Hàm lắng nghe thông báo từ Firestore
+const listenToNotifications = (userId, onNotification) => {
+  const unsubscribe = firestore()
+    .collection('notifications')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snapshot => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      onNotification(notifications); // Gọi callback để cập nhật danh sách
+    });
+
+  return unsubscribe; // Trả về hàm hủy đăng ký
+};
 
 const NotificationScreen = () => {
   const [notifications, setNotifications] = useState([]);
-
-  const notificationTemplate = {
-    from: '',
-    to: '',
-    createdAt: Date.now(),
-    content: 'Nội dung thông báo mẫu',
-    isRead: false,
-  };
+  const [loading, setLoading] = useState(true); // Hiển thị trạng thái tải dữ liệu
 
   useEffect(() => {
-    // Tạo danh sách thông báo mẫu
-    const items = Array.from({ length: 10 }, (_, index) => ({
-      ...notificationTemplate,
-      id: index + 1, // ID duy nhất
-    }));
-    setNotifications(items); // Đổi thành `[]` để kiểm tra giao diện không có thông báo
+    const userId = 'currentUserId'; // Thay bằng ID người dùng thực tế
+
+    // Lắng nghe thông báo từ Firestore
+    const unsubscribe = listenToNotifications(userId, (fetchedNotifications) => {
+      setNotifications(fetchedNotifications);
+      setLoading(false); // Tắt trạng thái tải
+    });
+
+    // Hủy đăng ký lắng nghe khi màn hình bị unmount
+    return () => unsubscribe();
   }, []);
 
   // Hàm render từng thông báo
@@ -30,6 +46,15 @@ const NotificationScreen = () => {
       <Text style={styles.notificationText}>{item.content}</Text>
     </Row>
   );
+
+  // Hiển thị thông báo khi đang tải dữ liệu
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Đang tải thông báo...</Text>
+      </View>
+    );
+  }
 
   // Kiểm tra nếu không có thông báo
   if (notifications.length === 0) {
@@ -51,7 +76,7 @@ const NotificationScreen = () => {
     <FlatList
       data={notifications}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => item.id}
     />
   );
 };
