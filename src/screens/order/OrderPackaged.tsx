@@ -116,7 +116,9 @@ const OrderPackaged = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        <View style={{flex: 1, justifyContent: 'center'}}>
+          <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        </View>
       ) : (
         <FlatList
           data={orders}

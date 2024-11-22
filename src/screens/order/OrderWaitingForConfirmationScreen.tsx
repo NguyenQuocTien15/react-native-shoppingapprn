@@ -5,6 +5,7 @@ import {
   Image,
   StyleSheet,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
@@ -271,7 +272,9 @@ const OrderWaitingForConfirmationScreen = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <Text>Loading...</Text>
+        <View style={{ flex:1, justifyContent:'center'}}>
+          <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        </View>
       ) : (
         <FlatList
           data={orders}
@@ -284,9 +287,7 @@ const OrderWaitingForConfirmationScreen = () => {
       {/* Dialog for cancellation */}
       <Dialog.Container visible={dialogVisible}>
         <Dialog.Title>Cancel Order</Dialog.Title>
-        <Dialog.Description>
-          Do you want to cancel order?
-        </Dialog.Description>
+        <Dialog.Description>Do you want to cancel order?</Dialog.Description>
         <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
         <Dialog.Button label="Yes" onPress={handleCancelOrder} />
       </Dialog.Container>
