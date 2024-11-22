@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
   },
   message: {
     marginVertical: 5,
+    marginHorizontal:5,
     padding: 10,
     borderRadius: 10,
     maxWidth: '70%',
