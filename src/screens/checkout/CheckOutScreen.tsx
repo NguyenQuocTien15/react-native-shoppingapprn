@@ -214,7 +214,7 @@ const CheckOutScreen = ({route}: any) => {
             userId,
             {
               title: 'Đơn hàng mới',
-              body: `Đơn hàng của bạn (#${orderId}) đã được đặt thành công.`,
+              body: `Bạn đã đặt thành công.(#${orderId}) `,
             },
             {orderId, status: orderStatus},
           );
@@ -228,7 +228,7 @@ const CheckOutScreen = ({route}: any) => {
           // Gửi thông báo ngay lập tức
           await sendNotification(
             'Đơn hàng mới',
-            `Đơn hàng của bạn (#${orderId}) đã được đặt thành công.`,
+            `Bạn đã đặt thành công.(#${orderId})`,
           );
 
           console.log(
@@ -246,7 +246,7 @@ const CheckOutScreen = ({route}: any) => {
 
       // Hiển thị thông báo đặt hàng thành công
       Alert.alert('Thông báo', 'Đặt hàng thành công!', [
-        {text: 'OK', onPress: () => navigation.navigate('HomeScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
+        {text: 'OK', onPress: () => navigation.navigate('CartScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
       ]);
     } catch (error) {
       console.error('Lỗi khi xử lý đơn hàng:', error);

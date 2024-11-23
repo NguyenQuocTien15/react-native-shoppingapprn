@@ -123,8 +123,7 @@ export default class NotificationService {
     }
   };
 
- 
-   /**
+ /**
  * Lưu thông báo vào Firestore
  * @param orderId ID đơn hàng
  * @param status Trạng thái đơn hàng
@@ -143,8 +142,33 @@ static async saveNotificationToFirestore(orderId: string, status: string) {
     return;
   }
 
+  // Xử lý body của thông báo tùy thuộc vào trạng thái
+  let body = '';
+  switch (status) {
+    case '1': // Đang xử lý
+      body = `Đơn hàng của bạn (#${orderId}) đang được xử lý. Vui lòng chờ...`;
+      break;
+    case '0': // Đã hủy
+      body = `Đơn hàng (#${orderId}) của bạn đã bị hủy.`;
+      break;
+    case '2': // Đã đóng gói
+      body = `Đơn hàng (#${orderId}) của bạn đã được đóng gói và sẵn sàng vận chuyển.`;
+      break;
+    case '3': // Đang vận chuyển
+      body = `Đơn hàng (#${orderId}) của bạn đang trên đường đến nơi.`;
+      break;
+    case '4': // Đã giao
+      body = `Đơn hàng (#${orderId}) của bạn đã được giao thành công.`;
+      break;
+    case '5': // Đã nhận lại hàng
+      body = `Đơn hàng (#${orderId}) đã được nhận lại.`;
+      break;
+    default:
+      body = `Trạng thái của đơn hàng (#${orderId}) đã thay đổi.`;
+  }
+
   const notificationData = {
-    body: `Bạn đã đặt đơn hàng thành công. Vui lòng đợi Shop xác nhận!`,
+    body,
     createdAt: firestore.FieldValue.serverTimestamp(),
     orderId, // ID đơn hàng
     status,  // Trạng thái đơn hàng

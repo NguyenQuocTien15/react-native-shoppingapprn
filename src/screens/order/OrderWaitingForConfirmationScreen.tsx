@@ -13,7 +13,27 @@ import {orderRef} from '../../firebase/firebaseConfig';
 import Dialog from 'react-native-dialog';
 import auth from '@react-native-firebase/auth';
 import {deleteDoc, doc, firebase, getDoc, setDoc} from '@react-native-firebase/firestore';
+import notifee from '@notifee/react-native';
+import NotificationService from '../../utils/notificationService';
+import MessageNotificationService from '../../utils/messageNotificationService';
+const sendNotification = async (title, body) => {
+  // Đảm bảo kênh thông báo tồn tại trước khi gửi thông báo
+  const channelId = await notifee.createChannel({
+    id: 'message_channel',
+    name: 'Message Channel',
+    sound: 'default',
+  });
 
+  // Hiển thị thông báo
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {
+      channelId,
+      smallIcon: 'ic_launcher', // Đảm bảo rằng bạn đã thêm ic_launcher vào tài nguyên Android
+    },
+  });
+};
 const OrderWaitingForConfirmationScreen = () => {
   const [userId, setUserId] = useState('');
   const [orders, setOrders] = useState([]);
@@ -121,6 +141,8 @@ const OrderWaitingForConfirmationScreen = () => {
   //     console.error('Lỗi khi xóa đơn hàng:', error);
   //   }
   // };
+
+  //xử lí hủy hàng
   const handleCancelOrder = async () => {
     try {
       if (!selectedOrder) return;
@@ -156,15 +178,61 @@ const OrderWaitingForConfirmationScreen = () => {
         // // Delete the order from `orders`
         // await deleteDoc(orderRef);
         // console.log('Order canceled and moved to orderHistory.');
-      } else {
-        console.log('Order not found.');
-      }
 
-      setDialogVisible(false);
-    } catch (error) {
-      console.error('Error canceling order:', error);
+       // Send notification to user using Notifee
+       await NotificationService.saveNotificationToFirestore(
+        selectedOrder,
+        'Đã hủy'
+      );
+
+      // Send notification through MessageNotificationService
+      if (auth().currentUser?.uid && selectedOrder) {
+        const userId = auth().currentUser.uid;
+
+        // Send notification
+        
+        try {
+          await MessageNotificationService.setupMessageNotificationListener(
+            //@ts-ignore
+            userId,
+            {
+              title: 'Đơn hàng hủy',
+              body: `Bạn đã hủy đơn (#${selectedOrder})`,
+            },
+            { orderId: selectedOrder, status: 'Đã hủy' },
+          );
+
+          // Optional: Remove listener after a short delay
+          setTimeout(() => {
+            MessageNotificationService.removeMessageNotificationListener();
+            console.log(`Đã gỡ bỏ listener cho đơn hàng ${selectedOrder}`);
+          }, 1000); // 1 second delay
+
+          // Send immediate notification
+          await sendNotification(
+            'Đơn hàng đã hủy',
+            `Bạn đã hủy đơn (#${selectedOrder})`,
+          );
+
+          console.log(
+            `Thông báo hủy đơn hàng ${selectedOrder} đã được gửi thành công cho người dùng ${userId}`
+          );
+        } catch (error) {
+          console.error('Lỗi khi gửi thông báo:', error);
+        }
+      } else {
+        console.error('Không có UID người dùng hoặc ID đơn hàng không hợp lệ.');
+      }
+    } else {
+      console.log('Không tìm thấy đơn hàng.');
     }
-  };
+
+    setDialogVisible(false);
+  } catch (error) {
+    console.error('Lỗi khi hủy đơn hàng:', error);
+  }
+};
+  //xử lí hủy hàng
 
 
   const renderItem = ({item}) => (
@@ -254,7 +322,9 @@ const OrderWaitingForConfirmationScreen = () => {
               width: '35%',
             },
           ]}
+          //nút hủy
           onPress={() => showDialog(item.id)}>
+             {/* //nút hủy */}
           <Text
             style={[
               styles.textTouch,
@@ -289,7 +359,10 @@ const OrderWaitingForConfirmationScreen = () => {
         <Dialog.Title>Cancel Order</Dialog.Title>
         <Dialog.Description>Do you want to cancel order?</Dialog.Description>
         <Dialog.Button label="Cancel" onPress={handleCancelDialog} />
+
+        {/*chắc chắn hủy */}
         <Dialog.Button label="Yes" onPress={handleCancelOrder} />
+        {/*chắc chắn hủy */}
       </Dialog.Container>
     </View>
   );
