@@ -15,10 +15,11 @@ const listenToNotifications = ({ userId, onNotification }) => {
     .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
     .onSnapshot(snapshot => {
-      const notifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const notifications = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const shipperId = data.shipperId || null; // Default to null if missing
+        return { id: doc.id, ...data, shipperId };
+      });
       onNotification(notifications);
     });
 
@@ -38,19 +39,26 @@ const NotificationScreen = () => {
     }
 
     const unsubscribe = firestore()
-      .collection('notifications')
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        const notificationsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setNotifications(notificationsData);
-        setLoading(false);
-      });
+  .collection('notifications')
+  .where('userId', '==', userId)
+  .orderBy('createdAt', 'desc')
+  .onSnapshot(snapshot => {
+    const notificationsData = snapshot.docs.map(doc => {
+      const data = doc.data(); // Lấy dữ liệu từ Firestore
 
-    return () => unsubscribe();
+      // Kiểm tra shipperId có tồn tại không
+      const shipperId = data.shipperId || 'Không có shipperId'; // Gán giá trị mặc định nếu không có shipperId
+
+      return { id: doc.id, ...data, shipperId }; // Trả về dữ liệu đã được bổ sung shipperId nếu cần
+    });
+
+    setNotifications(notificationsData); // Lưu vào state
+    console.log(notificationsData); // In ra để kiểm tra dữ liệu
+    setLoading(false); // Cập nhật trạng thái loading
+  });
+
+return () => unsubscribe(); // Hủy đăng ký khi component unmount
+
   }, []);
 // Handle notification deletion
 const handleDeleteNotification = async (notificationId: string) => {

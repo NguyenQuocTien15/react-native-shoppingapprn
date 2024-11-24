@@ -128,7 +128,7 @@ export default class NotificationService {
  * @param orderId ID đơn hàng
  * @param status Trạng thái đơn hàng
  */
-static async saveNotificationToFirestore(orderId: string, status: string) {
+ static async saveNotificationToFirestore(orderId: string, status: string, shipperId: string | null) {
   const userId = auth().currentUser?.uid;
 
   if (!userId) {
@@ -141,6 +141,7 @@ static async saveNotificationToFirestore(orderId: string, status: string) {
     console.error('Order ID or status is undefined or empty');
     return;
   }
+  shipperId = shipperId || "";
 
   // Xử lý body của thông báo tùy thuộc vào trạng thái
   let body = '';
@@ -174,6 +175,7 @@ static async saveNotificationToFirestore(orderId: string, status: string) {
     status,  // Trạng thái đơn hàng
     title: 'Trạng thái đơn hàng',
     userId,  // ID người dùng nhận thông báo
+    shipperId // ID người giao hàng
   };
 
   try {
@@ -184,5 +186,6 @@ static async saveNotificationToFirestore(orderId: string, status: string) {
     console.error('Lỗi khi lưu thông báo vào Firestore:', error);
   }
 }
+
 
 }

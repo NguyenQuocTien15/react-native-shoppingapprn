@@ -40,6 +40,7 @@ const OrderPackaged = () => {
             id: doc.id,
             ...doc.data(),
           }));
+          //@ts-ignore
           setOrders(ordersData);
           setLoading(false);
         },
