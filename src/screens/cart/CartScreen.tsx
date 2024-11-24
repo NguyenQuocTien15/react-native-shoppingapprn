@@ -402,7 +402,11 @@ const CartScreen = () => {
                                     text={`${item.colorName} - ${item.sizeName}`}
                                     size={17}
                                   />
-
+                                  {item.quantity === size.quantity && (
+                                    <Text style={{color: 'black'}}>
+                                      Sô lượng trong kho {size.quantity}
+                                    </Text>
+                                  )}
                                   <Row flex={1} alignItems="flex-end">
                                     <Col>
                                       <TextComponent
@@ -419,6 +423,7 @@ const CartScreen = () => {
                                         paddingHorizontal: 12,
                                       }}>
                                       <TouchableOpacity
+                                        disabled={item.quantity === 1}
                                         onPress={() =>
                                           handleDecrease(userId, item)
                                         }>
@@ -429,7 +434,11 @@ const CartScreen = () => {
                                         text={`${item.quantity}`}
                                       />
                                       <Space width={6} />
+
                                       <TouchableOpacity
+                                        disabled={
+                                          item.quantity === size.quantity
+                                        }
                                         onPress={() =>
                                           handleIncrease(userId, item)
                                         }>
@@ -439,7 +448,6 @@ const CartScreen = () => {
                                   </Row>
                                 </Col>
                               </Row>
-                              
                             ) : (
                               <View>
                                 <Row alignItems="center" styles={{margin: 10}}>
