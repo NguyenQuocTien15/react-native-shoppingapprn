@@ -100,7 +100,37 @@ const CheckOutScreen = ({route}: any) => {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  
+  //lay status id
+  function getOrderStatusById(orderStatusId: string): string {
+    switch (orderStatusId) {
+      case '0':
+        return 'Hủy đơn';
+      case '1':
+        return 'Đang xử lý đơn hàng mới';
+      case '2':
+        return 'Đang chuẩn bị';
+      case '2':
+        return 'Đã đóng gói';
+      case '4':
+        return 'Chờ vận chuyển';
+      case '5':
+        return 'Đang vận chuyển';
+      case '6':
+        return 'Đã giao hàng';
+      case '7':
+        return 'Giao thất bại';
+      case '8':
+        return 'Trả kho';
+      case '9':
+        return 'Trả tiền';
+      case '10':
+        return 'Đã nhận lại hàng';
+      case '11':
+        return 'Hoàn thành';
+      default:
+        return 'Trạng thái không xác định';
+    }
+  }
   useEffect(() => {
     // Cleanup the timer if the component unmounts
     return () => {
@@ -213,10 +243,10 @@ const CheckOutScreen = ({route}: any) => {
       // Sau khi đặt hàng thành công, xóa các sản phẩm trong giỏ hàng
       await removeItemsFromCart(items);
 
-      // Hiển thị thông báo đặt hàng thành công
-      Alert.alert('Thông báo', 'Đặt hàng thành công!', [
-        {text: 'OK', onPress: () => navigation.navigate('CartScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
-      ]);
+      // // Hiển thị thông báo đặt hàng thành công
+      // Alert.alert('Thông báo', 'Đặt hàng thành công!', [
+      //   {text: 'OK', onPress: () => navigation.navigate('CartScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
+      // ]);
       await orderRef.add(orderData);
 
       // Trừ số lượng sản phẩm theo size

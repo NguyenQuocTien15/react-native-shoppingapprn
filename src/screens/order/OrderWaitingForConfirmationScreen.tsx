@@ -171,7 +171,7 @@ const OrderWaitingForConfirmationScreen = () => {
             firebase.firestore.FieldValue.serverTimestamp(),
         });
 
-        // Delete the order from `orders`
+        
         await deleteDoc(orderRef);
         console.log('Order canceled and moved to orderHistory.');
       } else {
@@ -222,9 +222,6 @@ const OrderWaitingForConfirmationScreen = () => {
       } else {
         console.error('Không có UID người dùng hoặc ID đơn hàng không hợp lệ.');
       }
-    } else {
-      console.log('Không tìm thấy đơn hàng.');
-    }
 
     setDialogVisible(false);
   } catch (error) {
