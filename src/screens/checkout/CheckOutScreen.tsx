@@ -12,8 +12,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
-import {orderRef} from '../../firebase/firebaseConfig';
-import {firebase} from '@react-native-firebase/firestore';
+import {db, orderRef} from '../../firebase/firebaseConfig';
+import {doc, firebase, getDoc, updateDoc} from '@react-native-firebase/firestore';
 import {PaymentMethodModel} from '../../models/OrderModel';
 import auth, { getAuth } from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -81,6 +81,77 @@ const CheckOutScreen = ({route}) => {
       clearTimeout(timerRef.current); // Clear the timer
     };
   }, []);
+  // const showDialogAndAddOrders = async () => {
+  //   try {
+  //     if (!selectedPaymentMethod) {
+  //       console.error('Payment method is not selected.');
+  //       return;
+  //     }
+
+  //     if (!items || items.length === 0) {
+  //       console.error('No items found.');
+  //       return;
+  //     }
+  //     if (!user.phoneNumber) {
+  //       Alert.alert(
+  //         'Thông báo',
+  //         'Vui lòng nhập số điện thoại',
+  //         [
+  //           {
+  //             text: 'OK',
+  //             onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+  //           },
+  //         ],
+  //         {cancelable: false},
+  //       );
+  //       return;
+  //     }
+  //     if (!user.fullAddress) {
+  //       Alert.alert(
+  //         'Thông báo',
+  //         'Vui lòng nhập địa chỉ',
+  //         [
+  //           {
+  //             text: 'OK',
+  //             onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+  //           },
+  //         ],
+  //         {cancelable: false},
+  //       );
+  //       return;
+  //     }
+
+  //     if (totalPrice <= 0) {
+  //       console.error('Total price must be greater than 0.');
+  //       return;
+  //     }
+  //     const sanitizedItems = items.map(item => ({
+  //       ...item,
+  //     }));
+  //     const orderData = {
+  //       userId: getUserId(),
+  //       address: user.fullAddress,
+  //       items: sanitizedItems,
+  //       totalPrice: totalPrice,
+  //       shipperId: null,
+  //       paymentMethodId: selectedPaymentMethod,
+  //       orderStatusId: '1',
+  //       timestamp: getCurrentDateTime(),
+  //     };
+
+  //     // Thêm đơn hàng vào Firestore
+  //     await orderRef.add(orderData);
+  //     await removeItemsFromCart(items);
+      
+  //     setVisible(true);
+  //     setTimeout(() => {
+  //       setVisible(false); 
+  //       navigation.replace('CartScreen'); 
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error('Error saving order: ', error);
+  //   }
+  // };
   const showDialogAndAddOrders = async () => {
     try {
       if (!selectedPaymentMethod) {
@@ -92,6 +163,7 @@ const CheckOutScreen = ({route}) => {
         console.error('No items found.');
         return;
       }
+
       if (!user.phoneNumber) {
         Alert.alert(
           'Thông báo',
@@ -99,13 +171,14 @@ const CheckOutScreen = ({route}) => {
           [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+              onPress: () => navigation.navigate('Address'),
             },
           ],
           {cancelable: false},
         );
         return;
       }
+
       if (!user.fullAddress) {
         Alert.alert(
           'Thông báo',
@@ -113,7 +186,7 @@ const CheckOutScreen = ({route}) => {
           [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
+              onPress: () => navigation.navigate('Address'),
             },
           ],
           {cancelable: false},
@@ -125,9 +198,8 @@ const CheckOutScreen = ({route}) => {
         console.error('Total price must be greater than 0.');
         return;
       }
-      const sanitizedItems = items.map(item => ({
-        ...item,
-      }));
+
+      const sanitizedItems = items.map(item => ({...item}));
       const orderData = {
         userId: getUserId(),
         address: user.fullAddress,
@@ -141,17 +213,50 @@ const CheckOutScreen = ({route}) => {
 
       // Thêm đơn hàng vào Firestore
       await orderRef.add(orderData);
+
+      // Trừ số lượng sản phẩm theo size
+      for (const item of sanitizedItems) {
+        const productRef = doc(db, 'products', item.productId);
+        const productSnap = await getDoc(productRef);
+
+        if (productSnap.exists) {
+          const productData = productSnap.data();
+          const updatedVariations = productData.variations.map(variation => {
+            if (variation.color === item.colorSelected) {
+              return {
+                ...variation,
+                sizes: variation.sizes.map(size => {
+                  if (size.sizeId === item.sizeSelected) {
+                    return {
+                      ...size,
+                      quantity: Math.max(size.quantity - item.quantity, 0), // Đảm bảo không âm
+                    };
+                  }
+                  return size;
+                }),
+              };
+            }
+            return variation;
+          });
+
+          // Cập nhật lại sản phẩm
+          await updateDoc(productRef, {variations: updatedVariations});
+        }
+      }
+
+      // Xóa sản phẩm khỏi giỏ hàng
       await removeItemsFromCart(items);
-      
+
       setVisible(true);
       setTimeout(() => {
-        setVisible(false); 
-        navigation.replace('CartScreen'); 
+        setVisible(false);
+        navigation.replace('CartScreen');
       }, 2000);
     } catch (error) {
       console.error('Error saving order: ', error);
     }
   };
+
   const removeItemsFromCart = async (items: any[]) => {
     const userId = getAuth().currentUser?.uid;
     const cartRef = firebase.firestore().collection('carts').doc(userId);
