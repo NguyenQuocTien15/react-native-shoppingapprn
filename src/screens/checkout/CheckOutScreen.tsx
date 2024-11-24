@@ -12,8 +12,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
-import {orderRef} from '../../firebase/firebaseConfig';
-import {firebase} from '@react-native-firebase/firestore';
+import {db, orderRef} from '../../firebase/firebaseConfig';
+import {doc, firebase, getDoc, updateDoc} from '@react-native-firebase/firestore';
 import {PaymentMethodModel} from '../../models/OrderModel';
 import auth, {getAuth} from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -100,37 +100,7 @@ const CheckOutScreen = ({route}: any) => {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  //lay status id
-  function getOrderStatusById(orderStatusId: string): string {
-    switch (orderStatusId) {
-      case '0':
-        return 'Hủy đơn';
-      case '1':
-        return 'Đang xử lý đơn hàng mới';
-      case '2':
-        return 'Đang chuẩn bị';
-      case '2':
-        return 'Đã đóng gói';
-      case '4':
-        return 'Chờ vận chuyển';
-      case '5':
-        return 'Đang vận chuyển';
-      case '6':
-        return 'Đã giao hàng';
-      case '7':
-        return 'Giao thất bại';
-      case '8':
-        return 'Trả kho';
-      case '9':
-        return 'Trả tiền';
-      case '10':
-        return 'Đã nhận lại hàng';
-      case '11':
-        return 'Hoàn thành';
-      default:
-        return 'Trạng thái không xác định';
-    }
-  }
+  
   useEffect(() => {
     // Cleanup the timer if the component unmounts
     return () => {
@@ -173,11 +143,10 @@ const CheckOutScreen = ({route}: any) => {
         console.error('Tổng giá trị đơn hàng phải lớn hơn 0.');
         return;
       }
-
-      // Chuyển đổi giỏ hàng sang dạng cần thiết
-      const sanitizedItems = items.map(item => ({...item}));
+    
 
       // Tạo dữ liệu đơn hàng
+      const sanitizedItems = items.map(item => ({...item}));
       const orderData = {
         userId: auth().currentUser?.uid, // UID người dùng
         address: user.fullAddress,
@@ -248,12 +217,51 @@ const CheckOutScreen = ({route}: any) => {
       Alert.alert('Thông báo', 'Đặt hàng thành công!', [
         {text: 'OK', onPress: () => navigation.navigate('CartScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
       ]);
+      await orderRef.add(orderData);
+
+      // Trừ số lượng sản phẩm theo size
+      for (const item of sanitizedItems) {
+        const productRef = doc(db, 'products', item.productId);
+        const productSnap = await getDoc(productRef);
+
+        if (productSnap.exists) {
+          const productData = productSnap.data();
+          const updatedVariations = productData.variations.map(variation => {
+            if (variation.color === item.colorSelected) {
+              return {
+                ...variation,
+                sizes: variation.sizes.map(size => {
+                  if (size.sizeId === item.sizeSelected) {
+                    return {
+                      ...size,
+                      quantity: Math.max(size.quantity - item.quantity, 0), // Đảm bảo không âm
+                    };
+                  }
+                  return size;
+                }),
+              };
+            }
+            return variation;
+          });
+
+          // Cập nhật lại sản phẩm
+          await updateDoc(productRef, {variations: updatedVariations});
+        }
+      }
+
+      // Xóa sản phẩm khỏi giỏ hàng
+      await removeItemsFromCart(items);
+
+      setVisible(true);
+      setTimeout(() => {
+        setVisible(false);
+        navigation.replace('CartScreen');
+      }, 2000);
     } catch (error) {
       console.error('Lỗi khi xử lý đơn hàng:', error);
     }
   };
 
-  // Xóa các sản phẩm trong giỏ hàng
   const removeItemsFromCart = async (items: any[]) => {
     const userId = getAuth().currentUser?.uid;
     const cartRef = firebase.firestore().collection('carts').doc(userId);

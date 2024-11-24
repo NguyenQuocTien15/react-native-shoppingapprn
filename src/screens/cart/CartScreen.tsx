@@ -17,6 +17,7 @@ import Dialog from 'react-native-dialog';
 import auth, {getAuth} from '@react-native-firebase/auth';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {firebase} from '@react-native-firebase/firestore';
+import {colors} from '../../constants/colors';
 const CartScreen = () => {
   const navigation = useNavigation();
 
@@ -359,141 +360,176 @@ const CartScreen = () => {
             }
             renderItem={({item, index}) => (
               <View key={item.productId} style={styles.itemListProduct}>
-                {item.quantity > 0 ? (
-                  <Row alignItems="center" styles={{margin: 10}}>
-                    <TouchableOpacity
-                      style={{flex: 0.15}}
-                      onPress={() => toggleSelectProduct(item)}>
-                      <View style={styles.radioCircle}>
-                        {selectedProducts.includes(
-                          `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
-                        ) && <View style={styles.selectedRb} />}
+                {item.variations
+                  .find((v: {color: string}) => v.color === item.colorSelected)
+                  ?.sizes.map((size: {sizeId: string}) => {
+                    return (
+                      <View key={size.sizeId}>
+                        {item.sizeSelected === size.sizeId && (
+                          <View>
+                            {size.quantity > 0 ? (
+                              <Row alignItems="center" styles={{margin: 10}}>
+                                <TouchableOpacity
+                                  style={{flex: 0.15}}
+                                  onPress={() => toggleSelectProduct(item)}>
+                                  <View style={styles.radioCircle}>
+                                    {selectedProducts.includes(
+                                      `${item.productId}-${item.colorSelected}-${item.sizeSelected}`,
+                                    ) && <View style={styles.selectedRb} />}
+                                  </View>
+                                </TouchableOpacity>
+
+                                <Image
+                                  source={{uri: item.imageUrl}}
+                                  style={{
+                                    width: 110,
+                                    height: 110,
+                                    borderRadius: 12,
+                                    resizeMode: 'cover',
+                                  }}
+                                />
+                                <Space width={12} />
+                                <Col>
+                                  <TextComponent
+                                    type="title"
+                                    numberOfLine={1}
+                                    ellipsizeMode="tail"
+                                    text={item.title}
+                                    size={20}
+                                  />
+
+                                  <TextComponent
+                                    text={`${item.colorName} - ${item.sizeName}`}
+                                    size={17}
+                                  />
+                                  {item.quantity === size.quantity && (
+                                    <Text style={{color: 'black'}}>
+                                      Sô lượng trong kho {size.quantity}
+                                    </Text>
+                                  )}
+                                  <Row flex={1} alignItems="flex-end">
+                                    <Col>
+                                      <TextComponent
+                                        type="title"
+                                        text={`$${item.price}`}
+                                        size={20}
+                                      />
+                                    </Col>
+                                    <Row
+                                      styles={{
+                                        backgroundColor: '#e0e0e0',
+                                        paddingVertical: 4,
+                                        borderRadius: 100,
+                                        paddingHorizontal: 12,
+                                      }}>
+                                      <TouchableOpacity
+                                        disabled={item.quantity === 1}
+                                        onPress={() =>
+                                          handleDecrease(userId, item)
+                                        }>
+                                        <Minus size={20} color="black" />
+                                      </TouchableOpacity>
+                                      <Space width={6} />
+                                      <TextComponent
+                                        text={`${item.quantity}`}
+                                      />
+                                      <Space width={6} />
+
+                                      <TouchableOpacity
+                                        disabled={
+                                          item.quantity === size.quantity
+                                        }
+                                        onPress={() =>
+                                          handleIncrease(userId, item)
+                                        }>
+                                        <Add size={20} color="black" />
+                                      </TouchableOpacity>
+                                    </Row>
+                                  </Row>
+                                </Col>
+                              </Row>
+                            ) : (
+                              <View>
+                                <Row alignItems="center" styles={{margin: 10}}>
+                                  <Image
+                                    source={{uri: item.imageUrl}}
+                                    style={{
+                                      width: 110,
+                                      height: 110,
+                                      borderRadius: 12,
+                                      resizeMode: 'cover',
+                                    }}
+                                  />
+                                  <Space width={12} />
+                                  <Col>
+                                    <TextComponent
+                                      type="title"
+                                      numberOfLine={1}
+                                      ellipsizeMode="tail"
+                                      text={item.title}
+                                      size={20}
+                                    />
+
+                                    <TextComponent
+                                      text={`${item.colorName} - ${item.sizeName}`}
+                                      size={17}
+                                    />
+
+                                    <Row flex={1} alignItems="flex-end">
+                                      <Col>
+                                        <TextComponent
+                                          type="title"
+                                          text={`$${item.price}`}
+                                          size={20}
+                                        />
+                                      </Col>
+                                      <Row
+                                        styles={{
+                                          backgroundColor: '#e0e0e0',
+                                          paddingVertical: 4,
+                                          borderRadius: 100,
+                                          paddingHorizontal: 12,
+                                        }}>
+                                        <TouchableOpacity
+                                          disabled={size.quantity === 0}
+                                          onPress={() =>
+                                            handleDecrease(userId, item)
+                                          }>
+                                          <Minus size={20} color="black" />
+                                        </TouchableOpacity>
+                                        <Space width={6} />
+                                        <TextComponent
+                                          text={`${item.quantity}`}
+                                        />
+                                        <Space width={6} />
+                                        <TouchableOpacity
+                                          disabled={size.quantity === 0}
+                                          onPress={() =>
+                                            handleIncrease(userId, item)
+                                          }>
+                                          <Add size={20} color="black" />
+                                        </TouchableOpacity>
+                                      </Row>
+                                    </Row>
+                                    <TextComponent
+                                      type="title"
+                                      numberOfLine={1}
+                                      color="red"
+                                      ellipsizeMode="tail"
+                                      text="Sản phẩm này hiện tại đã hết"
+                                      size={16}
+                                    />
+                                  </Col>
+                                </Row>
+                              </View>
+                            )}
+                          </View>
+                        )}
                       </View>
-                    </TouchableOpacity>
+                    );
+                  })}
 
-                    <Image
-                      source={{uri: item.imageUrl}}
-                      style={{
-                        width: 110,
-                        height: 110,
-                        borderRadius: 12,
-                        resizeMode: 'cover',
-                      }}
-                    />
-                    <Space width={12} />
-                    <Col>
-                      <TextComponent
-                        type="title"
-                        numberOfLine={1}
-                        ellipsizeMode="tail"
-                        text={item.title}
-                        size={20}
-                      />
-
-                      <TextComponent
-                        text={`${item.colorName} - ${item.sizeName}`}
-                        size={17}
-                      />
-
-                      <Row flex={1} alignItems="flex-end">
-                        <Col>
-                          <TextComponent
-                            type="title"
-                            text={`$${item.price}`}
-                            size={20}
-                          />
-                        </Col>
-                        <Row
-                          styles={{
-                            backgroundColor: '#e0e0e0',
-                            paddingVertical: 4,
-                            borderRadius: 100,
-                            paddingHorizontal: 12,
-                          }}>
-                          <TouchableOpacity
-                            onPress={() => handleDecrease(userId, item)}>
-                            <Minus size={20} color="black" />
-                          </TouchableOpacity>
-                          <Space width={6} />
-                          <TextComponent text={`${item.quantity}`} />
-                          <Space width={6} />
-                          <TouchableOpacity
-                            onPress={() => handleIncrease(userId, item)}>
-                            <Add size={20} color="black" />
-                          </TouchableOpacity>
-                        </Row>
-                      </Row>
-                    </Col>
-                  </Row>
-                ) : (
-                  <View>
-                    <Row alignItems="center" styles={{margin: 10}}>
-                      <Image
-                        source={{uri: item.imageUrl}}
-                        style={{
-                          width: 110,
-                          height: 110,
-                          borderRadius: 12,
-                          resizeMode: 'cover',
-                        }}
-                      />
-                      <Space width={12} />
-                      <Col>
-                        <TextComponent
-                          type="title"
-                          numberOfLine={1}
-                          ellipsizeMode="tail"
-                          text={item.title}
-                          size={20}
-                        />
-
-                        <TextComponent
-                          text={`${item.colorName} - ${item.sizeName}`}
-                          size={17}
-                        />
-
-                        <Row flex={1} alignItems="flex-end">
-                          <Col>
-                            <TextComponent
-                              type="title"
-                              text={`$${item.price}`}
-                              size={20}
-                            />
-                          </Col>
-                          <Row
-                            styles={{
-                              backgroundColor: '#e0e0e0',
-                              paddingVertical: 4,
-                              borderRadius: 100,
-                              paddingHorizontal: 12,
-                            }}>
-                            <TouchableOpacity
-                              disabled={item.quantity === 0}
-                              onPress={() => handleDecrease(userId, item)}>
-                              <Minus size={20} color="black" />
-                            </TouchableOpacity>
-                            <Space width={6} />
-                            <TextComponent text={`${item.quantity}`} />
-                            <Space width={6} />
-                            <TouchableOpacity
-                              disabled={item.quantity === 0}
-                              onPress={() => handleIncrease(userId, item)}>
-                              <Add size={20} color="black" />
-                            </TouchableOpacity>
-                          </Row>
-                        </Row>
-                        <TextComponent
-                          type="title"
-                          numberOfLine={1}
-                          color="red"
-                          ellipsizeMode="tail"
-                          text="Sản phẩm này hiện tại đã hết"
-                          size={16}
-                        />
-                      </Col>
-                    </Row>
-                  </View>
-                )}
+                
               </View>
             )}
             // Phần render khi vuốt sang trái để xóa

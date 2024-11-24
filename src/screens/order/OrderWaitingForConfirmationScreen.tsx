@@ -170,14 +170,13 @@ const OrderWaitingForConfirmationScreen = () => {
           cancellationTimestamp:
             firebase.firestore.FieldValue.serverTimestamp(),
         });
-        await setDoc(orderRef, {
-          ...orderData,
-          orderStatusId: '0',
-        });
 
-        // // Delete the order from `orders`
-        // await deleteDoc(orderRef);
-        // console.log('Order canceled and moved to orderHistory.');
+        // Delete the order from `orders`
+        await deleteDoc(orderRef);
+        console.log('Order canceled and moved to orderHistory.');
+      } else {
+        console.log('Order not found.');
+      }
 
        // Send notification to user using Notifee
        await NotificationService.saveNotificationToFirestore(

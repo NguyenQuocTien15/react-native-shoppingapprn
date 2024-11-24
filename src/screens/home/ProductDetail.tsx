@@ -141,62 +141,6 @@ const ProductDetail = ({navigation, route}: any) => {
       );
     }
   };
-  // const handleAddToCart = async (
-  //   userId: string | null | undefined,
-  //   productId: string | number,
-  //   colorSelected: string,
-  //   sizeSelected: string,
-  //   quantity: number,
-  // ) => {
-  //   if (!sizeSelected) {
-  //     Alert.alert('Bạn chưa chọn size');
-  //     return;
-  //   }
-  //   if (!colorSelected) {
-  //     Alert.alert('Bạn chưa chọn màu');
-  //     return;
-  //   }
-  //   const cartRef = firestore().collection('carts').doc(userId);
-
-  //   try {
-  //     await firestore().runTransaction(async transaction => {
-  //       const cartDoc = await transaction.get(cartRef);
-
-  //       if (!cartDoc.exists) {
-  //         transaction.set(cartRef, {
-  //           products: {
-  //             [productId]: {
-  //               colorSelected,
-  //               sizeSelected,
-  //               quantity: quantity,
-  //               addedAt: new Date().toISOString(),
-  //             },
-  //           },
-  //         });
-  //       } else {
-  //         const currentProducts = cartDoc.data().products || {};
-  //         const currentQuantity = currentProducts[productId]?.quantity || 0;
-
-  //         transaction.update(cartRef, {
-  //           [`products.${productId}`]: {
-  //             colorSelected,
-  //             sizeSelected,
-  //             quantity: currentQuantity + quantity,
-  //             addedAt: new Date().toISOString(),
-  //           },
-  //         });
-  //       }
-  //     });
-
-  //     setVisible(true);
-  //     setTimeout(() => {
-  //       setVisible(false);
-  //       //navigation.navigate('CartScreen');
-  //     }, 2000);
-  //   } catch (error) {
-  //     console.error('Error adding product to cart: ', error);
-  //   }
-  // };
 
   const handleAddToCart = async (
     userId: string | null | undefined,
@@ -445,7 +389,20 @@ const ProductDetail = ({navigation, route}: any) => {
                                   fontWeight: 'bold',
                                   color: colors.black,
                                 }}>
-                                Available Quantity: {size.quantity}
+                                {size.quantity > 0 ? (
+                                  <Text>
+                                    Available Quantity: {size.quantity}
+                                  </Text>
+                                ) : (
+                                  <TextComponent
+                                    type="title"
+                                    numberOfLine={1}
+                                    color="red"
+                                    ellipsizeMode="tail"
+                                    text="Sản phẩm này hiện tại đã hết"
+                                    size={16}
+                                  />
+                                )}
                               </Text>
                             )}
                           </View>
@@ -513,27 +470,6 @@ const ProductDetail = ({navigation, route}: any) => {
                   font={fontFamilies.RobotoMedium}
                   size={16}
                 />
-
-                {/* <Row wrap="wrap" justifyContent="flex-start">
-                  {productDetail.variations.map((variation: any) => (
-                    <TouchableOpacity
-                      key={variation.color}
-                      onPress={() => handleColorChange(variation.color)}>
-                      <View
-                        style={{
-                          width: 50,
-                          height: 50,
-                          margin: 5,
-                          backgroundColor: variation.colorCode,
-                          borderRadius: 50,
-                          borderWidth:
-                            colorSelected === variation.color ? 2 : 0,
-                          borderColor: colors.black,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </Row> */}
                 <Row wrap="wrap" justifyContent="flex-start">
                   {productDetail.variations.map((variation: any) => (
                     <TouchableOpacity
