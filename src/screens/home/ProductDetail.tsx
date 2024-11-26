@@ -341,6 +341,12 @@ const ProductDetail = ({navigation, route}: any) => {
                       font={fontFamilies.RobotoBold}
                       size={20}
                     />
+                    <TextComponent
+                      text={`$${productDetail.price}`}
+                      size={24}
+                      font={fontFamilies.poppinsBold}
+                      color={colors.danger}
+                    />
                   </Col>
 
                   <Row
@@ -565,7 +571,7 @@ const ProductDetail = ({navigation, route}: any) => {
                   color={colors.black}
                 />
                 <TextComponent
-                  text={`$${count * parseFloat(productDetail.price)}`}
+                  text={`$${productDetail.price * count}`}
                   size={24}
                   font={fontFamilies.poppinsBold}
                   color={colors.danger}
@@ -593,9 +599,8 @@ const ProductDetail = ({navigation, route}: any) => {
                 (size: {sizeId: string}) => size.sizeId === sizeSelected,
               )?.quantity > 0 ? (
               <Button
-                styles={{marginTop: 15}}
-                title="Add to Cart"
-                color="black"
+                icon={<FontAwesome6 name="cart-plus" size={18} color="white" />}
+                inline
                 onPress={() =>
                   handleAddToCart(
                     userId,
@@ -605,14 +610,22 @@ const ProductDetail = ({navigation, route}: any) => {
                     count,
                   )
                 }
+                color={colors.black}
+                title={'Add to cart'}
               />
             ) : (
-              <Button
-                title="Out of Stock"
-                color={colors.gray}
-                styles={{marginTop: 15}}
-                disabled
-              />
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.gray,
+                  padding: 12,
+                  borderRadius: 20,
+                  alignItems: 'center',
+                }}
+                disabled>
+                <Text style={{color: colors.white, fontWeight: 'bold'}}>
+                  Out to Stock
+                </Text>
+              </TouchableOpacity>
             ))}
         </Row>
       </Section>
