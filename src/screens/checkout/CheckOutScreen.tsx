@@ -132,28 +132,23 @@ const CheckOutScreen = ({route}: any) => {
     }
   }
   useEffect(() => {
-    // Cleanup the timer if the component unmounts
     return () => {
-      clearTimeout(timerRef.current); // Clear the timer
+      clearTimeout(timerRef.current); 
     };
   }, []);
 
-  // Mua và xóa sản phẩm khỏi giỏ hàng
   const showDialogAndAddOrders = async () => {
     try {
-      // Kiểm tra phương thức thanh toán
       if (!selectedPaymentMethod) {
         console.error('Chưa chọn phương thức thanh toán.');
         return;
       }
 
-      // Kiểm tra sản phẩm trong giỏ hàng
       if (!items || items.length === 0) {
         console.error('Không có sản phẩm trong giỏ hàng.');
         return;
       }
 
-      // Kiểm tra thông tin người dùng
       if (!user.phoneNumber) {
         Alert.alert('Thông báo', 'Vui lòng nhập số điện thoại', [
           {text: 'OK', onPress: () => navigation.navigate('Address')},
@@ -168,14 +163,12 @@ const CheckOutScreen = ({route}: any) => {
         return;
       }
 
-      // Kiểm tra giá trị tổng đơn hàng
       if (totalPrice <= 0) {
         console.error('Tổng giá trị đơn hàng phải lớn hơn 0.');
         return;
       }
     
 
-      // Tạo dữ liệu đơn hàng
       const sanitizedItems = items.map(item => ({...item}));
       const orderData = {
         userId: auth().currentUser?.uid, // UID người dùng
@@ -188,14 +181,11 @@ const CheckOutScreen = ({route}: any) => {
         timestamp: getCurrentDateTime(),
       };
 
-      // Thêm đơn hàng vào Firestore
       const docRef = await firestore().collection('orders').add(orderData);
       const orderId = docRef.id; // Lấy ID của đơn hàng vừa thêm
 
-      // Lấy trạng thái đơn hàng từ orderStatusId
       const orderStatus = getOrderStatusById(orderData.orderStatusId);
 
-      // Lưu thông báo vào Firestore
       await NotificationService.saveNotificationToFirestore(
         orderId,
         orderStatus,
@@ -218,13 +208,11 @@ const CheckOutScreen = ({route}: any) => {
             {orderId, status: orderStatus},
           );
 
-          // Thực hiện gỡ bỏ listener sau một khoảng thời gian nếu cần thiết
           setTimeout(() => {
             MessageNotificationService.removeMessageNotificationListener();
             console.log(`Đã gỡ bỏ listener cho đơn hàng ${orderId}`);
           }, 1000); // Gỡ bỏ listener sau 5 giây
 
-          // Gửi thông báo ngay lập tức
           await sendNotification(
             'Đơn hàng mới',
             `Bạn đã đặt thành công.(#${orderId})`,
@@ -240,13 +228,8 @@ const CheckOutScreen = ({route}: any) => {
         console.error('Không có UID người dùng hoặc ID đơn hàng không hợp lệ.');
       }
 
-      // Sau khi đặt hàng thành công, xóa các sản phẩm trong giỏ hàng
       await removeItemsFromCart(items);
 
-      // // Hiển thị thông báo đặt hàng thành công
-      // Alert.alert('Thông báo', 'Đặt hàng thành công!', [
-      //   {text: 'OK', onPress: () => navigation.navigate('CartScreen')}, // Điều hướng đến màn hình home hoặc nơi bạn muốn
-      // ]);
       await orderRef.add(orderData);
 
       // Trừ số lượng sản phẩm theo size
@@ -441,8 +424,9 @@ const CheckOutScreen = ({route}: any) => {
                     style={{color: 'black', fontSize: 18}}
                     numberOfLines={1}
                     ellipsizeMode="tail">
-                    {item.color} - {item.size}
+                    {item.color} - {item.size} - SL: {item.quantity}
                   </Text>
+                  <Text style={styles.customText}>Price: {`$${item.price}`}</Text>
                   <View
                     style={{
                       flex: 1,
@@ -450,15 +434,15 @@ const CheckOutScreen = ({route}: any) => {
                       justifyContent: 'space-between',
                       alignItems: 'flex-end',
                     }}>
-                    <Text style={styles.customText}>{`$${
-                      item.price * item.quantity
-                    }`}</Text>
-                    <View
+                    <Text style={styles.customText}>
+                      Total: {`$${item.price * item.quantity}`}
+                    </Text>
+                    {/* <View
                       style={[
                         styles.flexDirection,
                         {
                           backgroundColor: '#e0e0e0',
-                          paddingVertical: 4,
+                          
                           borderRadius: 100,
                           paddingHorizontal: 12,
                           alignItems: 'center',
@@ -482,7 +466,7 @@ const CheckOutScreen = ({route}: any) => {
                         onPress={() => handleIncreaseQuantity(item.id)}>
                         <Add size={20} color="black"></Add>
                       </TouchableOpacity>
-                    </View>
+                    </View> */}
                   </View>
                 </View>
               </View>
