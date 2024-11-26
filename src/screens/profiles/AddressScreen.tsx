@@ -19,20 +19,6 @@ import {
 } from '@react-native-firebase/firestore';
 import {Picker} from '@react-native-picker/picker';
 const AddressSelector = () => {
-  // const [userName, setUserName] = useState('');
-  // const [phoneNumber, setPhoneNumber] = useState('');
-  // const [fullAddress, setFullAddress] = useState('');
-  // const [houseNumber, setHouseNumber] = useState('');
-  // const [provinces, setProvinces] = useState([]);
-  // const [districts, setDistricts] = useState([]);
-  // const [wards, setWards] = useState([]);
-  // const [selectedProvince, setSelectedProvince] = useState('');
-  // const [selectedDistrict, setSelectedDistrict] = useState('');
-  // const [selectedWard, setSelectedWard] = useState('');
-  // const [loading, setLoading] = useState(false); // Loading state
-  // const [existingAddress, setExistingAddress] = useState(null); // Địa chỉ hiện tại
-  // const [isAddressEditable, setIsAddressEditable] = useState(false); // Trạng thái cho phép chỉnh sửa
-  // const country = 'Việt Nam';
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
@@ -48,7 +34,6 @@ const AddressSelector = () => {
   const country = 'Việt Nam';
   useEffect(() => {
     const fetchProvinces = async () => {
-     
       try {
         const response = await fetch('https://provinces.open-api.vn/api/p/');
         const data = await response.json();
@@ -56,7 +41,6 @@ const AddressSelector = () => {
       } catch (error) {
         console.error('Error fetching provinces:', error);
       } finally {
-       
       }
     };
     fetchProvinces();
@@ -65,7 +49,6 @@ const AddressSelector = () => {
   useEffect(() => {
     if (selectedProvince) {
       const fetchDistricts = async () => {
-       
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`,
@@ -78,7 +61,6 @@ const AddressSelector = () => {
           setWards([]);
           setSelectedDistrict('');
           setSelectedWard('');
-         
         }
       };
       fetchDistricts();
@@ -93,7 +75,6 @@ const AddressSelector = () => {
   useEffect(() => {
     if (selectedDistrict) {
       const fetchWards = async () => {
-       
         try {
           const response = await fetch(
             `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`,
@@ -104,7 +85,6 @@ const AddressSelector = () => {
           console.error('Error fetching wards:', error);
         } finally {
           setSelectedWard('');
-         
         }
       };
       fetchWards();
@@ -113,89 +93,7 @@ const AddressSelector = () => {
       setSelectedWard('');
     }
   }, [selectedDistrict]);
-
-   // useEffect(() => {
-  //   const fetchUser = async () => {
-     
-  //     try {
-  //       const userId = getAuth().currentUser?.uid;
-  //       if (!userId) {
-  //         console.log('User not logged in');
-  //         return;
-  //       }
-  //       const userDoc = await userRef.doc(userId).get();
-  //       if (userDoc.exists) {
-  //         const userData = userDoc.data();
-  //         setUserName(userData?.displayName || '');
-  //         setPhoneNumber(userData?.phoneNumber || '');
-  //         setHouseNumber(userData?.houseNumber || '');
-  //         setFullAddress(userData?.fullAddress || '');
-
-  //         const provinceCode =
-  //           provinces.find(p => p.name === userData?.province)?.code || '';
-  //         const districtCode =
-  //           districts.find(d => d.name === userData?.district)?.code || '';
-  //         const wardCode =
-  //           wards.find(w => w.name === userData?.ward)?.code || '';
-
-  //         setSelectedProvince(provinceCode);
-  //         setSelectedDistrict(districtCode);
-  //         setSelectedWard(wardCode);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching user data:', error);
-  //     } finally {
-       
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [provinces, districts, wards]);
- 
-  // const handleConfirmAddress = async () => {
-  //   if (!phoneNumber) {
-  //     Alert.alert('Vui lòng nhập số điện thoại');
-  //     return;
-  //   }
-
-   
-  //   try {
-  //     const userId = getAuth().currentUser?.uid;
-  //     if (!userId) {
-  //       console.log('User not logged in');
-  //       return;
-  //     }
-  //     const userDocRef = doc(userRef, userId);
-
-  //     const provinceName =
-  //       provinces.find(p => p.code === selectedProvince)?.name || '';
-  //     const districtName =
-  //       districts.find(d => d.code === selectedDistrict)?.name || '';
-  //     const wardName = wards.find(w => w.code === selectedWard)?.name || '';
-  //     const fullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}, ${country}`;
-
-  //     const updatedData = {
-  //       displayName: userName,
-  //       phoneNumber: phoneNumber,
-  //       houseNumber: houseNumber || '',
-  //       country: country,
-  //       province: provinceName,
-  //       district: districtName,
-  //       ward: wardName,
-  //       fullAddress: fullAddress,
-  //     };
-  //     //cho phép đọc địa chỉ từ firebase nếu chưa có cho phép nhập vào rồi lưu
-  //     await updateDoc(userDocRef, updatedData);
-
-  //     Alert.alert('Thông tin đã được lưu');
-  //   } catch (error) {
-  //     console.error('Error updating user data: ', error);
-  //     Alert.alert('Lỗi khi lưu thông tin');
-  //   } finally {
-     
-  //   }
-  // };
-   useEffect(() => {
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userId = getAuth().currentUser?.uid;
@@ -231,55 +129,14 @@ const AddressSelector = () => {
       }
     };
     fetchUserData();
-  }, [provinces, districts, wards]);
-  // const handleConfirmAddress = async () => {
-  //   if (!phoneNumber || !userName || !houseNumber || !selectedWard) {
-  //     Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin.');
-  //     return;
-  //   }
-  //   try {
-  //     const userId = getAuth().currentUser?.uid;
-  //     if (!userId) {
-  //       console.log('User not logged in');
-  //       return;
-  //     }
-  //     const userDocRef = doc(userRef, userId);
+  }, []);
 
-  //     const provinceName =
-  //       provinces.find(p => p.code === selectedProvince)?.name || '';
-  //     const districtName =
-  //       districts.find(d => d.code === selectedDistrict)?.name || '';
-  //     const wardName = wards.find(w => w.code === selectedWard)?.name || '';
-  //     const fullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}, ${country}`;
-
-  //     const updatedData = {
-  //       displayName: userName,
-  //       phoneNumber: phoneNumber,
-  //       houseNumber: houseNumber || '',
-  //       country: country,
-  //       province: provinceName,
-  //       district: districtName,
-  //       ward: wardName,
-  //       fullAddress: fullAddress,
-  //     };
-
-  //     await updateDoc(userDocRef, updatedData);
-
-  //     setExistingAddress(fullAddress);
-  //     setIsAddressEditable(false);
-  //     Alert.alert('Thành công', 'Địa chỉ đã được lưu.');
-  //   } catch (error) {
-  //     console.error('Error updating user data: ', error);
-  //     Alert.alert('Lỗi', 'Không thể lưu thông tin địa chỉ.');
-  //   }
-  // };
- 
   const handleConfirmAddress = async () => {
     if (!phoneNumber || !userName || !houseNumber || !selectedWard) {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin.');
       return;
     }
-  
+
     try {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
@@ -287,14 +144,14 @@ const AddressSelector = () => {
         return;
       }
       const userDocRef = doc(userRef, userId);
-  
+
       const provinceName =
         provinces.find(p => p.code === selectedProvince)?.name || '';
       const districtName =
         districts.find(d => d.code === selectedDistrict)?.name || '';
       const wardName = wards.find(w => w.code === selectedWard)?.name || '';
       const updatedFullAddress = `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}, ${country}`;
-  
+
       const updatedData = {
         displayName: userName,
         phoneNumber: phoneNumber,
@@ -305,116 +162,104 @@ const AddressSelector = () => {
         ward: wardName,
         fullAddress: updatedFullAddress,
       };
-  
+
       await updateDoc(userDocRef, updatedData);
-  
+
       // Cập nhật địa chỉ hiển thị ngay lập tức
       setFullAddress(updatedFullAddress);
       setExistingAddress(updatedFullAddress);
       setIsAddressEditable(false);
-  
+
       Alert.alert('Thành công', 'Địa chỉ đã được lưu.');
     } catch (error) {
       console.error('Error updating user data: ', error);
       Alert.alert('Lỗi', 'Không thể lưu thông tin địa chỉ.');
     }
   };
-  
+
   return (
     <View style={styles.container}>
-
-        <ScrollView>
-          <View>
-            <Text style={styles.label}>Thông tin liên hệ</Text>
-            <View style={styles.customView}>
-              <TextInput
-                style={styles.input}
-                placeholder="Họ và tên...."
-                value={userName}
-                onChangeText={setUserName}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập số điện thoại hợp lệ..."
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="numeric"
-              />
-            </View>
-            <Text style={styles.label}>Thông tin địa chỉ</Text>
-            <View style={styles.customView}>
-              <Picker
-                selectedValue={selectedProvince}
-                onValueChange={value => setSelectedProvince(value)}>
-                <Picker.Item label="Chọn tỉnh/thành phố" value="" />
-                {provinces.map(province => (
-                  <Picker.Item
-                    key={province.code}
-                    label={province.name}
-                    value={province.code}
-                  />
-                ))}
-              </Picker>
-              <Picker
-                selectedValue={selectedDistrict}
-                onValueChange={value => setSelectedDistrict(value)}
-                enabled={!!selectedProvince}>
-                <Picker.Item label="Chọn quận/huyện" value="" />
-                {districts.map(district => (
-                  <Picker.Item
-                    key={district.code}
-                    label={district.name}
-                    value={district.code}
-                  />
-                ))}
-              </Picker>
-              <Picker
-                selectedValue={selectedWard}
-                onValueChange={value => setSelectedWard(value)}
-                enabled={!!selectedDistrict}>
-                <Picker.Item label="Chọn xã/phường" value="" />
-                {wards.map(ward => (
-                  <Picker.Item
-                    key={ward.code}
-                    label={ward.name}
-                    value={ward.code}
-                  />
-                ))}
-              </Picker>
-            </View>
-
-            <Text style={styles.label}>Thông tin địa chỉ</Text>
-            <View style={styles.customView}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập thông tin địa chỉ..."
-                value={houseNumber}
-                onChangeText={setHouseNumber}
-              />
-            </View>
-            {selectedWard &&
-            selectedDistrict &&
-            selectedProvince &&
-            houseNumber ? (
-              <View>
-                <Text style={styles.label}>Địa chỉ của bạn</Text>
-                <View style={styles.customView}>
-                  <Text style={{color: 'black', fontSize: 18}}>
-                    {fullAddress}
-                  </Text>
-                </View>
-              </View>
-            ) : (
-              <Text>''</Text>
-            )}
+      <ScrollView>
+        <View>
+          <Text style={styles.label}>Thông tin liên hệ</Text>
+          <View style={styles.customView}>
+            <TextInput
+              style={styles.input}
+              placeholder="Họ và tên...."
+              value={userName}
+              onChangeText={setUserName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập số điện thoại hợp lệ..."
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="numeric"
+            />
           </View>
-        </ScrollView>
+          <Text style={styles.label}>Thông tin địa chỉ</Text>
+          <View style={styles.customView}>
+            <Picker
+              selectedValue={selectedProvince}
+              onValueChange={value => setSelectedProvince(value)}>
+              <Picker.Item label="Chọn tỉnh/thành phố" value="" />
+              {provinces.map(province => (
+                <Picker.Item
+                  key={province.code}
+                  label={province.name}
+                  value={province.code}
+                />
+              ))}
+            </Picker>
+            <Picker
+              selectedValue={selectedDistrict}
+              onValueChange={value => setSelectedDistrict(value)}
+              enabled={!!selectedProvince}>
+              <Picker.Item label="Chọn quận/huyện" value="" />
+              {districts.map(district => (
+                <Picker.Item
+                  key={district.code}
+                  label={district.name}
+                  value={district.code}
+                />
+              ))}
+            </Picker>
+            <Picker
+              selectedValue={selectedWard}
+              onValueChange={value => setSelectedWard(value)}
+              enabled={!!selectedDistrict}>
+              <Picker.Item label="Chọn xã/phường" value="" />
+              {wards.map(ward => (
+                <Picker.Item
+                  key={ward.code}
+                  label={ward.name}
+                  value={ward.code}
+                />
+              ))}
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>Thông tin địa chỉ</Text>
+          <View style={styles.customView}>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập thông tin địa chỉ..."
+              value={houseNumber}
+              onChangeText={setHouseNumber}
+            />
+          </View>
+
+          <Text style={styles.label}>Địa chỉ của bạn</Text>
+          <View style={styles.customView}>
+            <Text style={{color: 'black', fontSize: 18}}>{fullAddress}</Text>
+          </View>
+        </View>
+      </ScrollView>
 
       <View style={{margin: 10}}>
         <TouchableOpacity
           style={styles.touchCheckOut}
-          onPress={handleConfirmAddress}
-         >
+          onPress={handleConfirmAddress}>
           <Text style={styles.textCheckOut}>Lưu</Text>
         </TouchableOpacity>
       </View>
