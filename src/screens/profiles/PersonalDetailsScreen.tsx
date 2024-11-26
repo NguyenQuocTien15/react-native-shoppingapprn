@@ -109,7 +109,7 @@ const PersonalDetailsScreen = () => {
       }
     } catch (error) {
       console.error('Lỗi khi tải ảnh lên:', error);
-      Alert.alert('Lỗi', 'Không thể tải ảnh lên Firebase.');
+      
     }
   };
   
