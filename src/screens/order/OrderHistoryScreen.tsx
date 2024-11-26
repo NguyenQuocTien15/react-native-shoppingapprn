@@ -43,7 +43,7 @@ const OrderHistoryScreen = () => {
     '3': 'Đã đóng gói', // Packed
     '4': 'Chờ vận chuyển', // Awaiting Shipment
     '5': 'Đang vận chuyển', // In Transit
-    '6': 'Đơn hàng đã giao hàng', // Delivered
+    '6': 'Giao thành công', // Delivered
     '7': 'Giao thất bại', // Failed Delivery
     '8': 'Trả kho', // Returned to Warehouse
   };
@@ -92,20 +92,16 @@ const OrderHistoryScreen = () => {
                   {orderItem.title}
                 </Text>
                 <Text style={{color: 'black', fontSize: 18}}>
-                  {orderItem.color} - {orderItem.size} - SL:{' '}
+                  {orderItem.color} - {orderItem.size} - SL:
                   {orderItem.quantity}
                 </Text>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-end',
-                  }}>
-                  <Text style={styles.customText}>
-                    Price: ${orderItem.price * orderItem.quantity}
-                  </Text>
-                </View>
+
+                <Text style={{color: 'black', fontSize: 18}}>
+                  Price: ${orderItem.price}
+                </Text>
+                <Text style={styles.customText}>
+                  Total: ${orderItem.price * orderItem.quantity}
+                </Text>
               </View>
             </View>
             {item.orderStatusId == '6' ? (
@@ -140,29 +136,6 @@ const OrderHistoryScreen = () => {
             ${item.totalPrice.toLocaleString()}
           </Text>
         </View>
-
-        {/* <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-          <TouchableOpacity
-            style={[
-              styles.touch,
-              {
-                backgroundColor: 'white',
-                width: '30%',
-                marginRight: 7,
-              },
-            ]}
-            onPress={() => Alert.alert('Returned')}>
-            <Text
-              style={[
-                styles.textTouch,
-                {
-                  color: 'black',
-                },
-              ]}>
-              Trả hàng
-            </Text>
-          </TouchableOpacity>
-        </View> */}
       </View>
     );
   };

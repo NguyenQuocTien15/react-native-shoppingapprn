@@ -27,9 +27,9 @@ const OrderWaitingShippingScreen = () => {
       })
       return ()=> unsubscribe()
   },[]);
-  const renderItem = ({item} : any) => (
+  const renderItem = ({item}: any) => (
     <View style={styles.itemListProduct}>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop:5}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
         <Image
           source={require('../../assets/images/logofs.jpg')}
           style={{width: 25, height: 25, marginRight: 10}}></Image>
@@ -52,29 +52,16 @@ const OrderWaitingShippingScreen = () => {
                 {orderItem.title}
               </Text>
               <Text style={{color: 'black', fontSize: 18}}>
-                Quantity: {orderItem.quantity}
+                {orderItem.color} - {orderItem.size} - SL:
+                {orderItem.quantity}
               </Text>
 
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                }}>
-                <Text style={styles.customText}>
-                  Price: ${orderItem.price * orderItem.quantity}
-                </Text>
-                <View
-                  style={[
-                    styles.flexDirection,
-                    {
-                      paddingVertical: 4,
-                      borderRadius: 100,
-                      alignItems: 'center',
-                    },
-                  ]}></View>
-              </View>
+              <Text style={{color: 'black', fontSize: 18}}>
+                Price: ${orderItem.price}
+              </Text>
+              <Text style={styles.customText}>
+                Total: ${orderItem.price * orderItem.quantity}
+              </Text>
             </View>
           </View>
         </View>
@@ -88,7 +75,7 @@ const OrderWaitingShippingScreen = () => {
         </Text>
       </View>
     </View>
-  )
+  );
   return (
     <View style={styles.container}>
       {loading ? (

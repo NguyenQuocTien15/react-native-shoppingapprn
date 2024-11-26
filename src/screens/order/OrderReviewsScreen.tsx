@@ -46,38 +46,6 @@ const ReviewsProduct = ({navigation}) => {
   };
 
 
-  // const handleReviewProduct = async () => {
-  //   if (rating === 0 && comment.trim() === '') {
-  //     Alert.alert('Vui lòng chọn đánh giá và viết bình luận');
-  //     return;
-  //   }
-  //   try {
-  //     if (!userId) {
-  //       Alert.alert('Bạn cần đăng nhập để đánh giá và viết bình luận');
-  //     }
-  //     const productId = route.params.productId;
-  //     const reviewRef = doc(
-  //       collection(getFirestore(), 'reviews', productId, 'productReviews'),
-  //     );
-  //     await setDoc(reviewRef, {
-  //       productId: productId,
-  //       userId: userId,
-  //       rating: rating,
-  //       color:color,
-  //       size:size,
-  //       comment: comment,
-  //       created_at: serverTimestamp(),
-  //     });
-
-  //     Alert.alert('Cảm ơn bạn đã đánh giá sản phẩm!');
-  //     // Optionally, navigate back or reset fields
-  //     navigation.goBack();
-  //   } catch (error) {
-  //     console.error('Error submitting review:', error);
-  //     Alert.alert('Có lỗi xảy ra, vui lòng thử lại!');
-  //   }
-  // };
- 
  const handleReviewProduct = async () => {
    if (rating === 0 || comment.trim() === '') {
      Alert.alert('Vui lòng chọn đánh giá và viết bình luận');

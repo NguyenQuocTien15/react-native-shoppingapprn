@@ -260,50 +260,19 @@ const OrderWaitingForConfirmationScreen = () => {
                 {orderItem.quantity}
               </Text>
 
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                }}>
-                <Text style={styles.customText}>Price: ${orderItem.price}</Text>
-                <View
-                  style={[
-                    styles.flexDirection,
-                    {
-                      paddingVertical: 4,
-                      borderRadius: 100,
-                      alignItems: 'center',
-                    },
-                  ]}>
-                  {/* <TouchableOpacity
-                    style={[
-                      styles.touch,
-                      {
-                        backgroundColor: 'white',
-                      },
-                    ]}
-                    onPress={() => showDialog(item.id, index)}>
-                    <Text
-                      style={[
-                        styles.textTouch,
-                        {
-                          color: 'black',
-                        },
-                      ]}>
-                      Cancel
-                    </Text>
-                  </TouchableOpacity> */}
-                </View>
-              </View>
+              <Text style={{color: 'black', fontSize: 18}}>
+                Price: ${orderItem.price}
+              </Text>
+              <Text style={styles.customText}>
+                Total: ${orderItem.price * orderItem.quantity}
+              </Text>
             </View>
           </View>
         </View>
       ))}
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
-          Total:
+          Total order:
         </Text>
         <Text style={styles.customText}>
           ${item.totalPrice.toLocaleString()}
@@ -320,7 +289,7 @@ const OrderWaitingForConfirmationScreen = () => {
           ]}
           //nút hủy
           onPress={() => showDialog(item.id)}>
-             {/* //nút hủy */}
+          {/* //nút hủy */}
           <Text
             style={[
               styles.textTouch,
