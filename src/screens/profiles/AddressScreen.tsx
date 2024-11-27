@@ -81,49 +81,7 @@ const AddressSelector = () => {
             fetchWards();
         }
     }, [selectedDistrict]);
-
-
-    //   useEffect(() => {
-    //     const fetchUserData = async () => {
-    //       try {
-    //         const userId = getAuth().currentUser?.uid;
-    //         if (!userId) return;
-
-    //         // Lấy tài liệu của người dùng từ Firestore
-    //         const userDocRef = doc(userRef, userId); // Tạo tham chiếu đến document
-    //         const userDoc = await getDoc(userDocRef); // Lấy dữ liệu document
-
-    //         // Kiểm tra nếu dữ liệu tồn tại
-    //         if (userDoc.exists) {
-    //           const userData = userDoc.data(); // Lấy dữ liệu từ document
-    //           console.log('User Data:', userData);
-
-    //           // Cập nhật các state với dữ liệu từ Firestore
-    //           setUserName(userData?.displayName || '');
-    //           setPhoneNumber(userData?.phoneNumber || '');
-    //           setHouseNumber(userData?.houseNumber || '');
-
-    //           // Xử lý tỉnh/huyện/xã dựa vào tên lưu trong Firestore
-    //           const provinceCode = provinces.find(p => p.name === userData?.province)?.code || '';
-    //           const districtCode = districts.find(d => d.name === userData?.district)?.code || '';
-    //           const wardCode = wards.find(w => w.name === userData?.ward)?.code || '';
-
-    //           setSelectedProvince(provinceCode);
-    //           setSelectedDistrict(districtCode);
-    //           setSelectedWard(wardCode);
-    //         } else {
-    //           console.log('User document does not exist!');
-    //         }
-    //       } catch (error) {
-    //         console.error('Error fetching user data:', error);
-    //         Alert.alert('Lỗi', 'Không thể tải dữ liệu người dùng từ Firestore.');
-    //       }
-    //     };
-
-    //     // Chỉ gọi hàm khi dữ liệu tỉnh/thành phố đã được tải xong
-    //     if (provinces.length > 0) fetchUserData();
-    //   }, [provinces]);
-
+    
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
 
     useEffect(() => {

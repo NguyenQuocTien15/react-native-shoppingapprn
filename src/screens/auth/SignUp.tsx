@@ -46,12 +46,27 @@ const initState = {
       }
     };
 
-    const saveUserInfoToFirestore = async (email: string, password: string, username: string) => {
+    // const saveUserInfoToFirestore = async (email: string, password: string, username: string) => {
+    //   try {
+    //     const createdAt = firestore.FieldValue.serverTimestamp();
+    //     await firestore().collection('users').doc(email).set({
+    //       email,
+    //       password,
+    //       username,
+    //       createdAt,
+    //       status: 'pending', // Trạng thái chờ xác nhận email
+    //     });
+    //     console.log('User info saved to Firestore successfully');
+    //   } catch (error) {
+    //     console.error('Error saving user info to Firestore:', error);
+    //   }
+    // };
+    // Gửi email xác nhận cho người dùng
+    const saveUserInfoToFirestore = async (email: string, username: string) => {
       try {
         const createdAt = firestore.FieldValue.serverTimestamp();
         await firestore().collection('users').doc(email).set({
           email,
-          password,
           username,
           createdAt,
           status: 'pending', // Trạng thái chờ xác nhận email
@@ -61,7 +76,7 @@ const initState = {
         console.error('Error saving user info to Firestore:', error);
       }
     };
-    // Gửi email xác nhận cho người dùng
+    
     const sendEmailVerification = async (user: any) => {
       try {
         if (!user.emailVerified) {
@@ -78,28 +93,38 @@ const initState = {
    const createNewAccount = async () => {
     setIsLoading(true);
     try {
-      // 1. Lưu thông tin người dùng vào Firestore với trạng thái 'pending'
-      await saveUserInfoToFirestore(registerForm.email, registerForm.password, registerForm.username);
-
-      // 2. Tạo tài khoản Firebase nhưng không cho phép đăng nhập ngay lập tức
-      const userCredential = await auth().createUserWithEmailAndPassword(registerForm.email, registerForm.password);
+      // 1. Tạo tài khoản Firebase
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        registerForm.email,
+        registerForm.password
+      );
       const user = userCredential.user;
-
+  
+      // 2. Lưu thông tin người dùng vào Firestore
+      await saveUserInfoToFirestore(registerForm.email, registerForm.username);
+  
       // 3. Gửi email xác minh
       await sendEmailVerification(user);
-
-      // 4. Hiển thị thông báo yêu cầu người dùng xác minh email
-      setErrorText('Please check your email and verify to complete registration.');
-
-      setIsLoading(false);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setErrorText(error.message);
+  
+      // 4. Hiển thị thông báo
+      setErrorText(
+        'Please check your email and verify to complete registration.'
+      );
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        setErrorText('This email is already in use.');
+      } else if (error.code === 'auth/invalid-email') {
+        setErrorText('Invalid email format.');
+      } else if (error.code === 'auth/weak-password') {
+        setErrorText('Password should be at least 6 characters.');
       } else {
-        setErrorText('An unknown error occurred');
+        setErrorText('An unknown error occurred.');
       }
+    } finally {
+      setIsLoading(false);
+    }
   };
-};
+  
 
   // Kiểm tra thời gian đăng ký và xóa nếu quá 2 phút
   const renderButtonRegister = () => {
