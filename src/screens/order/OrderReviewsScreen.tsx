@@ -22,9 +22,10 @@ import {
   serverTimestamp,
   setDoc,
 } from '@react-native-firebase/firestore';
-
+//@ts-ignore
 const ReviewsProduct = ({navigation}) => {
   const route = useRoute();
+  //@ts-ignore
   const {productId, title, imageUrl, size, color} = route.params;
 
   const [rating, setRating] = useState(0);
@@ -36,39 +37,15 @@ const ReviewsProduct = ({navigation}) => {
     'kích thước, màu sắc?';
 
   const userId = getAuth().currentUser?.uid;
+  const Star = ({rating}) => {
+    return <Text>{rating}</Text>;
+  };
 
-  // const handleReviewProduct = async () => {
-  //   if (rating === 0 && comment.trim() === '') {
-  //     Alert.alert('Vui lòng chọn đánh giá và viết bình luận');
-  //     return;
-  //   }
-  //   try {
-  //     if (!userId) {
-  //       Alert.alert('Bạn cần đăng nhập để đánh giá và viết bình luận');
-  //     }
-  //     const productId = route.params.productId;
-  //     const reviewRef = doc(
-  //       collection(getFirestore(), 'reviews', productId, 'productReviews'),
-  //     );
-  //     await setDoc(reviewRef, {
-  //       productId: productId,
-  //       userId: userId,
-  //       rating: rating,
-  //       color:color,
-  //       size:size,
-  //       comment: comment,
-  //       created_at: serverTimestamp(),
-  //     });
+  Star.defaultProps = {
+    rating: 3, // Default value for rating
+  };
 
-  //     Alert.alert('Cảm ơn bạn đã đánh giá sản phẩm!');
-  //     // Optionally, navigate back or reset fields
-  //     navigation.goBack();
-  //   } catch (error) {
-  //     console.error('Error submitting review:', error);
-  //     Alert.alert('Có lỗi xảy ra, vui lòng thử lại!');
-  //   }
-  // };
- 
+
  const handleReviewProduct = async () => {
    if (rating === 0 || comment.trim() === '') {
      Alert.alert('Vui lòng chọn đánh giá và viết bình luận');
@@ -81,11 +58,13 @@ const ReviewsProduct = ({navigation}) => {
      }
 
      // Get the productId from route params
+     //@ts-ignore
+
      const productId = route.params.productId;
 
      // Create a reference to the Firestore document path: reviews -> productId -> reviewId
      const reviewRef = doc(
-       collection(getFirestore(), 'reviews', productId, 'reviews'),
+       collection(getFirestore(), 'reviews', productId, 'productReviews'),
      );
 
      // Save the review data in Firestore under the specific product
@@ -145,6 +124,7 @@ const ReviewsProduct = ({navigation}) => {
             <TextComponent
               type="title"
               numberOfLine={1}
+              //@ts-ignore
               ellipsizeMode="tail"
               text={title}
               size={20}

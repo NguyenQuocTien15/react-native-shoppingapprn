@@ -13,12 +13,14 @@ import ChatScreen from "./home/ChatScreen";
 import SearchResultsScreen from "./home/SearchResultsScreen";
 import ProductsScreen from "./home/ProductsCategoryScreen";
 import FilterScreen from "./home/FilterScreen";
+import NoticationScreen from './notifications/NotificationScreen'
 
 export {
   HomeScreen,
   Login,
   CartScreen,
-  //NotificationsScreen,
+  NoticationScreen,
+  
   ProfileScreen,
   HomeAuth,
   SwiperScreen,

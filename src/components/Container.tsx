@@ -39,7 +39,6 @@ const Container = (props: Props) => {
                     padding: 0,
                     width: 34,
                     height: 34,
-                    marginTop: 26,
                   },
                 ]}
                 onPress={() => navigation.goBack()}>
@@ -56,7 +55,6 @@ const Container = (props: Props) => {
               style={{
                 paddingHorizontal: 5,
                 paddingVertical: 5,
-                marginTop: 5,
                 padding: 1,
                 flex: 1,
               }}>
@@ -64,7 +62,7 @@ const Container = (props: Props) => {
                 <TextComponent
                   text={bigTitle}
                   type="bigTitle"
-                  styles={{marginTop: 20, marginLeft: 10}}
+                  styles={{ marginLeft: 10}}
                 />
               )}
             </View>

@@ -51,9 +51,9 @@ const OrderPackaged = () => {
 
     return () => unsubscribe();
   }, [userId]);
-  const renderItem = ({item} : any) => (
+  const renderItem = ({item}: any) => (
     <View style={styles.itemListProduct}>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop:5}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
         <Image
           source={require('../../assets/images/logofs.jpg')}
           style={{width: 25, height: 25, marginRight: 10}}></Image>
@@ -76,36 +76,23 @@ const OrderPackaged = () => {
                 {orderItem.title}
               </Text>
               <Text style={{color: 'black', fontSize: 18}}>
-                Quantity: {orderItem.quantity}
+                {orderItem.color} - {orderItem.size} - SL:
+                {orderItem.quantity}
               </Text>
 
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                }}>
-                <Text style={styles.customText}>
-                  Price: ${orderItem.price * orderItem.quantity}
-                </Text>
-                <View
-                  style={[
-                    styles.flexDirection,
-                    {
-                      paddingVertical: 4,
-                      borderRadius: 100,
-                      alignItems: 'center',
-                    },
-                  ]}></View>
-              </View>
+              <Text style={{color: 'black', fontSize: 18}}>
+                Price: ${orderItem.price}
+              </Text>
+              <Text style={styles.customText}>
+                Total: ${orderItem.price * orderItem.quantity}
+              </Text>
             </View>
           </View>
         </View>
       ))}
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <Text style={[styles.orderTotal, {color: 'black', fontSize: 20}]}>
-          Total:
+          Total order:
         </Text>
         <Text style={styles.customText}>
           ${item.totalPrice.toLocaleString()}
@@ -116,7 +103,9 @@ const OrderPackaged = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        <View style={{flex: 1, justifyContent: 'center'}}>
+          <ActivityIndicator color="blue" size="small"></ActivityIndicator>
+        </View>
       ) : (
         <FlatList
           data={orders}

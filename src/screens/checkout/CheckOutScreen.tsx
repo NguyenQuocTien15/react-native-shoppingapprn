@@ -12,15 +12,40 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Add, Minus} from 'iconsax-react-native';
 import Dialog from 'react-native-dialog';
-import {orderRef} from '../../firebase/firebaseConfig';
-import {firebase} from '@react-native-firebase/firestore';
+import {db, orderRef} from '../../firebase/firebaseConfig';
+import {doc, firebase, getDoc, updateDoc} from '@react-native-firebase/firestore';
 import {PaymentMethodModel} from '../../models/OrderModel';
-import auth, { getAuth } from '@react-native-firebase/auth';
+import auth, {getAuth} from '@react-native-firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-const CheckOutScreen = ({route}) => {
+import firestore from '@react-native-firebase/firestore';
+import NotificationService from '../../utils/notificationService';
+import OrderNotificationService from '../../utils/orderNotificationService';
+import MessageNotificationService from '../../utils/messageNotificationService';
+import notifee from '@notifee/react-native';
+import HomeScreen from '../home/HomeScreen';
+const sendNotification = async (title, body) => {
+  // Đảm bảo kênh thông báo tồn tại trước khi gửi thông báo
+  const channelId = await notifee.createChannel({
+    id: 'message_channel',
+    name: 'Message Channel',
+    sound: 'default',
+  });
+
+  // Hiển thị thông báo
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {
+      channelId,
+      smallIcon: 'ic_launcher', // Đảm bảo rằng bạn đã thêm ic_launcher vào tài nguyên Android
+    },
+  });
+};
+
+const CheckOutScreen = ({route}: any) => {
   const navigation = useNavigation();
- const {selectedItems} = route.params;
+  const {selectedItems} = route.params;
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     string | null
   >(null);
@@ -30,7 +55,6 @@ const CheckOutScreen = ({route}) => {
 
   const [user, setUser] = useState('');
   const timerRef = useRef(null); // Create a ref to store the timer ID
-  
 
   const getUserId = () => {
     const currentUser = auth().currentUser;
@@ -75,83 +99,182 @@ const CheckOutScreen = ({route}) => {
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
+
+  //lay status id
+  function getOrderStatusById(orderStatusId: string): string {
+    switch (orderStatusId) {
+      case '0':
+        return 'Hủy đơn';
+      case '1':
+        return 'Đang xử lý đơn hàng mới';
+      case '2':
+        return 'Đang chuẩn bị';
+      case '2':
+        return 'Đã đóng gói';
+      case '4':
+        return 'Chờ vận chuyển';
+      case '5':
+        return 'Đang vận chuyển';
+      case '6':
+        return 'Đã giao hàng';
+      case '7':
+        return 'Giao thất bại';
+      case '8':
+        return 'Trả kho';
+      case '9':
+        return 'Trả tiền';
+      case '10':
+        return 'Đã nhận lại hàng';
+      case '11':
+        return 'Hoàn thành';
+      default:
+        return 'Trạng thái không xác định';
+    }
+  }
   useEffect(() => {
-    // Cleanup the timer if the component unmounts
     return () => {
-      clearTimeout(timerRef.current); // Clear the timer
+      clearTimeout(timerRef.current); 
     };
   }, []);
+
   const showDialogAndAddOrders = async () => {
     try {
       if (!selectedPaymentMethod) {
-        console.error('Payment method is not selected.');
+        console.error('Chưa chọn phương thức thanh toán.');
         return;
       }
 
       if (!items || items.length === 0) {
-        console.error('No items found.');
+        console.error('Không có sản phẩm trong giỏ hàng.');
         return;
       }
+
       if (!user.phoneNumber) {
-        Alert.alert(
-          'Thông báo',
-          'Vui lòng nhập số điện thoại',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
-            },
-          ],
-          {cancelable: false},
-        );
+        Alert.alert('Thông báo', 'Vui lòng nhập số điện thoại', [
+          {text: 'OK', onPress: () => navigation.navigate('Address')},
+        ]);
         return;
       }
+
       if (!user.fullAddress) {
-        Alert.alert(
-          'Thông báo',
-          'Vui lòng nhập địa chỉ',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Address'), // Navigate to Address screen on OK
-            },
-          ],
-          {cancelable: false},
-        );
+        Alert.alert('Thông báo', 'Vui lòng nhập địa chỉ', [
+          {text: 'OK', onPress: () => navigation.navigate('Address')},
+        ]);
         return;
       }
 
       if (totalPrice <= 0) {
-        console.error('Total price must be greater than 0.');
+        console.error('Tổng giá trị đơn hàng phải lớn hơn 0.');
         return;
       }
-      const sanitizedItems = items.map(item => ({
-        ...item,
-      }));
+    
+
+      const sanitizedItems = items.map(item => ({...item}));
       const orderData = {
-        userId: getUserId(),
+        userId: auth().currentUser?.uid, // UID người dùng
         address: user.fullAddress,
         items: sanitizedItems,
         totalPrice: totalPrice,
         shipperId: null,
         paymentMethodId: selectedPaymentMethod,
-        orderStatusId: '1',
+        orderStatusId: '1', // Trạng thái đơn hàng ban đầu là "Đã đặt"
         timestamp: getCurrentDateTime(),
       };
 
-      // Thêm đơn hàng vào Firestore
-      await orderRef.add(orderData);
+      const docRef = await firestore().collection('orders').add(orderData);
+      const orderId = docRef.id; // Lấy ID của đơn hàng vừa thêm
+
+      const orderStatus = getOrderStatusById(orderData.orderStatusId);
+
+      await NotificationService.saveNotificationToFirestore(
+        orderId,
+        orderStatus,
+      );
+
+      // Gửi thông báo đến người dùng
+      if (auth().currentUser?.uid && orderId) {
+        try {
+          //@ts-ignore
+          const userId = auth().currentUser.uid;
+
+          // Gửi thông báo
+          await MessageNotificationService.setupMessageNotificationListener(
+            //@ts-ignore
+            userId,
+            {
+              title: 'Đơn hàng mới',
+              body: `Bạn đã đặt thành công.(#${orderId}) `,
+            },
+            {orderId, status: orderStatus},
+          );
+
+          setTimeout(() => {
+            MessageNotificationService.removeMessageNotificationListener();
+            console.log(`Đã gỡ bỏ listener cho đơn hàng ${orderId}`);
+          }, 1000); // Gỡ bỏ listener sau 5 giây
+
+          await sendNotification(
+            'Đơn hàng mới',
+            `Bạn đã đặt thành công.(#${orderId})`,
+          );
+
+          console.log(
+            `Thông báo đơn hàng ${orderId} đã được gửi thành công cho người dùng ${userId}`,
+          );
+        } catch (error) {
+          console.error('Lỗi khi gửi thông báo cho người dùng:', error);
+        }
+      } else {
+        console.error('Không có UID người dùng hoặc ID đơn hàng không hợp lệ.');
+      }
+
       await removeItemsFromCart(items);
-      
+
+      await orderRef.add(orderData);
+
+      // Trừ số lượng sản phẩm theo size
+      for (const item of sanitizedItems) {
+        const productRef = doc(db, 'products', item.productId);
+        const productSnap = await getDoc(productRef);
+
+        if (productSnap.exists) {
+          const productData = productSnap.data();
+          const updatedVariations = productData.variations.map(variation => {
+            if (variation.color === item.colorSelected) {
+              return {
+                ...variation,
+                sizes: variation.sizes.map(size => {
+                  if (size.sizeId === item.sizeSelected) {
+                    return {
+                      ...size,
+                      quantity: Math.max(size.quantity - item.quantity, 0), // Đảm bảo không âm
+                    };
+                  }
+                  return size;
+                }),
+              };
+            }
+            return variation;
+          });
+
+          // Cập nhật lại sản phẩm
+          await updateDoc(productRef, {variations: updatedVariations});
+        }
+      }
+
+      // Xóa sản phẩm khỏi giỏ hàng
+      await removeItemsFromCart(items);
+
       setVisible(true);
       setTimeout(() => {
-        setVisible(false); 
-        navigation.replace('CartScreen'); 
+        setVisible(false);
+        navigation.replace('CartScreen');
       }, 2000);
     } catch (error) {
-      console.error('Error saving order: ', error);
+      console.error('Lỗi khi xử lý đơn hàng:', error);
     }
   };
+
   const removeItemsFromCart = async (items: any[]) => {
     const userId = getAuth().currentUser?.uid;
     const cartRef = firebase.firestore().collection('carts').doc(userId);
@@ -166,23 +289,22 @@ const CheckOutScreen = ({route}) => {
 
         items.forEach(item => {
           const productKey = `${item.productId}-${item.colorSelected}-${item.sizeSelected}`;
-         
+
           delete updatedProducts[productKey];
         });
 
-        // Update the cart in Firestore
+        // Cập nhật lại giỏ hàng trong Firestore
         await cartRef.update({products: updatedProducts});
-        console.log('Cart items removed successfully.');
+        console.log('Đã xóa sản phẩm khỏi giỏ hàng thành công.');
 
-        // Optionally, you could refetch the updated cart data here to update the UI
+        // Optionally, bạn có thể refetch lại dữ liệu giỏ hàng để cập nhật giao diện
       } else {
-        console.error('Cart not found.');
+        console.error('Không tìm thấy giỏ hàng.');
       }
     } catch (error) {
-      console.error('Error removing items from cart: ', error);
+      console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng: ', error);
     }
   };
-
   const calculateTotalPrice = () => {
     const total = items.reduce(
       (sum: number, item: {price: number; quantity: number}) =>
@@ -302,8 +424,9 @@ const CheckOutScreen = ({route}) => {
                     style={{color: 'black', fontSize: 18}}
                     numberOfLines={1}
                     ellipsizeMode="tail">
-                    {item.color} - {item.size}
+                    {item.color} - {item.size} - SL: {item.quantity}
                   </Text>
+                  <Text style={styles.customText}>Price: {`$${item.price}`}</Text>
                   <View
                     style={{
                       flex: 1,
@@ -311,15 +434,15 @@ const CheckOutScreen = ({route}) => {
                       justifyContent: 'space-between',
                       alignItems: 'flex-end',
                     }}>
-                    <Text style={styles.customText}>{`$${
-                      item.price * item.quantity
-                    }`}</Text>
-                    <View
+                    <Text style={styles.customText}>
+                      Total: {`$${item.price * item.quantity}`}
+                    </Text>
+                    {/* <View
                       style={[
                         styles.flexDirection,
                         {
                           backgroundColor: '#e0e0e0',
-                          paddingVertical: 4,
+                          
                           borderRadius: 100,
                           paddingHorizontal: 12,
                           alignItems: 'center',
@@ -343,7 +466,7 @@ const CheckOutScreen = ({route}) => {
                         onPress={() => handleIncreaseQuantity(item.id)}>
                         <Add size={20} color="black"></Add>
                       </TouchableOpacity>
-                    </View>
+                    </View> */}
                   </View>
                 </View>
               </View>
@@ -374,6 +497,7 @@ const CheckOutScreen = ({route}) => {
               {`$${totalPrice.toLocaleString()}`}
             </Text>
           </View>
+          {/* nút mua */}
           <TouchableOpacity
             style={[
               styles.touchCheckOut,
@@ -383,6 +507,7 @@ const CheckOutScreen = ({route}) => {
             disabled={!selectedPaymentMethod}>
             <Text style={styles.textCheckOut}>Mua</Text>
           </TouchableOpacity>
+          {/*  nút mua  */}
           <Dialog.Container contentStyle={{borderRadius: 15}} visible={visible}>
             <View style={{alignItems: 'center'}}>
               <Image

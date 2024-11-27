@@ -127,7 +127,7 @@ export class HandleNotification {
             };
 
             const res = await fetch(
-              'https://fcm.googleapis.com/v1/projects/shopping-app-3/messages:send',
+              'https://fcm.googleapis.com/v1/projects/shopping-app-3-410c2/messages:send',
               requestOptions,
             );
 

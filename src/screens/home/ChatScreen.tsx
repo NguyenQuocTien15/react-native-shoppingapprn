@@ -111,13 +111,13 @@ const ChatScreen = () => {
   );
 
   return (
-    <Container back bigTitle='Chat' isScroll={false}> 
+    <Container back bigTitle='Fashion Shop' isScroll={false}> 
     <View style={{ flex: 1 }}>
-      <KeyboardAwareScrollView
+      {/* <KeyboardAwareScrollView
         style={{ flex: 1 }}
         resetScrollToCoords={{ x: 0, y: 0 }}
         enableOnAndroid
-      >
+      > */}
         <FlatList
         ref={flatListRef} 
           data={messages}
@@ -127,7 +127,7 @@ const ChatScreen = () => {
           onScroll={handleScroll} 
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
-      </KeyboardAwareScrollView>
+      {/* </KeyboardAwareScrollView> */}
       
       {/* Phần input và nút gửi */}
       <View style={styles.inputContainer}>
@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
   },
   message: {
     marginVertical: 5,
+    marginHorizontal:5,
     padding: 10,
     borderRadius: 10,
     maxWidth: '70%',
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: 'black',
-    borderRadius: 20,
+    borderRadius: 50,
   },
   sendButtonText: {
     color: '#fff',

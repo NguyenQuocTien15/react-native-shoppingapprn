@@ -3,20 +3,16 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NotificationScreen from '../screens/notifications/NotificationScreen';
 
+
 const NotificationNavigator = () => {
   const Stack = createNativeStackNavigator();
 
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="NotificationScreen"
+        name="Notifications"
         //@ts-ignore
-        component={(props) => {
-          // Kiểm tra dữ liệu từ route.params
-          const isScroll = props.route.params?.data?.length > 0;
-          return <NotificationScreen {...props} isScroll={isScroll} />;
-        }}
-        options={{ title: 'Thông báo' }}
+        component={NotificationScreen}    
       />
     </Stack.Navigator>
   );

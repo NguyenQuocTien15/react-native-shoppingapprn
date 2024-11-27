@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
@@ -110,7 +109,7 @@ const PersonalDetailsScreen = () => {
       }
     } catch (error) {
       console.error('Lỗi khi tải ảnh lên:', error);
-      Alert.alert('Lỗi', 'Không thể tải ảnh lên Firebase.');
+      
     }
   };
   

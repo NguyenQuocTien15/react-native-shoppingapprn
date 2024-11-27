@@ -53,8 +53,8 @@ const ProductsByOfferListScreen = () => {
   }
 
   return (
-    <Container back title="Your Offer" isScroll={false}>
-      <Section>
+    <Container back bigTitle="Your Offer" isScroll={false}>
+      <Section styles={{marginTop: 15}}>
         <FlatList
           numColumns={2}
           data={products}
