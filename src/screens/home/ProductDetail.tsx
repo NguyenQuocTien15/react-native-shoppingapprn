@@ -268,6 +268,7 @@ const ProductDetail = ({navigation, route}: any) => {
       console.error('Error adding product to cart: ', error);
     }
   };
+//Fetch product reviews and calculate average rating
 
   const fetchProductReviews = async () => {
     try {
