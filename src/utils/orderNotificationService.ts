@@ -16,11 +16,12 @@ export default class OrderNotificationService {
   static setupOrderNotificationListener() {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       if (remoteMessage.data?.orderID) {
-        const { orderID, orderStatus = 'Đang xử lý' } = remoteMessage.data;
-
-        await this.sendOrderNotification(orderID, orderStatus);
+        const { orderID,shipperId, orderStatus = 'Đang xử lý' } = remoteMessage.data;
+//@ts-ignore
+        await this.sendOrderNotification(orderID, orderStatus,shipperId);
         // Lưu thông báo vào Firestore
-        await NotificationService.saveNotificationToFirestore(orderID, orderStatus);
+        //@ts-ignore
+        await NotificationService.saveNotificationToFirestore(orderID, orderStatus,shipperId);
       }
     });
 
@@ -48,7 +49,7 @@ export default class OrderNotificationService {
     });
   }
 
-  static sendOrderNotification = async (orderID: string, orderStatus: string) => {
+  static sendOrderNotification = async (orderID: string, orderStatus: string,shipperId?:string) => {
     try {
       // Kiểm tra kênh thông báo đã được tạo
       await notifee.createChannel({
@@ -60,7 +61,7 @@ export default class OrderNotificationService {
       // Gửi thông báo
       await notifee.displayNotification({
         title: `Cập nhật đơn hàng: #${orderID}`,
-        body: `Trạng thái: ${orderStatus}`,
+        body: `Trạng thái: ${orderStatus} ${shipperId}`,
         android: {
           channelId: 'order',
           smallIcon: 'ic_launcher',  // Biểu tượng nhỏ
