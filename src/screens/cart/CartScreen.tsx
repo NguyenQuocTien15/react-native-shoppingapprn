@@ -28,6 +28,9 @@ const CartScreen = () => {
 
   const [cartItems, setCartItems] = useState([]);
   const userId = getAuth().currentUser?.uid;
+  const [totalQuantity, setTotalQuantity] = useState(0);
+
+
   const sizeNameSelected = {
     1: 'S',
     2: 'M',
@@ -101,6 +104,8 @@ const CartScreen = () => {
           }
 
           setCartItems(productList);
+          const newTotalQuantity = calculateTotalQuantity(productList);
+          setTotalQuantity(newTotalQuantity);
           setDialogVisible(false);
         } else {
           console.log('Cart is empty.');
@@ -268,6 +273,11 @@ const CartScreen = () => {
     return 0;
   };
 
+  const calculateTotalQuantity = (cartItems: any[]) => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+
   const handleRemoveFromCart = async (
     userId: string | null | undefined,
     productId: string | number,
@@ -350,6 +360,7 @@ const CartScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.textCart}>Carts({cartItems.length})</Text>
+      
       {cartItems.length > 0 ? (
         <View style={{flex: 1, marginTop: 10}}>
           <SwipeListView
