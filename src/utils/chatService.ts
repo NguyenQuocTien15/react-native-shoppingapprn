@@ -29,6 +29,7 @@ export async function getChatWithUser(userId: string): Promise<string | null> {
 
 // Hàm lấy tất cả tin nhắn của một cuộc trò chuyện
 export async function getMessagesForChat(chatId: string) {
+  //@ts-ignore
   const messagesRef = collection(db, `chats/${chatId}/messages`);
   const q = query(messagesRef, orderBy("timestamp"));
 
@@ -43,6 +44,7 @@ export async function getMessagesForChat(chatId: string) {
 
 // Hàm gửi tin nhắn từ admin hoặc user
 export async function sendMessage(chatId: string, text: string, senderId: string) {
+  //@ts-ignore
   const messagesRef = collection(db, `chats/${chatId}/messages`);
 
   await addDoc(messagesRef, {
@@ -54,6 +56,7 @@ export async function sendMessage(chatId: string, text: string, senderId: string
 
 // Hàm lắng nghe tin nhắn theo thời gian thực
 export function listenToMessages(chatId: string, callback: (messages: any[]) => void) {
+  //@ts-ignore
   const messagesRef = collection(db, `chats/${chatId}/messages`);
   const q = query(messagesRef, orderBy("timestamp"));
 

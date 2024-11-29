@@ -46,7 +46,7 @@ const HomeScreen = ({navigation}: any) => {
             styles={{width: 48, height: 48}}
             icon={<Setting4 variant="TwoTone" size={24} color="white" />}
             color="black"
-            onPress={() => {}}
+            onPress={() => navigation.navigate('FilterScreen')}
           />
         </Row>
       </Section>
